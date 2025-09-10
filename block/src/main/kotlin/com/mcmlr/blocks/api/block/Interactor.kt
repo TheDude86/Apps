@@ -1,0 +1,75 @@
+package com.mcmlr.blocks.api.block
+
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.plugin.PluginManager
+import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.FlowDisposer
+import org.bukkit.Location
+
+abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() {
+
+    private var isChild = false
+    private val pluginManagers = mutableListOf<PluginManager<*>>()
+
+    protected lateinit var router: Router
+
+    open fun onCreate() {
+        basePresenter.createView()
+        basePresenter.render()
+        clearBundle()
+    }
+
+    open fun onPause() {}
+
+    open fun onResume(newOrigin: Location?) {
+        if (newOrigin != null) basePresenter.updateOrigin(newOrigin)
+        basePresenter.render()
+        clearBundle()
+    }
+
+    open fun onClose() {
+        clear()
+    }
+
+    fun <T> registerPluginManager(manager: PluginManager<T>) {
+        manager.register()
+        pluginManagers.add(manager)
+    }
+
+    fun attachChild(child: Block, parent: ViewContainer) {
+        router.attachChild(child, parent)
+    }
+
+    fun detachChild(child: Block) {
+        router.detachChild(child)
+    }
+
+    fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null) = router.routeTo(block, callback)
+
+    fun routeBack() = router.routeBack()
+
+    fun close() = router.close()
+
+    fun minimize() = router.minimize()
+
+    fun maximize() = router.maximize()
+
+    fun configure(router: Router, isChild: Boolean) {
+        this.router = router
+        this.isChild = isChild
+    }
+
+    fun addBundleData(key: String, data: Any) = router.bundle.add(key, data)
+
+    fun clearBundle() = router.bundle.clear()
+}
+
+class EmptyInteractor: Interactor(EmptyPresenter())
+
+class EmptyPresenter: Presenter {
+    override fun render() {}
+
+    override fun createView() {}
+
+    override fun updateOrigin(origin: Location) {}
+}
