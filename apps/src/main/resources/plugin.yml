@@ -1,0 +1,17 @@
+name: Apps
+version: $version
+main: com.mcmlr.apps.Apps
+api-version: '1.20'
+authors: [ The_Dude___ ]
+description: Create intuitive front ends using Minecraft's display entities
+softdepend: [ ProtocolLib ]
+commands:
+  .:
+    description: Opens Apps
+    usage: /.
+  c:
+    description: Closes Apps
+    usage: /c
+  k:
+    description: Kills all Apps related entities
+    usage: /k
