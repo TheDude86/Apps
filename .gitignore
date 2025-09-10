@@ -2,6 +2,5 @@
 .idea/
 .kotlin/
 build/
-gradle/
 gradlew
 gradlew.bat
