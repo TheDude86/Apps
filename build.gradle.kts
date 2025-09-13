@@ -5,10 +5,14 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-apply(plugin = "maven-publish")
+allprojects {
+    group = "com.mcmlr"
+    version = "0.2.2"
+}
 
-group = "com.mcmlr"
-version = "0.2.0"
+subprojects {
+    apply(plugin = "maven-publish")
+}
 
 repositories {
     mavenCentral()

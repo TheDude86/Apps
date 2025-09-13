@@ -3,9 +3,6 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-group = "com.mcmlr"
-version = "0.2.0"
-
 repositories {
     mavenCentral()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {

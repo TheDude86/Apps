@@ -5,9 +5,6 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "com.mcmlr"
-version = "0.2.0"
-
 repositories {
     mavenCentral()
     mavenLocal()
