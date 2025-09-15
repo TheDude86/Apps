@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "com.mcmlr"
-    version = "0.2.6"
+    version = "0.2.7"
 }
 
 subprojects {
@@ -21,6 +21,8 @@ subprojects {
                 artifactId = project.name
                 version = project.version as String
 
+                artifact("${layout.buildDirectory}/outputs/jar/${artifactId}-release.jar")
+//                from(components["java"])
             }
         }
     }
