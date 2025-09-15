@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.2.0-2.0.2" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("maven-publish")
+    id("java")
 }
 
 allprojects {
@@ -13,6 +14,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "maven-publish")
+    apply(plugin = "java")
 
     publishing {
         publications {
@@ -21,8 +23,8 @@ subprojects {
                 artifactId = project.name
                 version = project.version as String
 
-                artifact("${layout.buildDirectory}/outputs/jar/${artifactId}-release.jar")
-//                from(components["java"])
+//                artifact("${layout.buildDirectory}/${artifactId}.jar")
+                from(components["java"])
             }
         }
     }
