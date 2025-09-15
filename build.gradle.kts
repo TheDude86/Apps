@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "2.2.0"
     id("com.google.devtools.ksp") version "2.2.0-2.0.2" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("maven-publish")
 }
 
 allprojects {
@@ -12,6 +13,17 @@ allprojects {
 
 subprojects {
     apply(plugin = "maven-publish")
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = project.group as String
+                artifactId = project.name
+                version = project.version as String
+
+            }
+        }
+    }
 }
 
 repositories {
