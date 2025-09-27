@@ -3,6 +3,8 @@ package com.mcmlr.blocks.api.block
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.Location
@@ -34,6 +36,10 @@ open class Router {
 
     fun setCallback(callback: ((Bundle) -> Unit)? = null) {
         this.callback = callback
+    }
+
+    fun launchApp(app: Environment<App>, deeplink: String? = null) {
+        context.launchApp(app, deeplink)
     }
 
     fun routeBack() {

@@ -1,19 +1,16 @@
 package com.mcmlr.system.products.info
 
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock.Companion.ANNOUNCEMENT_POST_BUNDLE_KEY
-import com.mcmlr.system.products.announcements.AnnouncementsBlock
 import com.mcmlr.system.products.announcements.AnnouncementModel
 import com.mcmlr.system.products.announcements.AnnouncementsRepository
-import com.mcmlr.system.products.data.ApplicationModel
-import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.landing.FeedBlock
 import com.mcmlr.system.products.market.MarketBlock
-import com.mcmlr.system.products.preferences.PreferencesBlock
 import com.mcmlr.system.products.spawn.SpawnBlock
 import com.mcmlr.system.products.teleport.TeleportBlock
-import com.mcmlr.blocks.api.Resources
 import com.mcmlr.system.products.warps.WarpsBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -23,6 +20,7 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.SystemConfigRepository
+import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.settings.*
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -109,7 +107,7 @@ class SetupViewController(
     }
 
     override fun setAppEnabled(app: EnabledApplicationModel) {
-        appFeedContainers[app.app.appName]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
+        appFeedContainers[app.app.name()]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
     override fun setApps(apps: List<EnabledApplicationModel>) {
@@ -348,7 +346,7 @@ class SetupViewController(
                                 .alignStartToStartOf(this)
                                 .centerVertically()
                                 .margins(start = 150),
-                            item = it.app.appIcon
+                            item = it.app.getAppIcon()
                         )
 
                         val appName = addTextView(
@@ -357,7 +355,7 @@ class SetupViewController(
                                 .alignStartToEndOf(icon)
                                 .alignTopToTopOf(this)
                                 .margins(start = 50, top = 20),
-                            text = it.app.appName,
+                            text = it.app.name(),
                             size = 6,
                         )
 
@@ -367,7 +365,7 @@ class SetupViewController(
                                 .alignTopToBottomOf(appName)
                                 .alignStartToStartOf(appName)
                                 .margins(top = 10),
-                            text = it.app.summary,
+                            text = it.app.summary(),
                             alignment = Alignment.LEFT,
                             lineWidth = 250,
                             size = 4,
@@ -452,7 +450,7 @@ class SetupViewController(
                             text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
                         )
 
-                        appFeedContainers[it.app.appName] = selected
+                        appFeedContainers[it.app.name()] = selected
 
                         val icon = addItemView(
                             modifier = Modifier()
@@ -460,7 +458,7 @@ class SetupViewController(
                                 .alignStartToStartOf(this)
                                 .centerVertically()
                                 .margins(start = 150),
-                            item = it.app.appIcon
+                            item = it.app.getAppIcon()
                         )
 
                         val appName = addTextView(
@@ -469,7 +467,7 @@ class SetupViewController(
                                 .alignStartToEndOf(icon)
                                 .alignTopToTopOf(this)
                                 .margins(start = 50, top = 20),
-                            text = it.app.appName,
+                            text = it.app.name(),
                             size = 6,
                         )
 
@@ -479,7 +477,7 @@ class SetupViewController(
                                 .alignTopToBottomOf(appName)
                                 .alignStartToStartOf(appName)
                                 .margins(top = 10),
-                            text = it.app.summary,
+                            text = it.app.summary(),
                             alignment = Alignment.LEFT,
                             lineWidth = 250,
                             size = 4,
@@ -711,16 +709,15 @@ class SetupInteractor(
 
         feedBlock.enableCTA(false)
         enabledAppsList = applicationsRepository.getApps().map {
-            val alwaysEnabled = it.headBlock::class == AdminBlock::class ||
-                    it.headBlock::class == AnnouncementsBlock::class ||
-                    it.headBlock::class == PreferencesBlock::class
-            EnabledApplicationModel(it, alwaysEnabled, true)
+//            val alwaysEnabled = it.headBlock::class == AdminBlock::class ||
+//                    it.headBlock::class == AnnouncementsBlock::class ||
+//                    it.headBlock::class == PreferencesBlock::class
+//            TODO: update always enabled
+            EnabledApplicationModel(it, true, true) //update boolean
         }
 
         presenter.setContent(page)
         presenter.setApps(enabledAppsList)
-
-        applicationsRepository.getApps()
 
         presenter.setNextPageListener {
             page++
@@ -772,13 +769,14 @@ class SetupInteractor(
 
         presenter.getConfigurableApps {
             enabledAppsList.filter {
-                it.enabled && configurableApps.containsKey(it.app.headBlock::class)
+//                it.enabled && configurableApps.containsKey(it.app.headBlock::class) //TODO: Fix check
+                it.enabled
             }
         }
 
         presenter.setConfigureAppsListener {
-            val block = configurableApps[it.app.headBlock::class] ?: return@setConfigureAppsListener
-            routeTo(block)
+//            val block = configurableApps[it.app.headBlock::class] ?: return@setConfigureAppsListener //TODO: Fix check
+//            routeTo(block)
         }
 
         presenter.setFinishPageListener {
@@ -786,7 +784,7 @@ class SetupInteractor(
                 announcementsRepository.initAnnouncements(listOf(announcement))
             }
 
-            val enabledAppsName = enabledAppsList.filter { it.enabled }.map { it.app.appName }
+            val enabledAppsName = enabledAppsList.filter { it.enabled }.map { it.app.name() }
             systemConfigRepository.completeSetup(enabledAppsName)
             serverTitle?.let {
                 systemConfigRepository.updateServerTitle(it)
@@ -797,4 +795,4 @@ class SetupInteractor(
     }
 }
 
-data class EnabledApplicationModel(val app: ApplicationModel, val alwaysEnabled: Boolean, var enabled: Boolean)
+data class EnabledApplicationModel(val app: BaseEnvironment<BaseApp>, val alwaysEnabled: Boolean, var enabled: Boolean)

@@ -1,7 +1,7 @@
 package com.mcmlr.system.products.data
 
 import com.mcmlr.blocks.core.emitBackground
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filterNotNull

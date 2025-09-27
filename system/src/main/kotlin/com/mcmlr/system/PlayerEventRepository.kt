@@ -1,5 +1,7 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.data.PlayerOnlineEvent
+import com.mcmlr.blocks.api.data.PlayerOnlineEventType
 import com.mcmlr.blocks.core.emitBackground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,10 +29,10 @@ class PlayerEventRepository @Inject constructor() {
     fun onlinePlayerEventStream(): Flow<PlayerOnlineEvent> = onlinePlayersEventStream
 }
 
-data class PlayerOnlineEvent(val player: Player, val eventType: PlayerOnlineEventType)
-
-enum class PlayerOnlineEventType {
-    JOINED,
-    QUIT,
-    DIED,
-}
+//data class PlayerOnlineEvent(val player: Player, val eventType: PlayerOnlineEventType)
+//
+//enum class PlayerOnlineEventType {
+//    JOINED,
+//    QUIT,
+//    DIED,
+//}

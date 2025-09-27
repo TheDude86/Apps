@@ -2,8 +2,10 @@ package com.mcmlr.apps
 
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.CursorRepository
+import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.system.SystemCursorRepository
+import com.mcmlr.system.SystemInputRepository
 import com.mcmlr.system.SystemPlayerChatRepository
 import com.mcmlr.system.SystemResources
 import dagger.BindsInstance
@@ -58,6 +60,10 @@ object ManagerModule {
     @Singleton
     @Provides
     fun playerChatRepository(): PlayerChatRepository = SystemPlayerChatRepository()
+
+    @Singleton
+    @Provides
+    fun inputRepository(): InputRepository = SystemInputRepository()
 
     @Singleton
     @Provides

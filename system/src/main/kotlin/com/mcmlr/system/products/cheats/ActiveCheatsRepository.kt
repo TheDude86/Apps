@@ -1,7 +1,7 @@
 package com.mcmlr.system.products.cheats
 
 import com.mcmlr.blocks.core.*
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.ServerEventsRepository
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor

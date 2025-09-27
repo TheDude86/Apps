@@ -1,10 +1,8 @@
 package com.mcmlr.system.products.pong
 
-import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.data.CursorRepository
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.core.*
-import com.mcmlr.system.AppScope
+import com.mcmlr.system.dagger.AppScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.bukkit.entity.Player
@@ -17,7 +15,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @AppScope
 class PongRepository @Inject constructor(
-    private val cursorRepository: CursorRepository,
+
 ): FlowDisposer() {
     companion object {
         private const val PADDLE_LENGTH = 160
@@ -53,16 +51,16 @@ class PongRepository @Inject constructor(
             }
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
-        cursorRepository.cursorStream(player.uniqueId)
-            .filter { it.event != CursorEvent.CLEAR }
-            .collectOn(Dispatchers.IO)
-            .collectLatest { model ->
-                val rotation = model.data.pitch
-                val newY = (-24.5 * (rotation - 3.5)).toInt()
-                val finalY = min(600, max(-600, newY))
-                playerPaddlePositionFlow.emit(finalY)
-            }
-            .disposeOn(collection = GAME_DISPOSAL, disposer = this)
+//        cursorRepository.cursorStream(player.uniqueId)
+//            .filter { it.event != CursorEvent.CLEAR }
+//            .collectOn(Dispatchers.IO)
+//            .collectLatest { model ->
+//                val rotation = model.data.pitch
+//                val newY = (-24.5 * (rotation - 3.5)).toInt()
+//                val finalY = min(600, max(-600, newY))
+//                playerPaddlePositionFlow.emit(finalY)
+//            }
+//            .disposeOn(collection = GAME_DISPOSAL, disposer = this)
     }
 
     fun restart() {

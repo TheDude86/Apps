@@ -4,7 +4,7 @@ import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.system.products.settings.PriorityDirection
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.kits.KitModel
 import com.mcmlr.system.products.data.LocationModel
 import com.mcmlr.system.products.data.toLocationModel

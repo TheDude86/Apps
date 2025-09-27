@@ -1,6 +1,6 @@
 package com.mcmlr.system.products.teleport
 
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.Date

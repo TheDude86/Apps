@@ -1,12 +1,15 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListView
 import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.system.products.data.ApplicationModel
 import com.mcmlr.system.products.preferences.PreferencesRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -33,7 +36,7 @@ class AppsListViewController(
 
     private lateinit var listView: ListView
 
-    override fun setFavorites(favoriteApps: List<ApplicationModel>, callback: (ApplicationModel) -> Unit) {
+    override fun setFavorites(favoriteApps: List<Environment<App>>, callback: (Environment<App>) -> Unit) {
         if (favoriteApps.isEmpty()) return
 
         listView.updateDimensions(MATCH_PARENT, 50 * favoriteApps.size)
@@ -50,7 +53,7 @@ class AppsListViewController(
                             .size(50, 50)
                             .alignStartToStartOf(this)
                             .centerVertically(),
-                        item = it.appIcon
+                        item = it.getAppIcon()
                     )
 
                     addButtonView(
@@ -59,8 +62,8 @@ class AppsListViewController(
                             .alignStartToEndOf(appIcon)
                             .alignTopToTopOf(appIcon)
                             .alignBottomToBottomOf(appIcon),
-                        text = "${ChatColor.GOLD}${it.appName}",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.appName}",
+                        text = "${ChatColor.GOLD}${it.name()}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
                         size = 8,
                     ) {
                         callback.invoke(it)
@@ -103,7 +106,7 @@ class AppsListViewController(
 }
 
 interface AppsListPresenter: Presenter {
-    fun setFavorites(favoriteApps: List<ApplicationModel>, callback: (ApplicationModel) -> Unit)
+    fun setFavorites(favoriteApps: List<Environment<App>>, callback: (Environment<App>) -> Unit)
 }
 
 class AppsListInteractor(
@@ -115,7 +118,7 @@ class AppsListInteractor(
         super.onCreate()
 
         presenter.setFavorites(preferencesRepository.getFavorites(player)) {
-            routeTo(it.headBlock)
+            launchApp(it)
         }
     }
 }

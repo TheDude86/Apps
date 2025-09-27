@@ -4,7 +4,7 @@ import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.core.add
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.VaultRepository
 import kotlinx.coroutines.flow.flow
 import me.clip.placeholderapi.PlaceholderAPI

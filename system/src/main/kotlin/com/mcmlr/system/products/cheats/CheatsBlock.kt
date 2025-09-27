@@ -11,7 +11,7 @@ import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.*
-import com.mcmlr.system.AppScope
+import com.mcmlr.system.dagger.AppScope
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location

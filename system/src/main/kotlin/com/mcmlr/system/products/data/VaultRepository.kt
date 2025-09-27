@@ -1,7 +1,7 @@
 package com.mcmlr.system.products.data
 
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission

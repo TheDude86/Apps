@@ -1,12 +1,11 @@
 package com.mcmlr.system.products.teleport
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.blocks.api.log
-import com.mcmlr.system.AppScope
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.system.dagger.AppScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.CooldownRepository
 import com.mcmlr.system.products.homes.HomeListRepository
 import com.mcmlr.system.products.kits.KitRepository
@@ -14,6 +13,8 @@ import com.mcmlr.system.products.data.LocationModel
 import com.mcmlr.system.products.data.toLocationModel
 import com.mcmlr.system.products.spawn.RespawnType
 import com.mcmlr.system.products.spawn.SpawnRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -77,7 +78,10 @@ class GlobalTeleportRepository @Inject constructor(
         loadModel("Spawn/Players", "${e.player.uniqueId}", PlayerTeleportModel()) { model ->
             if (model.firstSpawn) {
                 spawnRepository.model.spawnLocation?.toLocation()?.let {
-                    e.player.teleport(it)
+                    CoroutineScope(DudeDispatcher()).launch {
+                        e.player.teleport(it)
+                    }
+
                     Bukkit.broadcastMessage(PlaceholderAPI.setPlaceholders(e.player, spawnRepository.model.welcomeMessage))
                 }
 

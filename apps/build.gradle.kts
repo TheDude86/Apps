@@ -55,13 +55,3 @@ tasks.test {
 tasks.build {
     dependsOn("shadowJar")
 }
-
-tasks.processResources {
-    val props = mapOf("version" to version)
-    inputs.properties(props)
-    filteringCharset = "UTF-8"
-    filesMatching("plugin.yml") {
-        expand(props)
-    }
-}
-

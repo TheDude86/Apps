@@ -3,7 +3,7 @@ package com.mcmlr.system.products.announcements
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.support.TextModel
 import java.util.Date
 import java.util.UUID

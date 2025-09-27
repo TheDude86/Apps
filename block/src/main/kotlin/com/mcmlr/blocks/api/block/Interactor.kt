@@ -1,6 +1,10 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.plugin.PluginManager
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.FlowDisposer
@@ -43,6 +47,8 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
     fun detachChild(child: Block) {
         router.detachChild(child)
     }
+
+    fun launchApp(app: Environment<App>, deeplink: String? = null) = router.launchApp(app, deeplink)
 
     fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null) = router.routeTo(block, callback)
 
