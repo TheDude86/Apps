@@ -50,7 +50,6 @@ abstract class App(player: Player): BaseApp(player) {
 
     override fun close() {
         appManager.notifyShutdown()
-        log(Log.ASSERT, "${javaClass.name} close")
         super.close()
     }
 

@@ -231,13 +231,11 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     override fun shutdown() {
         backgroundApps.values.forEach { it.close() }
         foregroundApp?.close()
-        log(Log.ASSERT, "${javaClass.name} shutdown")
         close()
     }
 
     override fun notifyShutdown() {
         backgroundApps.values.forEach { it.close() }
-        log(Log.ASSERT, "${javaClass.name} notifyShutdown")
         close()
     }
 

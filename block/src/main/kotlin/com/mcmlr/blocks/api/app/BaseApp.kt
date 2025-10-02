@@ -39,7 +39,6 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     }
 
     override fun close() {
-        log(Log.DEBUG, "${javaClass.name} end")
         onClose()
         head.onClose()
         clear()
@@ -81,7 +80,6 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     override fun routeBack() {
         val parent = head.parent
         if (parent == null) {
-            log(Log.ASSERT, "${javaClass.name} routeBack")
             close()
         } else {
             parent.onCreate()

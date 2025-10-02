@@ -148,7 +148,6 @@ class Apps : JavaPlugin() {
     }
 
     override fun onDisable() {
-        log(Log.ASSERT, "${javaClass.name} onDisable")
         disposer.clear()
         systemEnvironment.onDisable()
     }
