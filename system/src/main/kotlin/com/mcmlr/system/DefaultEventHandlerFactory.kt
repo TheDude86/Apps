@@ -1,5 +1,6 @@
 package com.mcmlr.system
 
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.teleport.GlobalTeleportRepository
 import com.mcmlr.system.products.data.ServerEventsRepository
 import org.bukkit.event.EventHandler

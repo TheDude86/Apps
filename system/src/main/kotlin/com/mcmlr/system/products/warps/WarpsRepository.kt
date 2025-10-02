@@ -2,11 +2,8 @@ package com.mcmlr.system.products.warps
 
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.system.AppScope
+import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.products.data.CooldownRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material

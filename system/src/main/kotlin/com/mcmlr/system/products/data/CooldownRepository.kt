@@ -1,6 +1,6 @@
 package com.mcmlr.system.products.data
 
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import org.bukkit.entity.Player
 import java.util.Date
 import java.util.UUID

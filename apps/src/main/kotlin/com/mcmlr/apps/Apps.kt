@@ -1,14 +1,34 @@
 package com.mcmlr.apps
 
+import com.mcmlr.blocks.api.AppInjector
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.CursorRepository
+import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.PlayerChatRepository
+import com.mcmlr.blocks.api.data.PlayerOnlineEventType
+import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.CommandRepository
-import com.mcmlr.system.DefaultEnvironment
+import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.PlayerEventRepository
-import com.mcmlr.system.PlayerOnlineEventType.JOINED
 import com.mcmlr.system.SystemConfigRepository
+import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
+import com.mcmlr.system.products.cheats.CheatsEnvironment
+import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.data.NotificationManager
+import com.mcmlr.system.products.homes.HomesEnvironment
+import com.mcmlr.system.products.info.TutorialEnvironment
+import com.mcmlr.system.products.kits.KitsEnvironment
+import com.mcmlr.system.products.market.MarketEnvironment
+import com.mcmlr.system.products.preferences.PreferencesEnvironment
+import com.mcmlr.system.products.recipe.RecipeEnvironment
+import com.mcmlr.system.products.settings.AdminEnvironment
+import com.mcmlr.system.products.spawn.SpawnEnvironment
+import com.mcmlr.system.products.teleport.TeleportEnvironment
+import com.mcmlr.system.products.warps.WarpsEnvironment
+import com.mcmlr.system.products.workbenches.WorkbenchesEnvironment
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -23,21 +43,22 @@ class Apps : JavaPlugin() {
     private val disposer = FlowDisposer()
 
     private lateinit var managerComponent: ManagerComponent
+    private lateinit var systemEnvironment: SystemEnvironment
 
     @Inject
     lateinit var eventHandler: EventHandlerFactory
 
     @Inject
-    lateinit var appManager: AppsManager
-
-    @Inject
     lateinit var commandRepository: CommandRepository
 
     @Inject
-    lateinit var cursorRepository: CursorRepository
+    lateinit var playerChatRepository: PlayerChatRepository
 
     @Inject
     lateinit var playerEventRepository: PlayerEventRepository
+
+    @Inject
+    lateinit var inputRepository: InputRepository
 
     @Inject
     lateinit var packetManager: PacketManager
@@ -62,9 +83,29 @@ class Apps : JavaPlugin() {
             .build()
         managerComponent.inject(this)
 
-        appManager.register(DefaultEnvironment(this))
+        systemEnvironment = SystemEnvironment(this)
+        systemEnvironment.configure(inputRepository, resources)
+        systemEnvironment.build()
 
-        playerEventRepository
+        AppInjector.setInjectorListener {
+            systemEnvironment.register(it)
+        }
+
+        AppInjector.register(AdminEnvironment())
+        AppInjector.register(AnnouncementsEnvironment())
+        AppInjector.register(HomesEnvironment())
+        AppInjector.register(WarpsEnvironment())
+        AppInjector.register(TeleportEnvironment())
+        AppInjector.register(MarketEnvironment())
+        AppInjector.register(PreferencesEnvironment())
+        AppInjector.register(SpawnEnvironment())
+//        AppInjector.register(WorkbenchesEnvironment())
+        AppInjector.register(RecipeEnvironment())
+        AppInjector.register(KitsEnvironment())
+        AppInjector.register(TutorialEnvironment())
+//        AppInjector.register(CheatsEnvironment())
+
+        inputRepository
             .onlinePlayerEventStream()
             .collectOn(DudeDispatcher())
             .collectLatest { event ->
@@ -74,7 +115,7 @@ class Apps : JavaPlugin() {
                     }
                     return@collectLatest
                 }
-                appManager.close(event.player)
+                systemEnvironment.shutdown(event.player)
             }
             .disposeOn(disposer = disposer)
 
@@ -86,9 +127,10 @@ class Apps : JavaPlugin() {
                 val command = it.command.name.lowercase()
                 val arg = it.args.firstOrNull()?.lowercase()
                 if (command == ".") {
-                    appManager.launch(player, "default", arg)
+                    //TODO: Handle deeplinks
+                    systemEnvironment.launch(player, arg)
                 } else if (command == "c") {
-                    appManager.close(player)
+                    systemEnvironment.shutdown(player)
                 } else if (command == "k") {
                     Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "kill @e[tag=mcmlr.apps]")
                 }
@@ -106,7 +148,8 @@ class Apps : JavaPlugin() {
     }
 
     override fun onDisable() {
+        log(Log.ASSERT, "${javaClass.name} onDisable")
         disposer.clear()
-        appManager.shutdown()
+        systemEnvironment.onDisable()
     }
 }

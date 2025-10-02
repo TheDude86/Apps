@@ -1,11 +1,11 @@
 package com.mcmlr.system.products.data
 
-import com.mcmlr.system.EnvironmentScope
 import com.mcmlr.system.SystemConfigRepository
 import org.bukkit.entity.Player
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@EnvironmentScope
+@Singleton
 class PermissionsRepository @Inject constructor(
     private val systemConfigRepository: SystemConfigRepository,
 ) {
@@ -16,6 +16,17 @@ class PermissionsRepository @Inject constructor(
                 (player.hasPermission(PermissionNode.PLAYER.node) && node != PermissionNode.ADMIN) ||
                 player.hasPermission(node.node)
     } else if (node == PermissionNode.ADMIN) {
+        player.isOp
+    } else {
+        true
+    }
+
+    fun checkPermission(player: Player, node: String): Boolean = if (systemConfigRepository.model.usePermissions) {
+        player.isOp ||
+                player.hasPermission(PermissionNode.ADMIN.node) ||
+                (player.hasPermission(PermissionNode.PLAYER.node) && node != PermissionNode.ADMIN.node) ||
+                player.hasPermission(node)
+    } else if (node == PermissionNode.ADMIN.node) {
         player.isOp
     } else {
         true

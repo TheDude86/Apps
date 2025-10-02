@@ -1,5 +1,7 @@
 package com.mcmlr.system.products.preferences
 
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -8,7 +10,6 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
-import com.mcmlr.system.products.data.ApplicationModel
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -45,7 +46,7 @@ class FavoritesViewController(
         slotListener = listener
     }
 
-    override fun setFavorites(favoriteApps: List<ApplicationModel>) {
+    override fun setFavorites(favoriteApps: List<BaseEnvironment<BaseApp>>) {
         favoriteApps.forEachIndexed { index, applicationModel ->
             if (favoriteSlots.size <= index) return@forEachIndexed
             val slot = favoriteSlots[index]
@@ -56,7 +57,7 @@ class FavoritesViewController(
                         .alignTopToTopOf(this)
                         .centerHorizontally()
                         .margins(top = 30),
-                    item = applicationModel.appIcon
+                    item = applicationModel.getAppIcon()
                 )
 
                 addTextView(
@@ -65,7 +66,7 @@ class FavoritesViewController(
                         .alignTopToBottomOf(appIcon)
                         .centerHorizontally()
                         .margins(top = 10),
-                    text = "${ChatColor.GOLD}${applicationModel.appName}",
+                    text = "${ChatColor.GOLD}${applicationModel.name()}",
                     size = 6,
                 )
             }
@@ -168,7 +169,7 @@ class FavoritesViewController(
 interface FavoritesPresenter: Presenter {
     fun setFavoriteSlotListener(listener: (Int) -> Unit)
 
-    fun setFavorites(favoriteApps: List<ApplicationModel>)
+    fun setFavorites(favoriteApps: List<BaseEnvironment<BaseApp>>)
 }
 
 class FavoritesInteractor(

@@ -2,7 +2,7 @@ package com.mcmlr.system.products.market
 
 import com.google.gson.GsonBuilder
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.system.AppScope
+import com.mcmlr.system.dagger.AppScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn

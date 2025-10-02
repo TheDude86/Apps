@@ -3,7 +3,7 @@ package com.mcmlr.system.products.market
 import com.google.gson.GsonBuilder
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.core.*
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.VaultRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

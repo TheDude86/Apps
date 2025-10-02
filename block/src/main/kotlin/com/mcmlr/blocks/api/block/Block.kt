@@ -1,9 +1,13 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -70,11 +74,13 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     open fun view(): ViewController = EmptyViewController(player, origin)
 
-    override fun setHead(head: Block) {
-        context.setHead(head)
+    override fun setHeadBlock(head: Block) {
+        context.setHeadBlock(head)
     }
 
-    override fun hasParent(): Boolean = parent != null
+    override fun hasParent(): Boolean = parent != null || context.hasParent()
+
+    override fun launchApp(app: Environment<App>, deeplink: String?) = context.launchApp(app, deeplink)
 
     override fun routeTo(block: Block, callback: ((Bundle) -> Unit)?) = context.routeTo(block, callback)
 
@@ -148,6 +154,8 @@ interface Context {
 
     fun onClose()
 
+    fun launchApp(app: Environment<App>, deeplink: String? = null)
+
     fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null)
 
     fun routeBack()
@@ -160,7 +168,7 @@ interface Context {
 
     fun maximize()
 
-    fun setHead(head: Block)
+    fun setHeadBlock(head: Block)
 
     fun hasParent(): Boolean
 

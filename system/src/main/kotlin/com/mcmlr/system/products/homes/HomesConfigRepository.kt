@@ -3,7 +3,7 @@ package com.mcmlr.system.products.homes
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.HomeConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import javax.inject.Inject
 
 @EnvironmentScope

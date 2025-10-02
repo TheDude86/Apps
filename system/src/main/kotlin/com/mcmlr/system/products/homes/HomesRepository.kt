@@ -3,12 +3,11 @@ package com.mcmlr.system.products.homes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.blocks.api.data.AppConfigModel
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.system.AppScope
-import com.mcmlr.system.EnvironmentScope
+import com.mcmlr.system.dagger.AppScope
+import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.CooldownRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flow

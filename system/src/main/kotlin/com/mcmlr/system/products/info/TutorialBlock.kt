@@ -1,20 +1,10 @@
 package com.mcmlr.system.products.info
 
-import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.ViewController
-import com.mcmlr.blocks.api.data.CursorRepository
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
 import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.blocks.core.collectLatest
-import com.mcmlr.blocks.core.collectOn
-import com.mcmlr.blocks.core.disposeOn
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.filter
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -22,16 +12,14 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
-import kotlin.math.*
 import kotlin.time.Duration.Companion.seconds
 
 class TutorialBlock @Inject constructor(
     player: Player,
     origin: Location,
-    cursorRepository: CursorRepository,
 ): Block(player, origin) {
     private val view = TutorialViewController(player, origin)
-    private val interactor = TutorialInteractor(origin, player, view, cursorRepository)
+    private val interactor = TutorialInteractor(origin, player, view)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -478,7 +466,7 @@ class TutorialInteractor(
     private val origin: Location,
     private val player: Player,
     private val presenter: TutorialPresenter,
-    private val cursorRepository: CursorRepository,
+//    private val cursorRepository: CursorRepository,
 ): Interactor(presenter) {
 
     private var clockJob: Job? = null
@@ -488,36 +476,37 @@ class TutorialInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        cursorRepository.cursorStream(player.uniqueId)
-            .filter { it.event != CursorEvent.CLEAR }
-            .collectOn(Dispatchers.IO)
-            .collectLatest { model ->
-                val originYaw = origin.yaw
-                val currentYaw = model.data.yaw
-
-                val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
-                    (originYaw - 180) - (180 + currentYaw)
-                } else if (originYaw < -90f && currentYaw > 90f) {
-                    (180 + originYaw) + (180 - currentYaw)
-                } else {
-                    originYaw - currentYaw
-                }
-
-                val modifier = max(-58.8f, min(58.8f, yawDelta))
-                val radian = 0.01745329 * modifier
-                val finalX = (-1162.79 * tan(radian)).toInt()
-
-                val maxPitch = -(modifier / 14.026f).pow(2) + 43f
-                val rotation = 0.01745329 * max(-maxPitch, min(maxPitch, model.data.pitch))
-                val range = -1080.0 / tan(0.01745329 * maxPitch)
-                val newY = 75 + (range * tan(rotation)).toInt()
-                val finalY = min(1165, max(-1000, newY))
-
-                CoroutineScope(DudeDispatcher()).launch {
-                    presenter.setCursorPosition(finalX, finalY)
-                }
-            }
-            .disposeOn(disposer = this)
+//        TODO: Reimplement cursor tracking
+//        cursorRepository.cursorStream(player.uniqueId)
+//            .filter { it.event != CursorEvent.CLEAR }
+//            .collectOn(Dispatchers.IO)
+//            .collectLatest { model ->
+//                val originYaw = origin.yaw
+//                val currentYaw = model.data.yaw
+//
+//                val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
+//                    (originYaw - 180) - (180 + currentYaw)
+//                } else if (originYaw < -90f && currentYaw > 90f) {
+//                    (180 + originYaw) + (180 - currentYaw)
+//                } else {
+//                    originYaw - currentYaw
+//                }
+//
+//                val modifier = max(-58.8f, min(58.8f, yawDelta))
+//                val radian = 0.01745329 * modifier
+//                val finalX = (-1162.79 * tan(radian)).toInt()
+//
+//                val maxPitch = -(modifier / 14.026f).pow(2) + 43f
+//                val rotation = 0.01745329 * max(-maxPitch, min(maxPitch, model.data.pitch))
+//                val range = -1080.0 / tan(0.01745329 * maxPitch)
+//                val newY = 75 + (range * tan(rotation)).toInt()
+//                val finalY = min(1165, max(-1000, newY))
+//
+//                CoroutineScope(DudeDispatcher()).launch {
+//                    presenter.setCursorPosition(finalX, finalY)
+//                }
+//            }
+//            .disposeOn(disposer = this)
 
         currentPage = 1
 

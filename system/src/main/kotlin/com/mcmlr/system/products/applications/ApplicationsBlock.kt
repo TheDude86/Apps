@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.applications
 
-import com.mcmlr.system.products.data.ApplicationModel
-import com.mcmlr.system.products.data.ApplicationsRepository
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -11,6 +13,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -90,7 +93,7 @@ class ApplicationsViewController(
         )
     }
 
-    override fun setApps(apps: List<ApplicationModel>, callback: (Block) -> Unit) {
+    override fun setApps(apps: List<Environment<App>>, callback: (Environment<App>) -> Unit) {
 
         container.updateView {
             apps.forEachIndexed { index, applicationModel ->
@@ -100,10 +103,10 @@ class ApplicationsViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .position(appPosition.x, appPosition.y),
                     size = 7,
-                    text = "${ChatColor.GOLD}${applicationModel.appName}",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${applicationModel.appName}",
+                    text = "${ChatColor.GOLD}${applicationModel.name()}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${applicationModel.name()}",
                 ) {
-                    callback.invoke(applicationModel.headBlock)
+                    callback.invoke(applicationModel)
                 }
 
                 addItemButtonView(
@@ -113,9 +116,9 @@ class ApplicationsViewController(
                         .alignEndToEndOf(appTitle)
                         .alignBottomToTopOf(appTitle)
                         .margins(bottom = 50),
-                    item = applicationModel.appIcon
+                    item = applicationModel.getAppIcon()
                 ) {
-                    callback.invoke(applicationModel.headBlock)
+                    callback.invoke(applicationModel)
                 }
             }
         }
@@ -125,7 +128,7 @@ class ApplicationsViewController(
 }
 
 interface ApplicationsPresenter: Presenter {
-    fun setApps(apps: List<ApplicationModel>, callback: (Block) -> Unit)
+    fun setApps(apps: List<Environment<App>>, callback: (Environment<App>) -> Unit)
 }
 
 class ApplicationsInteractor(
@@ -137,7 +140,7 @@ class ApplicationsInteractor(
         super.onCreate()
 
         presenter.setApps(applicationsRepository.getPlayerApps(player)) {
-            routeTo(it)
+            launchApp(it)
         }
     }
 }

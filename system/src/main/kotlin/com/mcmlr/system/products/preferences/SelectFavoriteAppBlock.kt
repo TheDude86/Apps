@@ -1,7 +1,7 @@
 package com.mcmlr.system.products.preferences
 
-import com.mcmlr.system.products.data.ApplicationModel
-import com.mcmlr.system.products.data.ApplicationsRepository
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -11,6 +11,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -41,7 +42,7 @@ class SelectFavoriteViewController(
 
     override fun setRemoveListener(listener: () -> Unit) { clearButton?.addListener(listener) }
 
-    override fun setSelectedApp(app: ApplicationModel?) {
+    override fun setSelectedApp(app: BaseEnvironment<BaseApp>?) {
         selectedContainer.updateView {
             val app = app ?: return@updateView
             val appIcon = addItemView(
@@ -50,7 +51,7 @@ class SelectFavoriteViewController(
                     .alignTopToTopOf(this)
                     .centerHorizontally()
                     .margins(top = 30),
-                item = app.appIcon
+                item = app.getAppIcon()
             )
 
             addTextView(
@@ -59,13 +60,13 @@ class SelectFavoriteViewController(
                     .alignTopToBottomOf(appIcon)
                     .centerHorizontally()
                     .margins(top = 10),
-                text = "${ChatColor.GOLD}${app.appName}",
+                text = "${ChatColor.GOLD}${app.name()}",
                 size = 6,
             )
         }
     }
 
-    override fun setAppsList(apps: List<ApplicationModel>, callback: (ApplicationModel) -> Unit) {
+    override fun setAppsList(apps: List<BaseEnvironment<BaseApp>>, callback: (BaseEnvironment<BaseApp>) -> Unit) {
         appsFeedView.updateView {
             apps.forEach {
                 addViewContainer(
@@ -79,7 +80,7 @@ class SelectFavoriteViewController(
                             .alignStartToStartOf(this)
                             .centerVertically()
                             .margins(start = 50),
-                        item = it.appIcon
+                        item = it.getAppIcon()
                     )
 
                     addButtonView(
@@ -89,8 +90,8 @@ class SelectFavoriteViewController(
                             .alignTopToTopOf(icon)
                             .alignBottomToBottomOf(icon)
                             .margins(start = 50),
-                        text = "${ChatColor.GOLD}${it.appName}",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.appName}",
+                        text = "${ChatColor.GOLD}${it.name()}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
                     ) {
                         callback.invoke(it)
                     }
@@ -141,9 +142,9 @@ class SelectFavoriteViewController(
 }
 
 interface SelectFavoritePresenter: Presenter {
-    fun setAppsList(apps: List<ApplicationModel>, callback: (ApplicationModel) -> Unit)
+    fun setAppsList(apps: List<BaseEnvironment<BaseApp>>, callback: (BaseEnvironment<BaseApp>) -> Unit)
 
-    fun setSelectedApp(app: ApplicationModel?)
+    fun setSelectedApp(app: BaseEnvironment<BaseApp>?)
 
     fun setRemoveListener(listener: () -> Unit)
 }
