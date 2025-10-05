@@ -58,6 +58,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     }
 
     override fun onCreate(child: Boolean) {
+        inputRepository.updateActivePlayer(player.uniqueId, true)
         inputRepository.cursorStream(player.uniqueId)
             .filter { it.event != CursorEvent.CLEAR }
             .collectOn(DudeDispatcher())
@@ -200,11 +201,11 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     }
 
     override fun setScrollState(isScrolling: Boolean) {
-//        TODO("Not yet implemented")
+        inputRepository.updateUserScrollState(player.uniqueId, isScrolling)
     }
 
     override fun setInputState(getInput: Boolean) {
-//        TODO("Not yet implemented")
+        inputRepository.updateUserInputState(player.uniqueId, getInput)
     }
 
     override fun root(): Block = rootBlock
@@ -226,6 +227,13 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         }
 
         foregroundApp = newApp
+    }
+
+    override fun close() {
+        super.close()
+        inputRepository.updateUserScrollState(player.uniqueId, false)
+        inputRepository.updateUserInputState(player.uniqueId, false)
+        inputRepository.updateActivePlayer(player.uniqueId, false)
     }
 
     override fun shutdown() {

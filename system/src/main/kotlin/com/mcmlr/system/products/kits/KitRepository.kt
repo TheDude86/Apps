@@ -5,9 +5,9 @@ import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.core.add
 import com.mcmlr.system.dagger.EnvironmentScope
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.data.VaultRepository
 import kotlinx.coroutines.flow.flow
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -66,7 +66,7 @@ class KitRepository @Inject constructor(
             }
 
             kit.commands.forEach {
-                Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, PlaceholderAPI.setPlaceholders(player, it))
+                Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, it.placeholders(player))
             }
         }
     }

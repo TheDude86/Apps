@@ -9,10 +9,10 @@ import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.blocks.core.titlecase
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.support.TextEditorBlock
 import com.mcmlr.system.products.support.TextEditorBlock.Companion.TEXT_BUNDLE_KEY
 import com.mcmlr.system.products.support.TextModel
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -257,7 +257,7 @@ class AnnouncementEditorViewController(
                 text = "${ChatColor.GRAY}The title of your post. This support's color codes and Placeholder API.",
             )
 
-            val titleText = PlaceholderAPI.setPlaceholders(player, model.title ?: "Set post's title").colorize()
+            val titleText = (model.title ?: "Set post's title").placeholders(player).colorize()
             titleView = addTextInputView(
                 modifier = Modifier()
                     .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -294,7 +294,7 @@ class AnnouncementEditorViewController(
                 text = "${ChatColor.GRAY}The message of your post. This will open a custom editor so you can write messages longer than Minecraft's chat limit.",
             )
 
-            val messageText = PlaceholderAPI.setPlaceholders(player, model.message?.toMCFormattedText() ?: "${ChatColor.GOLD}Set post's message").colorize()
+            val messageText = (model.message?.toMCFormattedText() ?: "${ChatColor.GOLD}Set post's message").placeholders(player).colorize()
             messageView = addButtonView(
                 modifier = Modifier()
                     .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -365,7 +365,7 @@ class AnnouncementEditorViewController(
                     text = "${ChatColor.GRAY}Set the CTA's text. This support's color codes and Placeholder API.",
                 )
 
-                val ctaText = PlaceholderAPI.setPlaceholders(player, model.ctaText ?: "Set post's CTA text").colorize()
+                val ctaText = (model.ctaText ?: "Set post's CTA text").placeholders(player).colorize()
                 ctaTextView = addTextInputView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -532,7 +532,7 @@ class AnnouncementEditorInteractor(
         }
 
         presenter.setTitleListener {
-            val title = PlaceholderAPI.setPlaceholders(player, it).colorize()
+            val title = it.placeholders(player).colorize()
             presenter.setTitleText(title)
             builder.title = title
         }
@@ -547,7 +547,7 @@ class AnnouncementEditorInteractor(
         }
 
         presenter.setCTATextListener {
-            val message = PlaceholderAPI.setPlaceholders(player, it).colorize()
+            val message = it.placeholders(player).colorize()
             builder.ctaText = message
             presenter.setCTAText(message)
         }

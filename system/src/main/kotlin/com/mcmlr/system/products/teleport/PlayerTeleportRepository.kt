@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.dagger.EnvironmentScope
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.data.CooldownRepository
 import com.mcmlr.system.products.homes.HomeListRepository
 import com.mcmlr.system.products.kits.KitRepository
@@ -15,7 +16,6 @@ import com.mcmlr.system.products.spawn.RespawnType
 import com.mcmlr.system.products.spawn.SpawnRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -72,7 +72,7 @@ class GlobalTeleportRepository @Inject constructor(
     fun playerJoinedServer(e: PlayerJoinEvent) {
         if (!spawnRepository.model.enabled) return
 
-        e.joinMessage = PlaceholderAPI.setPlaceholders(e.player, spawnRepository.model.joinMessage)
+        e.joinMessage = spawnRepository.model.joinMessage.placeholders(e.player)
 
 
         loadModel("Spawn/Players", "${e.player.uniqueId}", PlayerTeleportModel()) { model ->
@@ -82,7 +82,7 @@ class GlobalTeleportRepository @Inject constructor(
                         e.player.teleport(it)
                     }
 
-                    Bukkit.broadcastMessage(PlaceholderAPI.setPlaceholders(e.player, spawnRepository.model.welcomeMessage))
+                    Bukkit.broadcastMessage(spawnRepository.model.welcomeMessage.placeholders(e.player))
                 }
 
                 spawnRepository.model.spawnKit?.let {
@@ -100,7 +100,7 @@ class GlobalTeleportRepository @Inject constructor(
     fun playerLeftServer(e: PlayerQuitEvent) {
         if (!spawnRepository.model.enabled) return
 
-        e.quitMessage = PlaceholderAPI.setPlaceholders(e.player, spawnRepository.model.quitMessage)
+        e.quitMessage = spawnRepository.model.quitMessage.placeholders(e.player)
     }
 
     fun playerRespawn(e: PlayerRespawnEvent) {
