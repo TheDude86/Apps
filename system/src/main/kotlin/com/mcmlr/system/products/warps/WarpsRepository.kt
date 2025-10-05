@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.warps
 
+import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.system.dagger.AppScope
@@ -13,9 +14,10 @@ import javax.inject.Inject
 
 @AppScope
 class WarpsRepository @Inject constructor(
+    private val resources: Resources,
     private val cooldownRepository: CooldownRepository,
     private val warpsConfigRepository: WarpsConfigRepository,
-): Repository<ServerWarpsModel>() {
+): Repository<ServerWarpsModel>(resources.dataFolder()) {
 
     private var updatingWarp: WarpModel? = null
 
@@ -58,9 +60,9 @@ class WarpsRepository @Inject constructor(
     }
 
     fun saveWarp(warpModel: WarpModel) = save {
-        val existingHomes = model.warps.filter { it.uuid != warpModel.uuid }
+        val existingWarps = model.warps.filter { it.uuid != warpModel.uuid }
         val warpsList = mutableListOf(warpModel)
-        warpsList.addAll(existingHomes)
+        warpsList.addAll(existingWarps)
         model.warps = warpsList
     }
 

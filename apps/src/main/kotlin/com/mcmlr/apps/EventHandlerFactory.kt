@@ -42,7 +42,7 @@ class EventHandlerFactory @Inject constructor(
     @EventHandler
     fun playerClickEvent(e: PlayerInteractEvent) {
         if (inputRepository.updateStream(CursorModel(e.player.uniqueId, e.player.location, CursorEvent.CLICK)) &&
-            (e.action == Action.LEFT_CLICK_BLOCK || e.action == Action.LEFT_CLICK_AIR)) {
+            (e.action == Action.LEFT_CLICK_BLOCK || e.action == Action.LEFT_CLICK_AIR || e.action == Action.RIGHT_CLICK_AIR || e.action == Action.RIGHT_CLICK_BLOCK)) {
             e.isCancelled = true
         }
     }

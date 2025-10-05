@@ -1,22 +1,17 @@
 package com.mcmlr.apps
 
 import com.mcmlr.blocks.api.AppInjector
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.blocks.api.data.CursorRepository
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
-import com.mcmlr.blocks.api.data.PlayerOnlineEventType
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.CommandRepository
-import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.PlayerEventRepository
 import com.mcmlr.system.SystemConfigRepository
+import com.mcmlr.system.SystemEnvironment
+import com.mcmlr.system.placeholder.AppsDefaultPlayerExpansion
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
-import com.mcmlr.system.products.cheats.CheatsEnvironment
-import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.data.NotificationManager
 import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.info.TutorialEnvironment
@@ -28,7 +23,6 @@ import com.mcmlr.system.products.settings.AdminEnvironment
 import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
-import com.mcmlr.system.products.workbenches.WorkbenchesEnvironment
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -82,6 +76,8 @@ class Apps : JavaPlugin() {
             .plugin(this)
             .build()
         managerComponent.inject(this)
+
+        AppsDefaultPlayerExpansion().register()
 
         systemEnvironment = SystemEnvironment(this)
         systemEnvironment.configure(inputRepository, resources)

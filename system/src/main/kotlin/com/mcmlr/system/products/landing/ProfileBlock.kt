@@ -6,7 +6,7 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
-import me.clip.placeholderapi.PlaceholderAPI
+import com.mcmlr.system.placeholder.placeholders
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -55,7 +55,7 @@ class ProfileViewController(
                 .alignTopToBottomOf(statsTitle)
                 .centerHorizontally()
                 .margins(top = 20),
-            text = PlaceholderAPI.setPlaceholders(player, "Ping: %player_ping%ms"),
+            text = "Ping: %player_ping%ms".placeholders(player),
             size = 4,
         )
 
@@ -65,7 +65,7 @@ class ProfileViewController(
                 .alignTopToBottomOf(ping)
                 .centerHorizontally()
                 .margins(top = 20),
-            text = PlaceholderAPI.setPlaceholders(player, "$%vault_eco_balance%"),
+            text = "$%vault_eco_balance%".placeholders(player),
             size = 4,
         )
 

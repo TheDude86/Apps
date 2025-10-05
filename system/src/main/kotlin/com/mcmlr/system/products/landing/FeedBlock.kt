@@ -1,18 +1,16 @@
 package com.mcmlr.system.products.landing
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.announcements.AnnouncementModel
 import com.mcmlr.system.products.announcements.AnnouncementsRepository
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -78,7 +76,7 @@ class FeedViewController(
                             .alignStartToStartOf(this)
                             .alignTopToTopOf(this)
                             .margins(top = 50, start = 50),
-                        text = PlaceholderAPI.setPlaceholders(player, it.title),
+                        text = it.title.placeholders(player),
                         size = 10
                     )
 
@@ -115,7 +113,7 @@ class FeedViewController(
                             .alignStartToStartOf(authorHead)
                             .alignTopToBottomOf(authorHead)
                             .margins(top = 10),
-                        text = PlaceholderAPI.setPlaceholders(player, it.message),
+                        text = it.message.placeholders(player),
                         lineWidth = 280,
                         size = 5,
                         alignment = Alignment.LEFT,
@@ -134,27 +132,9 @@ class FeedViewController(
                         ) {
                             if (!enableCTA) return@addButtonView
                             val command = it.cta ?: return@addButtonView
-                            player.performCommand(PlaceholderAPI.setPlaceholders(player, command))
+                            player.performCommand(command.placeholders(player))
                         }
                     }
-
-//                    log(Log.ERROR, "Title Bottom=${title.bottom()} Message Top=${message.top()}")
-//                    log(Log.DEBUG,
-//                        "\nTop P=${message.getViewModifier().top?.p}\n" +
-//                                "Top Pos=${message.getViewModifier().top?.view?.getPosition()?.y}\n" +
-//                                "Top Margin=${message.getViewModifier().m.top}\n" +
-//                                "Height=${message.getDimensions().height}"
-//                    )
-
-//                    addTextView(
-//                        modifier = Modifier()
-//                            .size(MATCH_PARENT, WRAP_CONTENT)
-//                            .alignStartToStartOf(title)
-//                            .alignTopToBottomOf(title)
-//                            .margins(top = 50),
-//                        text = it.message,
-//                        size = 8
-//                    )
                 }
             }
         }

@@ -124,6 +124,9 @@ class HomesRepository @Inject constructor(
         cachePlayerHomes(player.uniqueId, newPlayerHomesModel)
 
         val homeConfigString = gson.toJson(newPlayerHomesModel)
+
+        if (!homes.exists()) homes.mkdirs()
+
         val homeWriter = FileWriter(File(homes.path, "${player.uniqueId}.json"))
         homeWriter.append(homeConfigString)
         homeWriter.close()
