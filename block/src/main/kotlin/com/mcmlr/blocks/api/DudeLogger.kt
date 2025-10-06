@@ -41,7 +41,8 @@ enum class Versions(val versionName: String, val versionNumber: Int) {
     V1_21_5("1.21.5-R0.1-SNAPSHOT", 11),
     V1_21_6("1.21.6-R0.1-SNAPSHOT", 12),
     V1_21_7("1.21.7-R0.1-SNAPSHOT", 13),
-    V1_21_8("1.21.8-R0.1-SNAPSHOT", 14);
+    V1_21_8("1.21.8-R0.1-SNAPSHOT", 14),
+    V1_21_9("1.21.9-R0.1-SNAPSHOT", 15);
 
     companion object {
         fun getByName(name: String): Versions = entries.find { it.versionName == name } ?: UNKNOWN
