@@ -57,7 +57,7 @@ open class ConfigModel() {
     @Transient var filePath: String = "path"
     @Transient var fileName: String = "config"
 
-    fun save(callback: ConfigModel.() -> Unit): ConfigModel {
+    fun save(callback: ConfigModel.() -> Unit = {}): ConfigModel {
         saveFile(filePath, fileName, this, callback)
 
         return this

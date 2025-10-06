@@ -1,8 +1,10 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.dagger.EnvironmentScope
@@ -143,9 +145,8 @@ class GlobalTeleportRepository @Inject constructor(
     fun setBackLocation(player: Player, backLocation: Location) {
         generateModel("Spawn/Players", player.uniqueId.toString(), PlayerTeleportModel()) { teleportModel ->
             val back = backLocation.toLocationModel() ?: return@generateModel
-            teleportModel.save {
-                teleportModel.backLocation = TeleportBackModel(Date().time, back)
-            }
+            teleportModel.backLocation = TeleportBackModel(Date().time, back)
+            teleportModel.save()
         }
     }
 }
