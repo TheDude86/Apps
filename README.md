@@ -9,7 +9,7 @@ Gradle Dependency:
     }
 
     dependencies {
-        compileOnly "com.github.TheDude86:Apps:0.2.0"
+        compileOnly "com.github.TheDude86.Apps:block:1.0.0"
     }
 
 Maven Dependency:
@@ -22,9 +22,9 @@ Maven Dependency:
     </repositories>
     <dependencies>
         <dependency>
-            <groupId>com.github.TheDude86</groupId>
-            <artifactId>Apps</artifactId>
-            <version>0.2.0</version>
+            <groupId>com.github.TheDude86.Apps</groupId>
+            <artifactId>block</artifactId>
+            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
