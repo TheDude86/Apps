@@ -21,32 +21,40 @@ class ApplicationsRepository @Inject constructor(
 
     private val environments = mutableListOf<Environment<App>>()
 
+    //Definitely going to need to keep this in some central area
+    private val systemApps = listOf(
+        "admin",
+        "announcements",
+        "homes",
+        "warps",
+        "teleport",
+        "market",
+        "preferences",
+        "spawn",
+        "workbenches",
+        "recipes",
+        "kits",
+        "tutorial",
+        "cheats",
+    )
+
     fun register(environment: Environment<App>) {
         environment.configure(resources)
         environment.build()
         environments.add(environment)
     }
 
-//    fun launch(player: Player, appName: String, deeplink: String? = null) {
-//        val environment = environments.find { it.name().lowercase() == appName.lowercase() }
-//        if (environment == null) {
-//            player.sendMessage("An app by this name doesn't exist...")
-//            return
-//        } else {
-//            cursorRepository.updateActivePlayer(player.uniqueId, true)
-//        }
-//
-//        environment.launch(player, deeplink)
-//    }
-
-//    TODO: Fixed enabled apps
-//    private fun enabledApps() = environments.filter { systemConfigRepository.model.enabledApps.contains(it.name().lowercase()) }
-    private fun enabledApps(): List<Environment<App>> = environments
+    private fun enabledApps(): List<Environment<App>> = environments.filter {
+        systemApps.contains(it.name().lowercase()) && systemConfigRepository.model.enabledApps.contains(it.name().lowercase()) ||
+                !systemApps.contains(it.name().lowercase())
+    }
 
     fun getPlayerApps(player: Player): List<Environment<App>> = enabledApps().filter {
         val node = it.permission() ?: return@filter true
         permissionsRepository.checkPermission(player, node)
     }
+
+    fun getSystemApps(): List<Environment<App>> = environments.filter { systemApps.contains(it.name().lowercase()) }
 
     fun getApps(): List<Environment<App>> = enabledApps()
 

@@ -856,7 +856,17 @@ class SpawnConfigInteractor(
 
     override fun onCreate() {
         super.onCreate()
+        setBlockState()
+    }
 
+    override fun onResume(newOrigin: Location?) {
+        if (state == SpawnConfigState.CAPTURE) return
+
+        super.onResume(newOrigin)
+        setBlockState()
+    }
+
+    private fun setBlockState() {
         when(state) {
             SpawnConfigState.LOCATION -> setLocationState()
             else -> setSettingsState()
@@ -1023,6 +1033,7 @@ class SpawnConfigInteractor(
 
     private fun countdown() {
         minimize()
+        state = SpawnConfigState.CAPTURE
         val countdownJob = CoroutineScope(Dispatchers.IO).launch {
             var countdown = 3
 
@@ -1038,6 +1049,7 @@ class SpawnConfigInteractor(
         countdownJob.invokeOnCompletion {
             CoroutineScope(DudeDispatcher()).launch {
                 newSpawn = player.location.clone()
+                state = SpawnConfigState.LOCATION
                 maximize()
             }
         }
@@ -1073,4 +1085,5 @@ enum class PriorityDirection {
 enum class SpawnConfigState {
     SETTINGS,
     LOCATION,
+    CAPTURE,
 }

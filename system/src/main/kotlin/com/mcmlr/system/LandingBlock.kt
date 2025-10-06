@@ -36,7 +36,6 @@ class LandingBlock @Inject constructor(
     warpsBlock: WarpsBlock,
     teleportBlock: TeleportBlock,
     marketBlock: MarketBlock,
-    adminBlock: AdminBlock,
     pongBlock: PongBlock,
     appsListBlock: AppsListBlock,
     applicationsBlock: ApplicationsBlock,
@@ -48,7 +47,7 @@ class LandingBlock @Inject constructor(
     spawnRepository: SpawnRepository,
     systemConfigRepository: SystemConfigRepository,
 ) : Block(player, origin) {
-    private val view: LandingViewController = LandingViewController(player, origin, systemConfigRepository, permissionsRepository)
+    private val view: LandingViewController = LandingViewController(player, origin, systemConfigRepository)
     private val interactor: LandingInteractor = LandingInteractor(
         player,
         view,
@@ -56,7 +55,6 @@ class LandingBlock @Inject constructor(
         homesBlock,
         warpsBlock,
         teleportBlock,
-        adminBlock,
         marketBlock,
         pongBlock,
         appsListBlock,
@@ -74,7 +72,7 @@ class LandingBlock @Inject constructor(
     override fun view() = view
 }
 
-class LandingViewController(private val player: Player, origin: Location, private val systemConfigRepository: SystemConfigRepository, private val permissionsRepository: PermissionsRepository): NavigationViewController(player, origin), LandingPresenter {
+class LandingViewController(private val player: Player, origin: Location, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
 
     private lateinit var title: TextView
     private lateinit var appsContainer: ViewContainer
@@ -84,8 +82,6 @@ class LandingViewController(private val player: Player, origin: Location, privat
     private lateinit var feedContainer: ViewContainer
     private lateinit var profileContainer: ViewContainer
 
-    private var admin: ButtonView? = null
-
     override fun getFeedBlockContainer(): ViewContainer = feedContainer
 
     override fun addAppsListener(listener: () -> Unit) = appsButton.addListener(listener)
@@ -93,10 +89,6 @@ class LandingViewController(private val player: Player, origin: Location, privat
     override fun getAppsBlockContainer(): ViewContainer = appsContainer
 
     override fun getSpawnBlockContainer(): ViewContainer = spawnContainer
-
-    override fun addAdminListener(listener: () -> Unit) {
-        admin?.addListener(listener)
-    }
 
     override fun createView() {
         super.createView()
@@ -166,24 +158,10 @@ class LandingViewController(private val player: Player, origin: Location, privat
             text = "${ChatColor.GOLD}Apps",
             highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Apps",
         )
-
-        if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN)) {
-            admin = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .alignTopToTopOf(this)
-                    .margins(top = 250, start = 500),
-                text = "${ChatColor.RED}\uD83D\uDD75",
-                size = 14,
-                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDD75",
-            )
-        }
     }
 }
 
 interface LandingPresenter: Presenter {
-    fun addAdminListener(listener: () -> Unit)
     fun getAppsBlockContainer(): ViewContainer
     fun getSpawnBlockContainer(): ViewContainer
     fun addAppsListener(listener: () -> Unit)
@@ -197,7 +175,6 @@ class LandingInteractor(
     private val homesBlock: HomesBlock,
     private val warpsBlock: WarpsBlock,
     private val teleportBlock: TeleportBlock,
-    private val adminBlock: AdminBlock,
     private val marketBlock: MarketBlock,
     private val pongBlock: PongBlock,
     private val appsListBlock: AppsListBlock,
@@ -251,10 +228,6 @@ class LandingInteractor(
             permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
 
             attachChild(spawnShortcutBlock, presenter.getSpawnBlockContainer())
-        }
-
-        presenter.addAdminListener {
-            routeTo(adminBlock)
         }
 
         presenter.addAppsListener {

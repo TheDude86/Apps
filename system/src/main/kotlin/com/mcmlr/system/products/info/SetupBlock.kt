@@ -20,8 +20,17 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.SystemConfigRepository
+import com.mcmlr.system.products.announcements.AnnouncementsBlock
+import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
+import com.mcmlr.system.products.homes.HomesEnvironment
+import com.mcmlr.system.products.market.MarketEnvironment
+import com.mcmlr.system.products.preferences.PreferencesBlock
+import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.settings.*
+import com.mcmlr.system.products.spawn.SpawnEnvironment
+import com.mcmlr.system.products.teleport.TeleportEnvironment
+import com.mcmlr.system.products.warps.WarpsEnvironment
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -697,23 +706,24 @@ class SetupInteractor(
     private var page = 1
 
     private val configurableApps = mapOf(
-        HomesBlock::class to homeConfigBlock,
-        WarpsBlock::class to warpConfigBlock,
-        TeleportBlock::class to teleportConfigBlock,
-        MarketBlock::class to marketConfigBlock,
-        SpawnBlock::class to spawnConfigBlock,
+        HomesEnvironment::class to homeConfigBlock,
+        WarpsEnvironment::class to warpConfigBlock,
+        TeleportEnvironment::class to teleportConfigBlock,
+        MarketEnvironment::class to marketConfigBlock,
+        SpawnEnvironment::class to spawnConfigBlock,
     )
 
     override fun onCreate() {
         super.onCreate()
 
         feedBlock.enableCTA(false)
-        enabledAppsList = applicationsRepository.getApps().map {
-//            val alwaysEnabled = it.headBlock::class == AdminBlock::class ||
-//                    it.headBlock::class == AnnouncementsBlock::class ||
-//                    it.headBlock::class == PreferencesBlock::class
-//            TODO: update always enabled
-            EnabledApplicationModel(it, true, true) //update boolean
+        if (enabledAppsList.isEmpty()) {
+            enabledAppsList = applicationsRepository.getSystemApps().map {
+                val alwaysEnabled = it::class == AdminEnvironment::class ||
+                        it::class == AnnouncementsEnvironment::class ||
+                        it::class == PreferencesEnvironment::class
+                EnabledApplicationModel(it, alwaysEnabled, true) //update boolean
+            }
         }
 
         presenter.setContent(page)
@@ -769,14 +779,13 @@ class SetupInteractor(
 
         presenter.getConfigurableApps {
             enabledAppsList.filter {
-//                it.enabled && configurableApps.containsKey(it.app.headBlock::class) //TODO: Fix check
-                it.enabled
+                it.enabled && configurableApps.containsKey(it.app::class)
             }
         }
 
         presenter.setConfigureAppsListener {
-//            val block = configurableApps[it.app.headBlock::class] ?: return@setConfigureAppsListener //TODO: Fix check
-//            routeTo(block)
+            val block = configurableApps[it.app::class] ?: return@setConfigureAppsListener
+            routeTo(block)
         }
 
         presenter.setFinishPageListener {
@@ -784,7 +793,7 @@ class SetupInteractor(
                 announcementsRepository.initAnnouncements(listOf(announcement))
             }
 
-            val enabledAppsName = enabledAppsList.filter { it.enabled }.map { it.app.name() }
+            val enabledAppsName = enabledAppsList.filter { it.enabled }.map { it.app.name().lowercase() }
             systemConfigRepository.completeSetup(enabledAppsName)
             serverTitle?.let {
                 systemConfigRepository.updateServerTitle(it)
