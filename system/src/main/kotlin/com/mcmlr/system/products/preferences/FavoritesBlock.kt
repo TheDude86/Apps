@@ -2,7 +2,6 @@ package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
-import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -26,11 +25,6 @@ class FavoritesBlock @Inject constructor(
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
-
-    override fun scrollEvent(event: ScrollModel, isChild: Boolean) {
-        super.scrollEvent(event, isChild)
-//        log(Log.ASSERT, "Favorites Scroll")
-    }
 }
 
 class FavoritesViewController(

@@ -1,6 +1,8 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Area.*
 import com.mcmlr.blocks.api.views.Axis.X
 import com.mcmlr.blocks.api.views.Axis.Y
@@ -240,6 +242,7 @@ abstract class View(
             if (modifier.top == null && modifier.bottom == null) {
                 throw Exception("TODO: add error messages") //TODO
             } else if (modifier.top == null) {
+                log(Log.ASSERT, "Bottom aligned")
                 val p = if (modifier.bottom?.view == parent) {
                     (modifier.bottom?.p ?: return 0) - (modifier.bottom?.view?.getPosition()?.y ?: 0) + (80 * (modifier.top?.view?.offset ?: 0))
                 } else {

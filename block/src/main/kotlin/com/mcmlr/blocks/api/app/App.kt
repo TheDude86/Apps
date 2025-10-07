@@ -2,10 +2,8 @@ package com.mcmlr.blocks.api.app
 
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
-import com.mcmlr.blocks.api.log
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player

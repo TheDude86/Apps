@@ -66,10 +66,8 @@ class FeedViewController(
                 addViewContainer(
                     modifier = Modifier()
                         .size(MATCH_PARENT, height)
-                        .margins(start = 50, end = 50, top = 50, bottom = 50)
+                        .margins(start = 50, end = 50, top = 25)
                 ) {
-
-
                     val title = addTextView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -83,7 +81,7 @@ class FeedViewController(
                     val author = Bukkit.getOfflinePlayer(UUID.fromString(it.authorId))
                     val head = ItemStack(Material.PLAYER_HEAD)
                     val headMeta = head.itemMeta as SkullMeta
-                    headMeta.setOwningPlayer(author)
+                    headMeta.owningPlayer = author
                     head.itemMeta = headMeta
 
                     val authorHead = addItemView(

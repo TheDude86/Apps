@@ -28,15 +28,15 @@ class KitRepository @Inject constructor(
     val builder: KitModel.Builder = KitModel.Builder()
 
     fun getCooldown(player: Player, kit: KitModel) = flow {
-        generateModel("Kits/Players", player.uniqueId.toString(), PlayerKitStorageModel()) { playerModel ->
+        generateModelSynced("Kits/Players", player.uniqueId.toString(), PlayerKitStorageModel()) { playerModel ->
             if (kit.kitCooldown < 0 && playerModel.kits.containsKey(kit.uuid)) {
                 emit(null)
-                return@generateModel
+                return@generateModelSynced
             }
 
             if (!playerModel.kits.containsKey(kit.uuid)) {
                 emit(-1)
-                return@generateModel
+                return@generateModelSynced
             }
 
             val lastUsed = playerModel.kits[kit.uuid] ?: 0

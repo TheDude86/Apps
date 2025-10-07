@@ -1,7 +1,9 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
@@ -100,7 +102,6 @@ open class ViewController(
 
     override fun scrollEvent(event: ScrollModel, isChild: Boolean) {
         if (!isScrolling && !isChild) return
-//        if (isChild) log(Log.ERROR, "Child VC")
         super.scrollEvent(event, isChild)
     }
 

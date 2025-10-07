@@ -1,10 +1,12 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.ChatColor
 import org.bukkit.Location

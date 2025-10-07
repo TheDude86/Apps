@@ -116,6 +116,8 @@ class OrderRepository @Inject constructor(
         val existingOrders = File(ordersDirectory, "${order.playerId}.json")
         val gson = GsonBuilder().setPrettyPrinting().create()
 
+        if (!ordersDirectory.exists()) ordersDirectory.mkdirs()
+
         if (!existingOrders.exists()) {
             val playerOrderStorage = PlayerOrdersStorage(mutableMapOf(item.type to mutableListOf(orderStorageModel)))
             val orderString = gson.toJson(playerOrderStorage)

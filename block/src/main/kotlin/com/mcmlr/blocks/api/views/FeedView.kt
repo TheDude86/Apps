@@ -1,7 +1,9 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.MutablePair
 import org.bukkit.Color
 
@@ -22,6 +24,7 @@ open class FeedView(
     private var bottom = 0
 
     override fun render() {
+        renderedChildren.clear()
         dudeDisplay = parent.addContainerDisplay(this)
 
         bottom = children.firstOrNull()?.bottom() ?: 0

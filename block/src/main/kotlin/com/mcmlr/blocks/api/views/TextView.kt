@@ -63,7 +63,7 @@ open class TextView(
                 throw Exception("TODO: add error messages") //TODO
             } else if (modifier.top == null) {
                 val p = if (modifier.bottom?.view == parent) {
-                    (modifier.bottom?.p ?: return 0) - (modifier.bottom?.view?.getPosition()?.y ?: 0)
+                    (modifier.bottom?.p ?: return 0) - (modifier.bottom?.view?.getPosition()?.y ?: 0) + (80 * (modifier.bottom?.view?.offset ?: 0))
                 } else {
                     (modifier.bottom?.p ?: return 0)
                 }
