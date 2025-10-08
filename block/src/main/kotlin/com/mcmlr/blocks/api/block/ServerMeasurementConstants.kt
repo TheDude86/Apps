@@ -10,7 +10,8 @@ fun getMeasurements(): ServerMeasurementConstants = when (serverVersion()) {
     Versions.V1_21_6,
     Versions.V1_21_7,
     Versions.V1_21_8,
-    Versions.V1_21_9, -> Server1213Measurements
+    Versions.V1_21_9,
+    Versions.V1_21_10, -> Server1213Measurements
     else -> Server1211Measurements
 }
 
