@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
 import com.mcmlr.blocks.api.app.BaseApp
@@ -10,6 +11,7 @@ import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn

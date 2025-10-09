@@ -7,7 +7,13 @@ import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
+import io.netty.channel.Channel
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelHandlerContext
+import net.minecraft.network.Connection
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import org.bukkit.Location
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 
@@ -30,6 +36,30 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         head = root()
         head.context = this
         head.onCreate()
+
+        foo(player)
+    }
+
+    lateinit var channel: Channel
+
+    fun foo(player: Player) {
+        val handle = (player as CraftPlayer).handle
+        val playerConnection = handle.connection
+        val connection = playerConnection.javaClass.getField("connection").get(playerConnection) as Connection
+        channel = connection.channel
+
+        channel.pipeline().addBefore("packet_handler", "Apps", object : ChannelDuplexHandler() {
+            override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
+
+                (msg as? String)?.let {
+                    log(Log.ASSERT, it)
+                }
+
+//                ClientboundMoveEntityPacket
+
+                super.channelRead(ctx, msg)
+            }
+        })
     }
 
     override fun deeplink(): String? = deeplink
@@ -42,6 +72,14 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         onClose()
         head.onClose()
         clear()
+
+        bar()
+    }
+
+    fun bar() {
+        channel.eventLoop().submit {
+            channel.pipeline().remove("Apps")
+        }
     }
 
     override fun minimize() {
