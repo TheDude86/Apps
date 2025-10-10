@@ -24,7 +24,7 @@ abstract class Environment<out T: App>: BaseEnvironment<T>() {
 
         val app = getInstance(player)
         app.configure(appManager, this.parentEnvironment, this.parentApp, inputRepository, deeplink, origin)
-        app.create(resources)
+        app.create(resources, Camera(player)) //TODO: Update Camera
 
         return app
     }

@@ -17,6 +17,9 @@ import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.system.dagger.SystemAppComponent
+import io.netty.channel.Channel
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -24,12 +27,20 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
+import net.minecraft.network.Connection
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
+import org.bukkit.GameMode
 import org.bukkit.Location
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
+import org.bukkit.entity.Bee
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import javax.inject.Inject
+import kotlin.collections.remove
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,6 +54,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     private var foregroundApp: App? = null
     private var moveJob: Job? = null
 
+    private var channel: Channel? = null
 
     @Inject
     lateinit var rootBlock: LandingBlock
@@ -58,6 +70,31 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     }
 
     override fun onCreate(child: Boolean) {
+
+        player.gameMode = GameMode.SPECTATOR
+        player.spectatorTarget = camera.camera
+        camera.camera?.addPassenger(player)
+
+        val handle = (player as CraftPlayer).handle
+        val playerConnection = handle.connection
+        val connection = playerConnection.javaClass.getField("connection").get(playerConnection) as Connection
+        channel = connection.channel
+
+        channel?.pipeline()?.addBefore("packet_handler", "Apps", object : ChannelDuplexHandler() {
+            override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
+
+                val movePlayerPacket = msg as? ServerboundMovePlayerPacket
+                if (movePlayerPacket != null) {
+                    log(Log.ASSERT, "Move Player = ${movePlayerPacket.xRot}, ${movePlayerPacket.yRot}")
+                } else {
+//                    log(Log.ASSERT, "Other Packet = $msg")
+                }
+
+                super.channelRead(ctx, msg)
+            }
+        })
+
+
         inputRepository.updateActivePlayer(player.uniqueId, true)
         inputRepository.cursorStream(player.uniqueId)
             .filter { it.event != CursorEvent.CLEAR }
@@ -240,6 +277,10 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         backgroundApps.values.forEach { it.close() }
         foregroundApp?.close()
         close()
+
+        channel?.eventLoop()?.submit {
+            channel?.pipeline()?.remove("Apps")
+        }
     }
 
     override fun notifyShutdown() {
