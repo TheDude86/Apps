@@ -1,5 +1,5 @@
 name: Apps
-version: $version
+version: ${version}
 main: com.mcmlr.apps.Apps
 api-version: '1.20'
 authors: [ The_Dude___ ]
