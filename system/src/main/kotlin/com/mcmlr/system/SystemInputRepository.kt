@@ -1,6 +1,7 @@
 package com.mcmlr.system
 
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
@@ -27,6 +28,7 @@ class SystemInputRepository: InputRepository {
     private val playerChatFlow = MutableStateFlow<AsyncPlayerChatEvent?>(null)
     private val inputUsers = HashSet<UUID>()
     private val cursorFlowMap = HashMap<UUID, MutableStateFlow<CursorModel>>()
+    private val fixedCursorFlowMap = HashMap<UUID, MutableStateFlow<FixedCursorModel>>()
     private val playerMoveFlowMap = HashMap<UUID, MutableSharedFlow<PlayerMoveEvent>>()
     private val cursorScrollMap = HashMap<UUID, MutableSharedFlow<ScrollModel>>()
     private val scrollingUsers = HashSet<UUID>()
@@ -36,6 +38,17 @@ class SystemInputRepository: InputRepository {
         val mapEntry = cursorFlowMap[data.playerId]
         if (mapEntry == null) {
             cursorFlowMap[data.playerId] = MutableStateFlow(data)
+        } else {
+            mapEntry.emitBackground(data)
+        }
+
+        return activeUsers.contains(data.playerId)
+    }
+
+    override fun updateFixedStream(data: FixedCursorModel): Boolean {
+        val mapEntry = fixedCursorFlowMap[data.playerId]
+        if (mapEntry == null) {
+            fixedCursorFlowMap[data.playerId] = MutableStateFlow(data)
         } else {
             mapEntry.emitBackground(data)
         }
@@ -68,6 +81,8 @@ class SystemInputRepository: InputRepository {
     }
 
     override fun cursorStream(playerId: UUID): Flow<CursorModel> = cursorFlowMap[playerId] ?: flow { }
+
+    override fun fixedCursorStream(playerId: UUID): Flow<FixedCursorModel> = fixedCursorFlowMap[playerId] ?: flow { }
 
     override fun playerMoveStream(playerId: UUID): Flow<PlayerMoveEvent> {
         return if (playerMoveFlowMap.containsKey(playerId)) {

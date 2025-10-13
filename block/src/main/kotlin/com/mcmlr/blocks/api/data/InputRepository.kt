@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.data
 
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import kotlinx.coroutines.flow.Flow
 import org.bukkit.entity.Player
@@ -13,11 +14,15 @@ interface InputRepository {
 
     fun updateStream(data: CursorModel): Boolean
 
+    fun updateFixedStream(data: FixedCursorModel): Boolean
+
     fun updateMoveStream(event: PlayerMoveEvent)
 
     fun updateScrollStream(event: PlayerItemHeldEvent)
 
     fun cursorStream(playerId: UUID): Flow<CursorModel>
+
+    fun fixedCursorStream(playerId: UUID): Flow<FixedCursorModel>
 
     fun playerMoveStream(playerId: UUID): Flow<PlayerMoveEvent>
 

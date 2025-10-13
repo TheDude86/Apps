@@ -31,7 +31,7 @@ open class ViewController(
 
     fun updateOrigin(origin: Location) {
         val direction = origin.direction.normalize()
-        val o = origin.clone().add(direction.multiply(0.15))
+        val o = origin.clone().add(direction.multiply(context.offset()))
 
         this.origin.x = o.x
         this.origin.y = o.y

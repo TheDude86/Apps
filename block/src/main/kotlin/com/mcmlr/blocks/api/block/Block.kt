@@ -41,7 +41,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
             newOrigin.pitch = 0f
 
             val direction = newOrigin.direction.normalize()
-            val o = newOrigin.clone().add(direction.multiply(0.15))
+            val o = newOrigin.clone().add(direction.multiply(offset()))
 
             this.origin.x = o.x
             this.origin.y = o.y
@@ -101,6 +101,8 @@ abstract class Block(protected val player: Player, origin: Location): Context {
     override fun setScrollState(isScrolling: Boolean) = context.setScrollState(isScrolling)
 
     override fun setInputState(getInput: Boolean) = context.setInputState(getInput)
+
+    override fun offset(): Double = context.offset()
 
     fun textInputEvent(event: AsyncPlayerChatEvent) {
         view().textInputEvent(event)
@@ -173,4 +175,6 @@ interface Context {
     fun setInputState(getInput: Boolean)
 
     fun deeplink(): String?
+
+    fun offset(): Double
 }

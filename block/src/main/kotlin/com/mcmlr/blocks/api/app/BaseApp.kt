@@ -36,6 +36,8 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
     override fun deeplink(): String? = deeplink
 
+    override fun offset(): Double = camera.offset()
+
     fun registerEvents(eventHandler: Listener) {
         resources.server().pluginManager.registerEvents(eventHandler, resources.plugin())
     }
@@ -51,7 +53,7 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     }
 
     override fun maximize() {
-        head.onResume(player.eyeLocation.clone())
+        head.onResume(camera.origin())
     }
 
     override fun onPause() {}

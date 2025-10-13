@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
 import net.minecraft.network.Connection
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
 import org.bukkit.GameMode
 import org.bukkit.Location
@@ -85,6 +87,15 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
                 val movePlayerPacket = msg as? ServerboundMovePlayerPacket
                 if (movePlayerPacket != null) {
+                    inputRepository.updateFixedStream(
+                        FixedCursorModel(
+                            player.uniqueId,
+                            movePlayerPacket.xRot,
+                            movePlayerPacket.yRot,
+                            CursorEvent.MOVE,
+                        )
+                    )
+
                     log(Log.ASSERT, "Move Player = ${movePlayerPacket.xRot}, ${movePlayerPacket.yRot}")
                 } else {
 //                    log(Log.ASSERT, "Other Packet = $msg")
@@ -114,7 +125,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 val modifier = min(60f, abs(yawDelta))
 
                 val direction = it.data.direction.normalize()
-                val cursor = it.data.add(direction.clone().multiply(0.15 + ((modifier / 60f) * 0.1)))
+                val cursor = it.data.add(direction.clone().multiply(camera.offset() + ((modifier / 60f) * 0.1)))
                 val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
                     entity is TextDisplay ||
                             entity is ItemDisplay ||
