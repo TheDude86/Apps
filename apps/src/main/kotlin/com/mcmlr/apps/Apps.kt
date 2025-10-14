@@ -128,7 +128,7 @@ class Apps : JavaPlugin() {
                 } else if (command == "c") {
                     systemEnvironment.shutdown(player)
                 } else if (command == "k") {
-                    Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "kill @e[tag=mcmlr.apps]")
+                    Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
                 }
             }
             .disposeOn(disposer = disposer)
