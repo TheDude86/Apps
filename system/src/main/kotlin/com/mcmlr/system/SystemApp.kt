@@ -21,6 +21,7 @@ import com.mcmlr.system.dagger.SystemAppComponent
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -28,21 +29,16 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.launch
 import net.minecraft.network.Connection
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket
 import org.bukkit.GameMode
-import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
-import org.bukkit.entity.Bee
 import org.bukkit.entity.BlockDisplay
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import javax.inject.Inject
-import kotlin.collections.remove
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
@@ -64,39 +60,38 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     @Inject
     lateinit var eventHandler: AppEventHandlerFactory
 
-    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Location, inputRepository: InputRepository) {
+    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, inputRepository: InputRepository) {
         this.parentEnvironment = environment
         this.deeplink = deeplink
-        this.origin = origin
         this.inputRepository = inputRepository
     }
 
     override fun onCreate(child: Boolean) {
-
-        player.gameMode = GameMode.SPECTATOR
-        player.spectatorTarget = camera.camera
-        camera.camera?.addPassenger(player)
-
         val handle = (player as CraftPlayer).handle
         val playerConnection = handle.connection
         val connection = playerConnection.javaClass.getField("connection").get(playerConnection) as Connection
+        var x = 0f
         channel = connection.channel
 
         channel?.pipeline()?.addBefore("packet_handler", "Apps", object : ChannelDuplexHandler() {
             override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
 
                 val movePlayerPacket = msg as? ServerboundMovePlayerPacket
-                if (movePlayerPacket != null) {
-                    inputRepository.updateFixedStream(
-                        FixedCursorModel(
-                            player.uniqueId,
-                            movePlayerPacket.xRot,
-                            movePlayerPacket.yRot,
-                            CursorEvent.MOVE,
-                        )
-                    )
+                if (movePlayerPacket != null && movePlayerPacket.xRot != 0f && movePlayerPacket.yRot != 0f) {
+                    val dx = movePlayerPacket.yRot - x
+                    x = movePlayerPacket.yRot
 
-                    log(Log.ASSERT, "Move Player = ${movePlayerPacket.xRot}, ${movePlayerPacket.yRot}")
+                    val cursorModel = FixedCursorModel(player.uniqueId, dx, -movePlayerPacket.xRot, CursorEvent.MOVE)
+
+                    cursorEvent(cursorModel)
+                    CoroutineScope(DudeDispatcher()).launch {
+                        val app = foregroundApp
+                        if (app != null) {
+                            app.fixedCursorEvent(cursorModel)
+                        } else {
+                            head.fixedCursorEvent(cursorModel)
+                        }
+                    }
                 } else {
 //                    log(Log.ASSERT, "Other Packet = $msg")
                 }
@@ -111,7 +106,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .filter { it.event != CursorEvent.CLEAR }
             .collectOn(DudeDispatcher())
             .collectLatest {
-                val originYaw = head.origin.yaw
+                val originYaw = head.camera.origin().yaw
                 val currentYaw = it.data.yaw
 
                 val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
@@ -220,6 +215,10 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
         systemAppComponent.inject(this)
 
+        player.gameMode = GameMode.SPECTATOR
+        player.spectatorTarget = camera.camera
+        camera.camera?.addPassenger(player)
+
         registerEvents(eventHandler)
     }
 
@@ -263,7 +262,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
         val backgroundApp = backgroundApps[app.name()]
         val newApp = if (backgroundApp == null) {
-            app.launch(parentEnvironment, this, this, player, inputRepository, origin, deeplink)
+            app.launch(parentEnvironment, this, this, player, inputRepository, deeplink)
         } else {
             backgroundApp.maximize()
             backgroundApp
@@ -282,16 +281,23 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.updateUserScrollState(player.uniqueId, false)
         inputRepository.updateUserInputState(player.uniqueId, false)
         inputRepository.updateActivePlayer(player.uniqueId, false)
+
+        resetPlayer()
     }
 
     override fun shutdown() {
         backgroundApps.values.forEach { it.close() }
         foregroundApp?.close()
         close()
+    }
 
+    private fun resetPlayer() {
         channel?.eventLoop()?.submit {
             channel?.pipeline()?.remove("Apps")
         }
+
+        camera.close()
+        player.previousGameMode?.let { player.gameMode = it }
     }
 
     override fun notifyShutdown() {

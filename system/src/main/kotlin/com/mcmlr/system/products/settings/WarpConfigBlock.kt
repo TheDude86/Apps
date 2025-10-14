@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -20,10 +21,10 @@ import kotlin.math.max
 
 class WarpConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     warpsConfigRepository: WarpsConfigRepository
-) : Block(player, origin) {
-    private val view: WarpConfigViewController = WarpConfigViewController(player, origin)
+) : Block(player, camera) {
+    private val view: WarpConfigViewController = WarpConfigViewController(player, camera)
     private val interactor: WarpConfigInteractor = WarpConfigInteractor(view, warpsConfigRepository)
 
     override fun interactor(): Interactor = interactor
@@ -31,7 +32,7 @@ class WarpConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class WarpConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class WarpConfigViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     WarpConfigPresenter {
 
     private lateinit var delayView: TextInputView

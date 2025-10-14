@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.app
 
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
 import org.bukkit.Location
@@ -20,18 +21,21 @@ abstract class App(player: Player): BaseApp(player) {
         parentApp: BaseApp,
         inputRepository: InputRepository,
         deeplink: String?,
-        origin: Location,
     ) {
         this.appManager = appManager
         this.parentEnvironment = environment
         this.parentApp = parentApp
         this.inputRepository = inputRepository
         this.deeplink = deeplink
-        this.origin = origin
     }
 
     fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
         head.cursorEvent(displays, cursor, event)
+    }
+
+    fun fixedCursorEvent(model: FixedCursorModel) {
+        cursorEvent(model)
+        head.fixedCursorEvent(model)
     }
 
     fun scrollEvent(event: ScrollModel, isChild: Boolean = false) {

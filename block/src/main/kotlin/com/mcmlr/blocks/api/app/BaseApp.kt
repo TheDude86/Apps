@@ -1,19 +1,23 @@
 package com.mcmlr.blocks.api.app
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Context
 import com.mcmlr.blocks.core.FlowDisposer
+import com.mcmlr.blocks.core.emitBackground
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 
 abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
+    private val cursorStream: MutableSharedFlow<FixedCursorModel> = MutableSharedFlow()
+
     protected lateinit var head: Block
-    protected lateinit var origin: Location
     protected lateinit var parentEnvironment: BaseEnvironment<BaseApp>
     protected lateinit var camera: Camera
 
@@ -33,6 +37,10 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         head.context = this
         head.onCreate()
     }
+
+    override fun cursorEvent(cursorModel: FixedCursorModel) = cursorStream.emitBackground(cursorModel)
+
+    override fun cursorStream(): Flow<FixedCursorModel> = cursorStream
 
     override fun deeplink(): String? = deeplink
 

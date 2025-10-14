@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -18,10 +19,10 @@ import kotlin.math.max
 
 class MarketConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     marketConfigRepository: MarketConfigRepository,
-) : Block(player, origin) {
-    private val view: MarketConfigViewController = MarketConfigViewController(player, origin)
+) : Block(player, camera) {
+    private val view: MarketConfigViewController = MarketConfigViewController(player, camera)
     private val interactor: MarketConfigInteractor = MarketConfigInteractor(view, marketConfigRepository)
 
     override fun interactor(): Interactor = interactor
@@ -29,7 +30,7 @@ class MarketConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class MarketConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class MarketConfigViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     MarketConfigPresenter {
 
     private lateinit var maxOrdersView: TextInputView

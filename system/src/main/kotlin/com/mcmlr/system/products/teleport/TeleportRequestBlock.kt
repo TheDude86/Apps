@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -15,19 +16,19 @@ import javax.inject.Inject
 
 class TeleportRequestBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     private val notificationManager: NotificationManager,
-): Block(player, origin) {
-    private val view = TeleportRequestViewController(player, origin)
+): Block(player, camera) {
+    private val view = TeleportRequestViewController(player, camera)
     private val interactor = TeleportRequestInteractor(player, view, teleportRepository, playerTeleportRepository, notificationManager)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
 }
 
-class TeleportRequestViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportRequestViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     TeleportRequestPresenter {
 
     private lateinit var content: ViewContainer

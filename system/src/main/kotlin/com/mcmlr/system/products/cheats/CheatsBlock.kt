@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.cheats
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.cheats.children.ItemsBlock
 import com.mcmlr.system.products.cheats.children.SpawnerBlock
 import com.mcmlr.blocks.api.block.Block
@@ -21,13 +22,13 @@ import javax.inject.Inject
 @AppScope
 class CheatsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     cheatsListBlock: CheatsListBlock,
     spawnerBlock: SpawnerBlock,
     itemsBlock: ItemsBlock,
     cheatRepository: SelectedCheatRepository,
-): Block(player, origin) {
-    private val view = CheatsViewController(player, origin)
+): Block(player, camera) {
+    private val view = CheatsViewController(player, camera)
     private val interactor = CheatsInteractor(
         player,
         view,
@@ -43,8 +44,8 @@ class CheatsBlock @Inject constructor(
 
 class CheatsViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), CheatsPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), CheatsPresenter {
 
     private lateinit var cheatsListContainer: ViewContainer
     private lateinit var cheatsDetailContainer: ViewContainer

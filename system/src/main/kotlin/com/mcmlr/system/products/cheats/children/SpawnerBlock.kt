@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.cheats.children
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -17,10 +18,10 @@ import javax.inject.Inject
 
 class SpawnerBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     activeCheatsRepository: ActiveCheatsRepository,
-): Block(player, origin) {
-    private val view = SpawnerViewController(player, origin)
+): Block(player, camera) {
+    private val view = SpawnerViewController(player, camera)
     private val interactor = SpawnerInteractor(player, view, activeCheatsRepository)
 
     override fun view(): ViewController = view
@@ -29,8 +30,8 @@ class SpawnerBlock @Inject constructor(
 
 class SpawnerViewController(
     player: Player,
-    origin: Location,
-): ViewController(player, origin), SpawnerPresenter {
+    camera: Camera,
+): ViewController(player, camera), SpawnerPresenter {
 
     private lateinit var mobsFeed: ListFeedView
 

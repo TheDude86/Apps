@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -22,19 +23,19 @@ import kotlin.time.Duration.Companion.seconds
 
 class TeleportResponseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     teleportConfigRepository: TeleportConfigRepository
-): Block(player, origin) {
-    private val view = TeleportResponseViewController(player, origin)
+): Block(player, camera) {
+    private val view = TeleportResponseViewController(player, camera)
     private val interactor = TeleportResponseInteractor(player, view, teleportRepository, playerTeleportRepository, teleportConfigRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
 }
 
-class TeleportResponseViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportResponseViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     TeleportResponsePresenter {
 
     private lateinit var content: ViewContainer

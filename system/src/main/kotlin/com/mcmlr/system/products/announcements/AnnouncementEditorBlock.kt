@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.announcements
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -21,16 +22,16 @@ import javax.inject.Inject
 
 class AnnouncementEditorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     announcementsRepository: AnnouncementsRepository,
     textEditorBlock: TextEditorBlock,
-): Block(player, origin) {
+): Block(player, camera) {
     companion object {
         const val ANNOUNCEMENT_BUNDLE_KEY = "announcement"
         const val ANNOUNCEMENT_POST_BUNDLE_KEY = "announcement"
     }
 
-    private val view = AnnouncementEditorViewController(player, origin)
+    private val view = AnnouncementEditorViewController(player, camera)
     private val interactor = AnnouncementEditorInteractor(player, view, announcementsRepository, textEditorBlock)
 
     override fun view(): ViewController = view
@@ -48,8 +49,8 @@ class AnnouncementEditorBlock @Inject constructor(
 
 class AnnouncementEditorViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), AnnouncementEditorPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), AnnouncementEditorPresenter {
 
     private lateinit var editorFeed: FeedView
     private lateinit var buttonsContainer: ViewContainer

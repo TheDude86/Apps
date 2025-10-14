@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.spawn
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -15,11 +16,11 @@ import javax.inject.Inject
 
 class SpawnBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     spawnRepository: SpawnRepository,
     teleportRepository: PlayerTeleportRepository,
-): Block(player, origin) {
-    private val view = SpawnViewController(player, origin, spawnRepository)
+): Block(player, camera) {
+    private val view = SpawnViewController(player, camera, spawnRepository)
     private val interactor = SpawnInteractor(player, view, spawnRepository, teleportRepository)
 
     override fun view(): ViewController = view
@@ -28,9 +29,9 @@ class SpawnBlock @Inject constructor(
 
 class SpawnViewController(
     private val player: Player,
-    origin: Location,
+    camera: Camera,
     private val spawnRepository: SpawnRepository,
-): NavigationViewController(player, origin), SpawnPresenter {
+): NavigationViewController(player, camera), SpawnPresenter {
 
     private lateinit var teleportBackButton: ButtonView
 

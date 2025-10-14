@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -17,12 +18,12 @@ import kotlin.math.max
 
 class PurchaseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     orderRepository: OrderRepository,
     marketRepository: MarketRepository,
     vaultRepository: VaultRepository,
-): Block(player, origin) {
-    private val view: PurchaseViewController = PurchaseViewController(player, origin)
+): Block(player, camera) {
+    private val view: PurchaseViewController = PurchaseViewController(player, camera)
     private val interactor: PurchaseInteractor = PurchaseInteractor(player, view, orderRepository, marketRepository, vaultRepository)
 
     override fun interactor(): Interactor = interactor
@@ -30,7 +31,7 @@ class PurchaseBlock @Inject constructor(
     override fun view(): ViewController = view
 }
 
-class PurchaseViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class PurchaseViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     PurchasePresenter {
 
     private lateinit var pageTitle: TextView

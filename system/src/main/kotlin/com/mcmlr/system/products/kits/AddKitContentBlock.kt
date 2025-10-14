@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.kits
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationPresenter
@@ -17,11 +18,11 @@ import javax.inject.Inject
 
 class AddKitContentBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     iconSelectionBlock: IconSelectionBlock,
     kitRepository: KitRepository,
-): Block(player, origin) {
-    private val view = AddKitContentViewController(player, origin, true)
+): Block(player, camera) {
+    private val view = AddKitContentViewController(player, camera, true)
     private val interactor = AddKitContentInteractor(true, player, view, iconSelectionBlock, kitRepository)
 
     override fun view(): ViewController = view
@@ -40,9 +41,9 @@ class AddKitContentBlock @Inject constructor(
 
 class AddKitContentViewController(
     player: Player,
-    origin: Location,
+    camera: Camera,
     var showItem: Boolean,
-): NavigationViewController(player, origin), AddKitContentPresenter {
+): NavigationViewController(player, camera), AddKitContentPresenter {
 
     private lateinit var itemContainer: ViewContainer
     private lateinit var addContentButton: ButtonView

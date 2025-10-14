@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -15,18 +16,18 @@ import javax.inject.Inject
 
 class OfferEditorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val iconSelectionBlock: IconSelectionBlock,
     private val orderRepository: OrderRepository,
-): Block(player, origin) {
-    private val view = OfferEditorViewController(player, origin)
+): Block(player, camera) {
+    private val view = OfferEditorViewController(player, camera)
     private val interactor = OfferEditorInteractor(player, view, iconSelectionBlock, orderRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
 }
 
-class OfferEditorViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class OfferEditorViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     OfferEditorPresenter {
 
     private lateinit var pageTitle: TextView

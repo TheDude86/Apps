@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.pong
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -27,10 +28,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class PongBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     pongRepository: PongRepository,
-): Block(player, origin) {
-    private val view = PongViewController(player, origin)
+): Block(player, camera) {
+    private val view = PongViewController(player, camera)
     private val interactor = PongInteractor(player, view, pongRepository)
 
     override fun view(): ViewController = view
@@ -39,8 +40,8 @@ class PongBlock @Inject constructor(
 
 class PongViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), PongPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), PongPresenter {
 
     private lateinit var point: TextView
     private lateinit var score: TextView
@@ -213,6 +214,13 @@ class PongInteractor(
     }
 
     private fun startGame() {
+        context.cursorStream()
+            .collectOn(DudeDispatcher())
+            .collectLatest {
+                presenter.setPaddlePosition(it.y.toInt() * 10)
+            }
+            .disposeOn(collection = GAME_DISPOSAL, disposer = this)
+
         pongRepository.playerPaddlePositionStream()
             .collectOn(DudeDispatcher())
             .collectLatest {

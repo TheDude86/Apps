@@ -3,6 +3,7 @@ package com.mcmlr.apps
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -33,22 +34,22 @@ class TestEnvironment: Environment<TestApp>() {
 class TestApp(player: Player): App(player) {
 
     override fun root(): Block {
-        return TestBlock(player, origin)
+        return TestBlock(player, camera)
     }
 
     override fun onCreate(child: Boolean) {}
 
 }
 
-class TestBlock(player: Player, origin: Location,): Block(player, origin) {
-    private val view = TestViewController(player, origin)
+class TestBlock(player: Player, camera: Camera,): Block(player, camera) {
+    private val view = TestViewController(player, camera)
     private val interactor = TestInteractor(player, view)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
 }
 
-class TestViewController(player: Player, origin: Location): NavigationViewController(player, origin), TestPresenter {
+class TestViewController(player: Player, camera: Camera,): NavigationViewController(player, camera), TestPresenter {
 
     override fun createView() {
         super.createView()

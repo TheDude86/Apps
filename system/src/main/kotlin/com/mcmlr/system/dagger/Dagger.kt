@@ -1,6 +1,7 @@
 package com.mcmlr.system.dagger
 
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.homes.HomesApp
@@ -11,6 +12,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
 import org.bukkit.Location
+import org.bukkit.entity.Bee
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import javax.inject.Scope
 import javax.inject.Singleton
@@ -41,6 +45,7 @@ class SubcomponentModule
         KitsAppComponent::class,
         TutorialAppComponent::class,
         CheatsAppComponent::class,
+        PongAppComponent::class,
     ]
 )
 class HomeSubcomponentModule
@@ -114,6 +119,8 @@ interface SystemAppComponent {
 
     fun cheatsSubcomponent(): CheatsAppComponent.Builder
 
+    fun pongSubcomponent(): PongAppComponent.Builder
+
     fun inject(app: SystemApp)
 }
 
@@ -125,13 +132,7 @@ class SystemAppModule {
 
     @AppScope
     @Provides
-    fun origin(player: Player): Location {
-        val o = player.eyeLocation.clone()
-        o.pitch = 0f //TODO: Fix pitch translation issue & remove
-
-        val direction = o.direction.normalize()
-        return o.add(direction.multiply(0.15))
-    }
+    fun camera(player: Player): Camera = Camera(player)
 }
 
 

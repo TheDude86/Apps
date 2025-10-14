@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -15,15 +16,15 @@ import javax.inject.Inject
 
 class AdminBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     homeConfigBlock: HomeConfigBlock,
     warpConfigBlock: WarpConfigBlock,
     teleportConfigBlock: TeleportConfigBlock,
     marketConfigBlock: MarketConfigBlock,
     spawnConfigBlock: SpawnConfigBlock,
     systemConfigRepository: SystemConfigRepository,
-) : Block(player, origin) {
-    private val view: AdminBlockViewController = AdminBlockViewController(player, origin)
+) : Block(player, camera) {
+    private val view: AdminBlockViewController = AdminBlockViewController(player, camera)
     private val interactor: AdminInteractor = AdminInteractor(view, homeConfigBlock, warpConfigBlock, teleportConfigBlock, marketConfigBlock, spawnConfigBlock, systemConfigRepository)
 
     override fun interactor(): Interactor = interactor
@@ -31,7 +32,7 @@ class AdminBlock @Inject constructor(
     override fun view() = view
 }
 
-class AdminBlockViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class AdminBlockViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     AdminPresenter {
 
     private lateinit var permissionsButton: ButtonView

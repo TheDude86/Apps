@@ -48,4 +48,5 @@ enum class PermissionNode(val node: String) {
     CHEATS("apps.cheats"),
     PLAYER("apps.player"),
     ADMIN("apps.admin"),
+    PONG("apps.pong"),
 }

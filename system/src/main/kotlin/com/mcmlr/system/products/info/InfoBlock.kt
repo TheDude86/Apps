@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.info
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -13,9 +14,9 @@ import javax.inject.Inject
 
 class InfoBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
-    private val view = InfoViewController(player, origin)
+    camera: Camera,
+): Block(player, camera) {
+    private val view = InfoViewController(player, camera)
     private val interactor = InfoInteractor(view)
 
     override fun view(): ViewController = view
@@ -24,8 +25,8 @@ class InfoBlock @Inject constructor(
 
 class InfoViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), InfoPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), InfoPresenter {
 
     override fun createView() {
         super.createView()

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.workbenches
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -13,9 +14,9 @@ import javax.inject.Inject
 
 class WorkbenchesBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
-    private val view = WorkbenchesViewController(player, origin)
+    camera: Camera,
+): Block(player, camera) {
+    private val view = WorkbenchesViewController(player, camera)
     private val interactor = WorkbenchesInteractor(player, view)
 
     override fun view(): ViewController = view
@@ -24,8 +25,8 @@ class WorkbenchesBlock @Inject constructor(
 
 class WorkbenchesViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), WorkbenchesPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), WorkbenchesPresenter {
 
     override fun createView() {
         super.createView()

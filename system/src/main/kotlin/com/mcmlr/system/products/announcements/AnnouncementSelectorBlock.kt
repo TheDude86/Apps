@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.announcements
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.announcements.AnnouncementSelectorBlock.Companion.ANNOUNCEMENT_SELECT_BUNDLE_KEY
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -20,14 +21,14 @@ import javax.inject.Inject
 
 class AnnouncementSelectorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     announcementsRepository: AnnouncementsRepository,
-): Block(player, origin) {
+): Block(player, camera) {
     companion object {
         const val ANNOUNCEMENT_SELECT_BUNDLE_KEY = "announcement select"
     }
 
-    private val view = AnnouncementSelectorViewController(player, origin)
+    private val view = AnnouncementSelectorViewController(player, camera)
     private val interactor = AnnouncementSelectorInteractor(view, announcementsRepository)
 
     override fun view(): ViewController = view
@@ -36,8 +37,8 @@ class AnnouncementSelectorBlock @Inject constructor(
 
 class AnnouncementSelectorViewController(
     player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), AnnouncementSelectorPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), AnnouncementSelectorPresenter {
 
     private lateinit var feed: ListFeedView
 

@@ -1,5 +1,6 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.applications.ApplicationsBlock
 import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.info.SetupBlock
@@ -31,7 +32,7 @@ import javax.inject.Inject
 
 class LandingBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     homesBlock: HomesBlock,
     warpsBlock: WarpsBlock,
     teleportBlock: TeleportBlock,
@@ -46,12 +47,11 @@ class LandingBlock @Inject constructor(
     permissionsRepository: PermissionsRepository,
     spawnRepository: SpawnRepository,
     systemConfigRepository: SystemConfigRepository,
-) : Block(player, origin) {
-    private val view: LandingViewController = LandingViewController(player, origin, systemConfigRepository)
+) : Block(player, camera) {
+    private val view: LandingViewController = LandingViewController(player, camera, systemConfigRepository)
     private val interactor: LandingInteractor = LandingInteractor(
         player,
         view,
-        this,
         homesBlock,
         warpsBlock,
         teleportBlock,
@@ -72,7 +72,7 @@ class LandingBlock @Inject constructor(
     override fun view() = view
 }
 
-class LandingViewController(private val player: Player, origin: Location, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
+class LandingViewController(private val player: Player, camera: Camera, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, camera), LandingPresenter {
 
     private lateinit var title: TextView
     private lateinit var appsContainer: ViewContainer
@@ -171,7 +171,6 @@ interface LandingPresenter: Presenter {
 class LandingInteractor(
     private val player: Player,
     private val presenter: LandingPresenter,
-    private val context: Context,
     private val homesBlock: HomesBlock,
     private val warpsBlock: WarpsBlock,
     private val teleportBlock: TeleportBlock,

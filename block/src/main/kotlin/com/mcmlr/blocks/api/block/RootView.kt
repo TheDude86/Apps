@@ -1,9 +1,11 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.log
@@ -26,7 +28,7 @@ import kotlin.math.sqrt
 
 class RootView(
     private val player: Player,
-    private val origin: Location,
+    private val camera: Camera,
     override var offset: Int = 0,
 ): Viewable {
     companion object {
@@ -100,6 +102,24 @@ class RootView(
             CursorEvent.MOVE -> update(displays, cursor)
             CursorEvent.CLICK -> click()
             CursorEvent.CLEAR -> { } //Do nothing
+        }
+    }
+
+    fun fixedCursorEvent(x: Int, y: Int) {
+        buttonMap.values.forEach {
+            val view = it as? View ?: return@forEach
+
+            val topLeft = Coordinates(view.start(), view.top()).offset(view.parent.getAbsolutePosition())
+            val bottomRight = Coordinates(view.end(), view.bottom()).offset(view.parent.getAbsolutePosition())
+            val inBounds = x > topLeft.x && x < bottomRight.x && y < topLeft.y && y > bottomRight.y
+
+            when (view) {
+                is ItemButtonView -> updateItemButton(view, inBounds)
+
+                is ButtonView -> updateButton(view, inBounds)
+
+                is ViewContainer -> updateContainerButton(view, inBounds)
+            }
         }
     }
 
@@ -494,10 +514,10 @@ class RootView(
     }
 
     private fun getDisplayLocation(x: Int, y: Int, level: Int): Location {
-        val xVector = xVector(origin.direction.normalize())
-        val yVector = yVector(origin.direction.normalize())
-        val direction = origin.direction.normalize()
-        val location = origin.clone().subtract(direction.multiply(0.004 * level)).add(yVector.multiply(y / 8000.toDouble())).subtract(xVector.multiply(x / 8000.toDouble()))
+        val xVector = xVector(camera.origin().direction.normalize())
+        val yVector = yVector(camera.origin().direction.normalize())
+        val direction = camera.origin().direction.normalize()
+        val location = camera.origin().subtract(direction.multiply(0.004 * level)).add(yVector.multiply(y / 8000.toDouble())).subtract(xVector.multiply(x / 8000.toDouble()))
         location.yaw += 180
         location.pitch *= -1
         return location

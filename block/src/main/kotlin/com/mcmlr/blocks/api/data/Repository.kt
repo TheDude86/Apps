@@ -2,6 +2,8 @@ package com.mcmlr.blocks.api.data
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +17,7 @@ abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) 
     lateinit var model: T
 
     fun <U: ConfigModel> generateModel(path: String, name: String, default: U, onCompleteListener: (suspend (U) -> Unit)? = null) {
+        log(Log.DEBUG, "Repo=${javaClass.simpleName}")
         CoroutineScope(Dispatchers.IO).launch {
             val gson = GsonBuilder()
                 .setPrettyPrinting()

@@ -2,19 +2,22 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
+import kotlinx.coroutines.flow.Flow
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-abstract class Block(protected val player: Player, origin: Location): Context {
+abstract class Block(protected val player: Player, val camera: Camera): Context {
 
-    val origin: Location = origin.clone()
+//    val origin: Location = origin.clone()
     lateinit var context: Context
     var parent: Block? = null
 
@@ -24,7 +27,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
     override fun onCreate(child: Boolean) {
         isChild = child
         router().configure(this)
-        interactor().configure(router(), isChild)
+        interactor().configure(this, router(), isChild)
         view().configure(isChild, router(), this)
         interactor().onCreate()
     }
@@ -37,15 +40,15 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     override fun onResume(newOrigin: Location?) {
         if (newOrigin != null) {
-            newOrigin.yaw = origin.yaw
+            newOrigin.yaw = camera.origin().yaw
             newOrigin.pitch = 0f
 
             val direction = newOrigin.direction.normalize()
             val o = newOrigin.clone().add(direction.multiply(offset()))
 
-            this.origin.x = o.x
-            this.origin.y = o.y
-            this.origin.z = o.z
+            this.camera.origin().x = o.x
+            this.camera.origin().y = o.y
+            this.camera.origin().z = o.z
         }
 
         router().onResume(newOrigin)
@@ -58,6 +61,10 @@ abstract class Block(protected val player: Player, origin: Location): Context {
         router().clear()
     }
 
+    override fun cursorEvent(cursorModel: FixedCursorModel) = context.cursorEvent(cursorModel)
+
+    override fun cursorStream(): Flow<FixedCursorModel> = context.cursorStream()
+
     override fun deeplink(): String? = context.deeplink()
 
     fun setResultCallback(callback: ((Bundle) -> Unit)?) {
@@ -68,7 +75,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     open fun router(): Router = router
 
-    open fun view(): ViewController = EmptyViewController(player, origin)
+    open fun view(): ViewController = EmptyViewController(player, camera)
 
     override fun setHeadBlock(head: Block) {
         context.setHeadBlock(head)
@@ -123,17 +130,22 @@ abstract class Block(protected val player: Player, origin: Location): Context {
         router().cursorEvent(displays, cursor, event)
     }
 
+    fun fixedCursorEvent(model: FixedCursorModel) {
+        view().fixedCursorEvent(model)
+        router().fixedCursorEvent(model)
+    }
+
     fun moveEventChild(newOrigin: Location) {
-        newOrigin.yaw = origin.yaw
+        newOrigin.yaw = camera.origin().yaw
         newOrigin.pitch = 0f
 
         val o = newOrigin.clone()
 
-        view().moveEvent(origin, o)
+        view().moveEvent(camera.origin(), o)
         router().moveEvent(o)
-        this.origin.x = o.x
-        this.origin.y = o.y
-        this.origin.z = o.z
+        this.camera.origin().x = o.x
+        this.camera.origin().y = o.y
+        this.camera.origin().z = o.z
     }
 
     fun attach(context: Context, parentView: ViewContainer) {
@@ -144,6 +156,10 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 }
 
 interface Context {
+    fun cursorEvent(cursorModel: FixedCursorModel)
+
+    fun cursorStream(): Flow<FixedCursorModel>
+
     fun onCreate(child: Boolean = false)
 
     fun onPause()

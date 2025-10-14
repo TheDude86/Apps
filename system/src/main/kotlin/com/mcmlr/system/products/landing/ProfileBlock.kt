@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -14,9 +15,9 @@ import javax.inject.Inject
 
 class ProfileBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
-    private val view = ProfileViewController(player, origin)
+    camera: Camera,
+): Block(player, camera) {
+    private val view = ProfileViewController(player, camera)
     private val interactor = ProfileInteractor(view)
 
     override fun view(): ViewController = view
@@ -25,8 +26,8 @@ class ProfileBlock @Inject constructor(
 
 class ProfileViewController(
     private val player: Player,
-    origin: Location,
-): ViewController(player, origin), ProfilePresenter {
+    camera: Camera,
+): ViewController(player, camera), ProfilePresenter {
 
     private lateinit var avatarContainer: ViewContainer
 

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.kits
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -18,13 +19,13 @@ import kotlin.time.Duration.Companion.seconds
 
 class KitsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     createKitBlock: CreateKitBlock,
     kitRepository: KitRepository,
     vaultRepository: VaultRepository,
     permissionsRepository: PermissionsRepository,
-): Block(player, origin) {
-    private val view = KitsViewController(player, origin, permissionsRepository)
+): Block(player, camera) {
+    private val view = KitsViewController(player, camera, permissionsRepository)
     private val interactor = KitsInteractor(player, view, createKitBlock, kitRepository, vaultRepository)
 
     override fun view(): ViewController = view
@@ -33,9 +34,9 @@ class KitsBlock @Inject constructor(
 
 class KitsViewController(
     private val player: Player,
-    origin: Location,
+    camera: Camera,
     private val permissionsRepository: PermissionsRepository,
-): NavigationViewController(player, origin), KitsPresenter {
+): NavigationViewController(player, camera), KitsPresenter {
 
     private lateinit var kitPurchase: ButtonView
     private lateinit var kitsPager: PagerView

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.homes
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -25,12 +26,12 @@ import kotlin.time.Duration.Companion.seconds
 
 class HomesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     addHomeBlock: AddHomeBlock,
     homesRepository: HomesRepository,
     homesConfigRepository: HomesConfigRepository,
-): Block(player, origin) {
-    private val view = HomesViewController(player, origin)
+): Block(player, camera) {
+    private val view = HomesViewController(player, camera)
     private val interactor = HomesInteractor(player, view, addHomeBlock, homesRepository, homesConfigRepository)
 
     override fun view(): ViewController = view
@@ -39,8 +40,8 @@ class HomesBlock @Inject constructor(
 
 class HomesViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), HomesPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), HomesPresenter {
 
     private lateinit var container: FeedView
     private lateinit var newHomeButton: ButtonView

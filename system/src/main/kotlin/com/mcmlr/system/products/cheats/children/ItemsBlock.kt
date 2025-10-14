@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.cheats.children
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -22,10 +23,10 @@ import javax.inject.Inject
 
 class ItemsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     materialsRepository: MaterialsRepository,
-): Block(player, origin) {
-    private val view = ItemsViewController(player, origin)
+): Block(player, camera) {
+    private val view = ItemsViewController(player, camera)
     private val interactor = ItemsInteractor(player, view, materialsRepository)
 
     override fun view(): ViewController = view
@@ -34,8 +35,8 @@ class ItemsBlock @Inject constructor(
 
 class ItemsViewController(
     player: Player,
-    origin: Location,
-): ViewController(player, origin), ItemsPresenter {
+    camera: Camera,
+): ViewController(player, camera), ItemsPresenter {
 
     private lateinit var contentView: ViewContainer
     private lateinit var searchButton: TextInputView

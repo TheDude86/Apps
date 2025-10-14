@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.warps
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -18,11 +19,11 @@ import javax.inject.Inject
 
 class AddWarpsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val iconSelectionBlock: IconSelectionBlock,
     private val warpsRepository: WarpsRepository,
-): Block(player, origin) {
-    private val view = AddWarpViewController(player, origin)
+): Block(player, camera) {
+    private val view = AddWarpViewController(player, camera)
     private val interactor = AddWarpInteractor(view, iconSelectionBlock, player, warpsRepository)
 
     override fun view(): ViewController = view
@@ -31,8 +32,8 @@ class AddWarpsBlock @Inject constructor(
 
 class AddWarpViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), AddWarpPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), AddWarpPresenter {
 
     private lateinit var warpNameButton: TextInputView
     private lateinit var warpIconButton: ButtonView

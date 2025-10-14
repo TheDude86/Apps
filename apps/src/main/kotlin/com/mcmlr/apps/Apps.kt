@@ -17,6 +17,8 @@ import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.info.TutorialEnvironment
 import com.mcmlr.system.products.kits.KitsEnvironment
 import com.mcmlr.system.products.market.MarketEnvironment
+import com.mcmlr.system.products.pong.PongApp
+import com.mcmlr.system.products.pong.PongEnvironment
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.recipe.RecipeEnvironment
 import com.mcmlr.system.products.settings.AdminEnvironment
@@ -100,6 +102,7 @@ class Apps : JavaPlugin() {
         AppInjector.register(KitsEnvironment())
         AppInjector.register(TutorialEnvironment())
 //        AppInjector.register(CheatsEnvironment())
+        AppInjector.register(PongEnvironment())
 
         inputRepository
             .onlinePlayerEventStream()

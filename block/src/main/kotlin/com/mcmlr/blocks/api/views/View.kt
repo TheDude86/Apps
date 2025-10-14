@@ -242,7 +242,6 @@ abstract class View(
             if (modifier.top == null && modifier.bottom == null) {
                 throw Exception("TODO: add error messages") //TODO
             } else if (modifier.top == null) {
-                log(Log.ASSERT, "Bottom aligned")
                 val p = if (modifier.bottom?.view == parent) {
                     (modifier.bottom?.p ?: return 0) - (modifier.bottom?.view?.getPosition()?.y ?: 0) + (80 * (modifier.top?.view?.offset ?: 0))
                 } else {

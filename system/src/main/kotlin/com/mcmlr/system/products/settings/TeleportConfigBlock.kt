@@ -1,6 +1,6 @@
 package com.mcmlr.system.products.settings
 
-import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -19,10 +19,10 @@ import kotlin.math.max
 
 class TeleportConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     teleportConfigRepository: TeleportConfigRepository,
-) : Block(player, origin) {
-    private val view: TeleportConfigViewController = TeleportConfigViewController(player, origin)
+) : Block(player, camera) {
+    private val view: TeleportConfigViewController = TeleportConfigViewController(player, camera)
     private val interactor: TeleportConfigInteractor = TeleportConfigInteractor(view, teleportConfigRepository)
 
     override fun interactor(): Interactor = interactor
@@ -30,7 +30,7 @@ class TeleportConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class TeleportConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportConfigViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     TeleportConfigPresenter {
 
     private lateinit var delayView: TextInputView

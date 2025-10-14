@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -18,10 +19,10 @@ import kotlin.math.max
 
 class HomeConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     homesConfigRepository: HomesConfigRepository,
-) : Block(player, origin) {
-    private val view: HomeConfigViewController = HomeConfigViewController(player, origin)
+) : Block(player, camera) {
+    private val view: HomeConfigViewController = HomeConfigViewController(player, camera)
     private val interactor: HomeConfigInteractor = HomeConfigInteractor(view, homesConfigRepository)
 
     override fun interactor(): Interactor = interactor
@@ -29,7 +30,7 @@ class HomeConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class HomeConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class HomeConfigViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     HomeConfigPresenter {
 
     private lateinit var maxHomesView: TextInputView

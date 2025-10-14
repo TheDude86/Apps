@@ -1,5 +1,7 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.teleport.GlobalTeleportRepository
 import com.mcmlr.system.products.data.ServerEventsRepository

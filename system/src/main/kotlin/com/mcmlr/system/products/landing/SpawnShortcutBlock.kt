@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -18,12 +19,12 @@ import javax.inject.Inject
 
 class SpawnShortcutBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     spawnRepository: SpawnRepository,
     playerTeleportRepository: PlayerTeleportRepository,
     permissionsRepository: PermissionsRepository,
-): Block(player, origin) {
-    private val view = SpawnShortcutViewController(player, origin, spawnRepository, permissionsRepository)
+): Block(player, camera) {
+    private val view = SpawnShortcutViewController(player, camera, spawnRepository, permissionsRepository)
     private val interactor = SpawnShortcutInteractor(player, view, spawnRepository, playerTeleportRepository)
 
     override fun view(): ViewController = view
@@ -32,10 +33,10 @@ class SpawnShortcutBlock @Inject constructor(
 
 class SpawnShortcutViewController(
     private val player: Player,
-    origin: Location,
+    camera: Camera,
     private val spawnRepository: SpawnRepository,
     private val permissionsRepository: PermissionsRepository,
-): ViewController(player, origin), SpawnShortcutPresenter {
+): ViewController(player, camera), SpawnShortcutPresenter {
 
     private var spawn: ButtonView? = null
     private var back: ButtonView? = null

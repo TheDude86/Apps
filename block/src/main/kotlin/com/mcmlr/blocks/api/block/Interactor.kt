@@ -17,6 +17,8 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
 
     protected lateinit var router: Router
 
+    lateinit var context: Context
+
     open fun onCreate() {
         basePresenter.createView()
         basePresenter.render()
@@ -60,7 +62,8 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
 
     fun maximize() = router.maximize()
 
-    fun configure(router: Router, isChild: Boolean) {
+    fun configure(context: Context, router: Router, isChild: Boolean) {
+        this.context = context
         this.router = router
         this.isChild = isChild
     }

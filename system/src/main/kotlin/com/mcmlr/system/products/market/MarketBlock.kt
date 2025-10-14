@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -19,20 +20,20 @@ import javax.inject.Inject
 
 class MarketBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     myOffersBlock: MyOffersBlock,
     purchaseBlock: PurchaseBlock,
     marketRepository: MarketRepository,
     orderRepository: OrderRepository,
-): Block(player, origin) {
-    private val view = MarketViewController(player, origin)
+): Block(player, camera) {
+    private val view = MarketViewController(player, camera)
     private val interactor = MarketInteractor(view, myOffersBlock, purchaseBlock, marketRepository, orderRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
 }
 
-class MarketViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class MarketViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     MarketPresenter {
     private lateinit var searchButton: TextInputView
     private lateinit var myOffersButton: ButtonView

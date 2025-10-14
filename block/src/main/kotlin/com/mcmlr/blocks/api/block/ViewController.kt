@@ -1,18 +1,20 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.FixedCursorModel
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.log
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 open class ViewController(
     private val player: Player,
-    private val origin: Location,
+    private val camera: Camera,
     background: Color = Color.fromARGB(192, 0, 0, 0),
 ): ViewContainer(
     modifier = Modifier().size(MATCH_PARENT, MATCH_PARENT),
@@ -21,21 +23,22 @@ open class ViewController(
 
     private var isChild: Boolean = false
     private var isScrolling: Boolean = false
+    private var cursor: ItemView? = null
 
     private lateinit var router: Router
     private lateinit var context: Context
 
     init {
-        attach(RootView(player, origin))
+        attach(RootView(player, camera))
     }
 
     fun updateOrigin(origin: Location) {
         val direction = origin.direction.normalize()
         val o = origin.clone().add(direction.multiply(context.offset()))
 
-        this.origin.x = o.x
-        this.origin.y = o.y
-        this.origin.z = o.z
+        this.camera.origin().x = o.x
+        this.camera.origin().y = o.y
+        this.camera.origin().z = o.z
     }
 
     fun configure(isChild: Boolean, router: Router, context: Context) {
@@ -47,7 +50,19 @@ open class ViewController(
     }
 
     override fun render() {
-        if (!isChild) dudeDisplay = parent.addContainerDisplay(this)
+        if (!isChild) {
+            dudeDisplay = parent.addContainerDisplay(this)
+
+            cursor?.clear()
+            cursor = addItemView(
+                modifier = Modifier()
+                    .size(10, 10)
+                    .x(0)
+                    .y(0),
+                teleportDuration = 1,
+                item = ItemStack(Material.SMOOTH_QUARTZ)
+            )
+        }
 
         children.forEach {
             it.render()
@@ -100,6 +115,16 @@ open class ViewController(
         root.cursorEvent(displays, cursor, event)
     }
 
+    fun fixedCursorEvent(model: FixedCursorModel) {
+        val root = parent as? RootView ?: return
+        val cursor = cursor ?: return
+
+        val x = cursor.getViewModifier().x + model.deltaX.toInt() * 11
+        val y = model.y.toInt() * 11
+        cursor.setPositionView(x, y)
+        root.fixedCursorEvent(x, y)
+    }
+
     override fun scrollEvent(event: ScrollModel, isChild: Boolean) {
         if (!isScrolling && !isChild) return
         super.scrollEvent(event, isChild)
@@ -127,4 +152,4 @@ open class ViewController(
     protected fun hasParent() = router.hasParent()
 }
 
-class EmptyViewController(player: Player, origin: Location): ViewController(player, origin)
+class EmptyViewController(player: Player, camera: Camera): ViewController(player, camera)

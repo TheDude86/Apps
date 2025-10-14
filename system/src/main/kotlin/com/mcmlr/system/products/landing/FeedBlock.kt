@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -21,10 +22,10 @@ import javax.inject.Inject
 
 class FeedBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     announcementsRepository: AnnouncementsRepository,
-): Block(player, origin) {
-    private val view = FeedViewController(player = player, origin = origin)
+): Block(player, camera) {
+    private val view = FeedViewController(player = player, camera = camera)
     private val interactor = FeedInteractor(view, announcementsRepository)
 
     override fun view(): ViewController = view
@@ -42,8 +43,8 @@ class FeedBlock @Inject constructor(
 class FeedViewController(
     var enableCTA: Boolean = true,
     private val player: Player,
-    origin: Location,
-): ViewController(player, origin), FeedPresenter {
+    camera: Camera,
+): ViewController(player, camera), FeedPresenter {
 
     private lateinit var feed: ListFeedView
 

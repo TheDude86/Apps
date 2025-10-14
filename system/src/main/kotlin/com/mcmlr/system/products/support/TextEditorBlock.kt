@@ -2,6 +2,7 @@ package com.mcmlr.system.products.support
 
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -20,13 +21,13 @@ import kotlin.math.min
 
 class TextEditorBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
+    camera: Camera,
+): Block(player, camera) {
     companion object {
         const val TEXT_BUNDLE_KEY = "text"
     }
 
-    private val view = TextEditorBlockViewController(player, origin)
+    private val view = TextEditorBlockViewController(player, camera)
     private val interactor = TextEditorInteractor(view)
 
     override fun view(): ViewController = view
@@ -40,8 +41,8 @@ class TextEditorBlock @Inject constructor(
 
 class TextEditorBlockViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), TextEditorPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), TextEditorPresenter {
 
     private lateinit var messageContainer: ListFeedView
     private lateinit var messageEditorContainer: ListFeedView

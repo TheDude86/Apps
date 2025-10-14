@@ -3,6 +3,7 @@ package com.mcmlr.system.products.applications
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -22,10 +23,10 @@ import javax.inject.Inject
 
 class ApplicationsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val applicationsRepository: ApplicationsRepository,
-): Block(player, origin) {
-    private val view = ApplicationsViewController(player, origin)
+): Block(player, camera) {
+    private val view = ApplicationsViewController(player, camera)
     private val interactor = ApplicationsInteractor(player, view, applicationsRepository)
 
     override fun view(): ViewController = view
@@ -34,8 +35,8 @@ class ApplicationsBlock @Inject constructor(
 
 class ApplicationsViewController(
     player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), ApplicationsPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), ApplicationsPresenter {
 
     private val appPositions = listOf(
         Coordinates(-1000, 500), Coordinates(-600, 500), Coordinates(-200, 500), Coordinates(200, 500), Coordinates(600, 500), Coordinates(1000, 500),

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -20,11 +21,11 @@ import kotlin.time.Duration.Companion.seconds
 
 class SpawnConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     spawnRepository: SpawnRepository,
     kitRepository: KitRepository,
-) : Block(player, origin) {
-    private val view: SpawnConfigViewController = SpawnConfigViewController(player, origin)
+) : Block(player, camera) {
+    private val view: SpawnConfigViewController = SpawnConfigViewController(player, camera)
     private val interactor: SpawnConfigInteractor = SpawnConfigInteractor(player, view, spawnRepository, kitRepository)
 
     override fun interactor(): Interactor = interactor
@@ -32,7 +33,7 @@ class SpawnConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class SpawnConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class SpawnConfigViewController(player: Player, camera: Camera,): NavigationViewController(player, camera),
     SpawnConfigPresenter {
 
     private lateinit var contentView: ViewContainer

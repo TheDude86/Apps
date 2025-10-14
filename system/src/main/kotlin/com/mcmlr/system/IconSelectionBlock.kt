@@ -1,5 +1,6 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.data.MaterialsRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -15,7 +16,6 @@ import com.mcmlr.blocks.core.collectFirst
 import com.mcmlr.blocks.core.collectOn
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
@@ -24,14 +24,14 @@ import javax.inject.Inject
 
 class IconSelectionBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val materialsRepository: MaterialsRepository,
-): Block(player, origin) {
+): Block(player, camera) {
     companion object {
         const val MATERIAL_BUNDLE_KEY = "material"
     }
 
-    private val view = IconSelectionBlockViewController(player, origin)
+    private val view = IconSelectionBlockViewController(player, camera)
     private val interactor = IconSelectionInteractor(view, materialsRepository)
 
     override fun view(): ViewController = view
@@ -48,8 +48,8 @@ class IconSelectionBlock @Inject constructor(
 
 class IconSelectionBlockViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), IconSelectionPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), IconSelectionPresenter {
 
     private lateinit var searchButton: TextInputView
     private lateinit var feedView: FeedView

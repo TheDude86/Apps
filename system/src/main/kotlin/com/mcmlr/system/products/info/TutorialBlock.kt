@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.info
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
@@ -7,7 +8,6 @@ import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.*
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -16,10 +16,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class TutorialBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
-    private val view = TutorialViewController(player, origin)
-    private val interactor = TutorialInteractor(origin, player, view)
+    camera: Camera,
+): Block(player, camera) {
+    private val view = TutorialViewController(player, camera)
+    private val interactor = TutorialInteractor(camera, player, view)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -27,8 +27,8 @@ class TutorialBlock @Inject constructor(
 
 class TutorialViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), TutorialPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), TutorialPresenter {
 
     private lateinit var contentContainer: ViewContainer
     private lateinit var clockTextView: TextView
@@ -463,7 +463,7 @@ interface TutorialPresenter: Presenter {
 }
 
 class TutorialInteractor(
-    private val origin: Location,
+    private val camera: Camera,
     private val player: Player,
     private val presenter: TutorialPresenter,
 //    private val cursorRepository: CursorRepository,

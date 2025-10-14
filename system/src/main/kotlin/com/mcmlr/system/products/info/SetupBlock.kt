@@ -2,6 +2,7 @@ package com.mcmlr.system.products.info
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock.Companion.ANNOUNCEMENT_POST_BUNDLE_KEY
 import com.mcmlr.system.products.announcements.AnnouncementModel
@@ -39,7 +40,7 @@ import javax.inject.Inject
 
 class SetupBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     tutorialBlock: TutorialBlock,
     feedBlock: FeedBlock,
     announcementEditorBlock: AnnouncementEditorBlock,
@@ -51,8 +52,8 @@ class SetupBlock @Inject constructor(
     applicationsRepository: ApplicationsRepository,
     announcementsRepository: AnnouncementsRepository,
     systemConfigRepository: SystemConfigRepository,
-): Block(player, origin) {
-    private val view = SetupViewController(player, origin)
+): Block(player, camera) {
+    private val view = SetupViewController(player, camera)
     private val interactor = SetupInteractor(
         view,
         tutorialBlock,
@@ -74,8 +75,8 @@ class SetupBlock @Inject constructor(
 
 class SetupViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), SetupPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), SetupPresenter {
 
     private lateinit var contentContainer: ViewContainer
 

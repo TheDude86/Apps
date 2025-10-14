@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.homes
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -18,11 +19,11 @@ import javax.inject.Inject
 
 class AddHomeBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     private val iconSelectionBlock: IconSelectionBlock,
     private val homesRepository: HomesRepository,
-): Block(player, origin) {
-    private val view = AddHomeViewController(player, origin)
+): Block(player, camera) {
+    private val view = AddHomeViewController(player, camera)
     private val interactor = AddHomeInteractor(view, iconSelectionBlock, player, homesRepository)
 
     override fun view(): ViewController = view
@@ -31,8 +32,8 @@ class AddHomeBlock @Inject constructor(
 
 class AddHomeViewController(
     player: Player,
-    origin: Location
-): NavigationViewController(player, origin), AddHomePresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), AddHomePresenter {
 
     private lateinit var homeNameButton: TextInputView
     private lateinit var homeIconButton: ButtonView

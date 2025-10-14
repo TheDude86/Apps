@@ -5,10 +5,22 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
-class Camera(val player: Player, var camera: LivingEntity? = null) {
+class Camera(player: Player, var camera: LivingEntity? = null) {
 
-    fun origin(): Location = (camera?.eyeLocation ?: player.eyeLocation).clone()
+    val origin = player.eyeLocation.clone()
 
-    fun offset(): Double = if (camera == null) 0.15 else 0.18
+    fun origin(): Location {
+        val loc = (camera?.eyeLocation ?: origin).clone()
+        loc.pitch = 0f
+
+        val direction = loc.direction.normalize()
+        return loc.add(direction.clone().multiply(offset()))
+    }
+
+    fun offset(): Double = if (camera == null) 0.18 else 0.18
+
+    fun close() {
+        camera?.remove()
+    }
 
 }

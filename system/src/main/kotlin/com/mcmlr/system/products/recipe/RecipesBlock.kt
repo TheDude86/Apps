@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.recipe
 
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -21,9 +22,9 @@ import javax.inject.Inject
 
 class RecipesBlock @Inject constructor(
     player: Player,
-    origin: Location,
-): Block(player, origin) {
-    private val view = RecipesViewController(player, origin)
+    camera: Camera,
+): Block(player, camera) {
+    private val view = RecipesViewController(player, camera)
     private val interactor = RecipesInteractor(view)
 
     override fun view(): ViewController = view
@@ -32,8 +33,8 @@ class RecipesBlock @Inject constructor(
 
 class RecipesViewController(
     private val player: Player,
-    origin: Location,
-): NavigationViewController(player, origin), RecipesPresenter {
+    camera: Camera,
+): NavigationViewController(player, camera), RecipesPresenter {
     companion object {
         private const val RECIPE_ITEM_SIZE = 40
     }

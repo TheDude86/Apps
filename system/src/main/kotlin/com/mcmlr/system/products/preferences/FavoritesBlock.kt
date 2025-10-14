@@ -2,6 +2,7 @@ package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.Camera
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
@@ -16,11 +17,11 @@ import javax.inject.Inject
 
 class FavoritesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    camera: Camera,
     selectFavoriteBlock: SelectFavoriteBlock,
     preferencesRepository: PreferencesRepository,
-): Block(player, origin) {
-    private val view = FavoritesViewController(player, origin)
+): Block(player, camera) {
+    private val view = FavoritesViewController(player, camera)
     private val interactor = FavoritesInteractor(player, view, selectFavoriteBlock, preferencesRepository)
 
     override fun view(): ViewController = view
@@ -29,8 +30,8 @@ class FavoritesBlock @Inject constructor(
 
 class FavoritesViewController(
     player: Player,
-    origin: Location,
-): ViewController(player, origin), FavoritesPresenter {
+    camera: Camera,
+): ViewController(player, camera), FavoritesPresenter {
 
     private lateinit var favoriteSlots: List<ViewContainer>
 

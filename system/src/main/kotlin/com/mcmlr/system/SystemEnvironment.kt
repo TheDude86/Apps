@@ -78,7 +78,7 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
 
     fun launch(player: Player, deeplink: String?) {
         val app = getInstance(player)
-        app.configure(this, deeplink, origin(player), inputRepository)
+        app.configure(this, deeplink, inputRepository)
 
         if (appMap.containsKey(app.player.uniqueId)) {
             appMap[app.player.uniqueId]?.shutdown()
@@ -91,17 +91,8 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
         val camera = player.world.spawnEntity(location, EntityType.BEE) as Bee
         (camera as? LivingEntity)?.setAI(false)
 
-
         app.create(resources, Camera(player, camera))
         appMap[app.player.uniqueId] = app
-    }
-
-    private fun origin(player: Player): Location {
-        val o = player.eyeLocation.clone()
-        o.pitch = 0f
-
-        val direction = o.direction.normalize()
-        return o.add(direction.multiply(0.15))
     }
 
     fun register(app: Environment<App>) {
