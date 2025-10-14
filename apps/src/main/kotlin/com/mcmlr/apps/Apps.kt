@@ -23,6 +23,7 @@ import com.mcmlr.system.products.settings.AdminEnvironment
 import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
+import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -77,7 +78,9 @@ class Apps : JavaPlugin() {
             .build()
         managerComponent.inject(this)
 
-        AppsDefaultPlayerExpansion().register()
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            AppsDefaultPlayerExpansion().register()
+        }
 
         systemEnvironment = SystemEnvironment(this)
         systemEnvironment.configure(inputRepository, resources)
