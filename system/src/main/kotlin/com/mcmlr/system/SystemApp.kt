@@ -84,6 +84,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
                 val app = foregroundApp
                 if (app != null) {
+                    app.cursorEvent(it)
                     app.cursorEvent(displays, cursor, it.event)
                 } else {
                     head.cursorEvent(displays, cursor, it.event)

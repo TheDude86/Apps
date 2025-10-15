@@ -2,11 +2,13 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
+import kotlinx.coroutines.flow.Flow
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -57,6 +59,10 @@ abstract class Block(protected val player: Player, origin: Location): Context {
         view().clear()
         router().clear()
     }
+
+    override fun cursorEvent(cursorModel: CursorModel) = context.cursorEvent(cursorModel)
+
+    override fun cursorStream(): Flow<CursorModel> = context.cursorStream()
 
     override fun deeplink(): String? = context.deeplink()
 
@@ -142,6 +148,11 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 }
 
 interface Context {
+
+    fun cursorEvent(cursorModel: CursorModel)
+
+    fun cursorStream(): Flow<CursorModel>
+
     fun onCreate(child: Boolean = false)
 
     fun onPause()
