@@ -3,15 +3,20 @@ package com.mcmlr.blocks.api.app
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Context
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 
 abstract class BaseApp(val player: Player): FlowDisposer(), Context {
+
+    private val cursorStream: MutableSharedFlow<CursorModel> = MutableSharedFlow()
 
     protected lateinit var head: Block
     protected lateinit var origin: Location
@@ -31,6 +36,10 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         head.context = this
         head.onCreate()
     }
+
+    override fun cursorEvent(cursorModel: CursorModel) = cursorStream.emitBackground(cursorModel)
+
+    override fun cursorStream(): Flow<CursorModel> = cursorStream
 
     override fun deeplink(): String? = deeplink
 

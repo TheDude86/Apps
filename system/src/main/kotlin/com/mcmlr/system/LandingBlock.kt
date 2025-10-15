@@ -51,7 +51,6 @@ class LandingBlock @Inject constructor(
     private val interactor: LandingInteractor = LandingInteractor(
         player,
         view,
-        this,
         homesBlock,
         warpsBlock,
         teleportBlock,
@@ -171,7 +170,6 @@ interface LandingPresenter: Presenter {
 class LandingInteractor(
     private val player: Player,
     private val presenter: LandingPresenter,
-    private val context: Context,
     private val homesBlock: HomesBlock,
     private val warpsBlock: WarpsBlock,
     private val teleportBlock: TeleportBlock,

@@ -184,6 +184,8 @@ class PongRepository @Inject constructor(
 
     fun playerPaddlePositionStream(): Flow<Int> = playerPaddlePositionFlow.filterNotNull()
 
+    fun updatePlayerPaddlePosition(y: Int) = playerPaddlePositionFlow.emitBackground(y)
+
     fun opponentPaddlePositionStream(): Flow<Int> = opponentPaddlePositionFlow
 
     fun scoreStream(): Flow<Pair<Int, Int>> = scoreFlow

@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
@@ -78,7 +79,7 @@ open class Router {
         childNodes.forEach { it.scrollEvent(event, true) }
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
+    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
         childNodes.forEach { it.cursorEvent(displays, cursor, event) }
     }
 

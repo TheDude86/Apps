@@ -17,6 +17,7 @@ import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.info.TutorialEnvironment
 import com.mcmlr.system.products.kits.KitsEnvironment
 import com.mcmlr.system.products.market.MarketEnvironment
+import com.mcmlr.system.products.pong.PongEnvironment
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.recipe.RecipeEnvironment
 import com.mcmlr.system.products.settings.AdminEnvironment
@@ -101,6 +102,7 @@ class Apps : JavaPlugin() {
 //        AppInjector.register(WorkbenchesEnvironment())
         AppInjector.register(RecipeEnvironment())
         AppInjector.register(KitsEnvironment())
+        AppInjector.register(PongEnvironment())
         AppInjector.register(TutorialEnvironment())
 //        AppInjector.register(CheatsEnvironment())
 

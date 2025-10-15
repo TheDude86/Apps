@@ -84,9 +84,10 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
                 val app = foregroundApp
                 if (app != null) {
-                    app.cursorEvent(displays, cursor, it.event)
+                    app.cursorEvent(it)
+                    app.cursorEvent(displays, cursor, it)
                 } else {
-                    head.cursorEvent(displays, cursor, it.event)
+                    head.cursorEvent(displays, cursor, it)
                 }
 
                 if (it.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, it.data, CursorEvent.CLEAR))

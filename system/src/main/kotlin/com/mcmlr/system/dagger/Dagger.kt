@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.Resources
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.homes.HomesApp
+import com.mcmlr.system.products.pong.PongApp
 import com.mcmlr.system.products.settings.AdminApp
 import dagger.BindsInstance
 import dagger.Component
@@ -41,6 +42,7 @@ class SubcomponentModule
         KitsAppComponent::class,
         TutorialAppComponent::class,
         CheatsAppComponent::class,
+        PongAppComponent::class,
     ]
 )
 class HomeSubcomponentModule
@@ -113,6 +115,8 @@ interface SystemAppComponent {
     fun tutorialSubcomponent(): TutorialAppComponent.Builder
 
     fun cheatsSubcomponent(): CheatsAppComponent.Builder
+
+    fun pongSubcomponent(): PongAppComponent.Builder
 
     fun inject(app: SystemApp)
 }
