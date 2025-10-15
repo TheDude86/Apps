@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.log
@@ -95,9 +96,9 @@ open class ViewController(
         root.cursorEventV2(position, event)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
+    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
         val root = parent as? RootView ?: return
-        root.cursorEvent(displays, cursor, event)
+        root.cursorEvent(displays, cursor, event.event)
     }
 
     override fun scrollEvent(event: ScrollModel, isChild: Boolean) {

@@ -26,7 +26,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
     override fun onCreate(child: Boolean) {
         isChild = child
         router().configure(this)
-        interactor().configure(router(), isChild)
+        interactor().configure(this, router(), isChild)
         view().configure(isChild, router(), this)
         interactor().onCreate()
     }
@@ -122,7 +122,8 @@ abstract class Block(protected val player: Player, origin: Location): Context {
         router().cursorEventV2(position, event)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
+    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
+        context.cursorEvent(event)
         view().cursorEvent(displays, cursor, event)
         router().cursorEvent(displays, cursor, event)
     }

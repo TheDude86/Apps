@@ -12,6 +12,8 @@ import org.bukkit.Location
 
 abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() {
 
+    lateinit var context: Context
+
     private var isChild = false
     private val pluginManagers = mutableListOf<PluginManager<*>>()
 
@@ -60,7 +62,8 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
 
     fun maximize() = router.maximize()
 
-    fun configure(router: Router, isChild: Boolean) {
+    fun configure(context: Context, router: Router, isChild: Boolean) {
+        this.context = context
         this.router = router
         this.isChild = isChild
     }

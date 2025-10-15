@@ -25,6 +25,7 @@ data class AppConfigModel(
         "recipes",
         "kits",
         "tutorial",
+        "pong",
         "cheats",
     ),
 ): ConfigModel()

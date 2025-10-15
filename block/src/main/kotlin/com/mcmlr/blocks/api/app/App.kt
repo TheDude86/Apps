@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.app
 
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
 import org.bukkit.Location
@@ -30,7 +31,7 @@ abstract class App(player: Player): BaseApp(player) {
         this.origin = origin
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
+    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
         head.cursorEvent(displays, cursor, event)
     }
 

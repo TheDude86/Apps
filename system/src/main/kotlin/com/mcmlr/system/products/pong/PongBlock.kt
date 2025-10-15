@@ -23,6 +23,8 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
 class PongBlock @Inject constructor(
@@ -213,6 +215,13 @@ class PongInteractor(
     }
 
     private fun startGame() {
+        context.cursorStream()
+            .collectOn(DudeDispatcher())
+            .collectLatest {
+                pongRepository.updatePlayerPaddlePosition(min(600, max(-600, ((-it.data.pitch + 3.1) * 19.3).toInt())))
+            }
+            .disposeOn(collection = GAME_DISPOSAL, disposer = this)
+
         pongRepository.playerPaddlePositionStream()
             .collectOn(DudeDispatcher())
             .collectLatest {
