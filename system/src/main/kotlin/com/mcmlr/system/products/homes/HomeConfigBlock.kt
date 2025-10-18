@@ -1,4 +1,4 @@
-package com.mcmlr.system.products.settings
+package com.mcmlr.system.products.homes
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -8,7 +8,6 @@ import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
-import com.mcmlr.system.products.homes.HomesConfigRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location

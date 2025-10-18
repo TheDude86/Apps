@@ -20,6 +20,10 @@ class SystemConfigRepository @Inject constructor(
         model.enabledApps = enabledAppNames
     }
 
+    fun saveEnabledApps(enabledAppNames: List<String>) = save {
+        model.enabledApps = enabledAppNames
+    }
+
     fun updateServerTitle(title: String) = save {
         model.title = title
     }

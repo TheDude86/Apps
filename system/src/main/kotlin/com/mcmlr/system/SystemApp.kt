@@ -7,6 +7,8 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
@@ -215,6 +217,25 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         val backgroundApp = backgroundApps[app.name()]
         val newApp = if (backgroundApp == null) {
             app.launch(parentEnvironment, this, this, player, inputRepository, origin, deeplink)
+        } else {
+            backgroundApp.maximize()
+            backgroundApp
+        }
+
+        foregroundApp?.let {
+            it.minimize()
+            backgroundApps[it::class.java.name] = it
+        }
+
+        foregroundApp = newApp
+    }
+
+    override fun launchConfig(app: ConfigurableEnvironment<ConfigurableApp>, deeplink: String?) {
+        minimize()
+
+        val backgroundApp = backgroundApps[app.name()]
+        val newApp = if (backgroundApp == null) {
+            app.launchConfig(parentEnvironment, this, this, player, inputRepository, origin, deeplink)
         } else {
             backgroundApp.maximize()
             backgroundApp

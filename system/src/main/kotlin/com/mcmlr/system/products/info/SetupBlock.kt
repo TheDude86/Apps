@@ -6,12 +6,7 @@ import com.mcmlr.system.products.announcements.AnnouncementEditorBlock
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock.Companion.ANNOUNCEMENT_POST_BUNDLE_KEY
 import com.mcmlr.system.products.announcements.AnnouncementModel
 import com.mcmlr.system.products.announcements.AnnouncementsRepository
-import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.landing.FeedBlock
-import com.mcmlr.system.products.market.MarketBlock
-import com.mcmlr.system.products.spawn.SpawnBlock
-import com.mcmlr.system.products.teleport.TeleportBlock
-import com.mcmlr.system.products.warps.WarpsBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -20,12 +15,11 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.SystemConfigRepository
-import com.mcmlr.system.products.announcements.AnnouncementsBlock
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
+import com.mcmlr.system.products.homes.HomeConfigBlock
 import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.market.MarketEnvironment
-import com.mcmlr.system.products.preferences.PreferencesBlock
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.settings.*
 import com.mcmlr.system.products.spawn.SpawnEnvironment
