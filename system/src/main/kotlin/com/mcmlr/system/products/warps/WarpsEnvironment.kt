@@ -1,15 +1,18 @@
 package com.mcmlr.system.products.warps
 
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.WarpsAppComponent
 import com.mcmlr.system.products.data.PermissionNode
+import com.mcmlr.system.products.settings.WarpConfigBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
-class WarpsEnvironment(): Environment<WarpsApp>() {
+class WarpsEnvironment(): ConfigurableEnvironment<WarpsApp>() {
     override fun build() {
         //Do nothing
     }
@@ -25,13 +28,18 @@ class WarpsEnvironment(): Environment<WarpsApp>() {
     override fun summary(): String = "Allows server staff to set warp locations in the world that players can teleport to."
 }
 
-class WarpsApp(player: Player): App(player) {
+class WarpsApp(player: Player): ConfigurableApp(player) {
     private lateinit var appComponent: WarpsAppComponent
 
     @Inject
     lateinit var warpsBlock: WarpsBlock
 
+    @Inject
+    lateinit var warpsConfigBlock: WarpConfigBlock
+
     override fun root(): Block = warpsBlock
+
+    override fun config(): Block = warpsConfigBlock
 
     override fun onCreate(child: Boolean) {
         appComponent = (parentApp as SystemApp)

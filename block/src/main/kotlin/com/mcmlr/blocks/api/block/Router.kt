@@ -5,6 +5,8 @@ import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -41,6 +43,10 @@ open class Router {
 
     fun launchApp(app: Environment<App>, deeplink: String? = null) {
         context.launchApp(app, deeplink)
+    }
+
+    fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) {
+        context.launchAppConfig(app)
     }
 
     fun routeBack() {

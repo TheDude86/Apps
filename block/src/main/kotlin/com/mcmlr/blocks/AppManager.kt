@@ -9,7 +9,7 @@ interface AppManager {
 
     fun launch(app: Environment<App>, deeplink: String? = null)
 
-    fun launchConfig(app: ConfigurableEnvironment<ConfigurableApp>, deeplink: String?)
+    fun launchConfig(app: ConfigurableEnvironment<ConfigurableApp>)
 
     fun shutdown()
 

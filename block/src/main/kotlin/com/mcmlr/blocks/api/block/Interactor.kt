@@ -4,6 +4,8 @@ import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.plugin.PluginManager
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -51,6 +53,8 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
     }
 
     fun launchApp(app: Environment<App>, deeplink: String? = null) = router.launchApp(app, deeplink)
+
+    fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) = router.launchAppConfig(app)
 
     fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null) = router.routeTo(block, callback)
 

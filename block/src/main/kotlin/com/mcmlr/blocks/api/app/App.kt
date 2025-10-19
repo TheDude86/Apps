@@ -47,9 +47,13 @@ abstract class App(player: Player): BaseApp(player) {
         appManager.launch(app, deeplink)
     }
 
-    override fun close() {
-        appManager.notifyShutdown()
-        super.close()
+    override fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) {
+        appManager.launchConfig(app)
+    }
+
+    override fun close(notifyShutdown: Boolean) {
+        if (notifyShutdown) appManager.notifyShutdown()
+        super.close(notifyShutdown)
     }
 
     override fun setScrollState(isScrolling: Boolean) {

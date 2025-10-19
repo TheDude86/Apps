@@ -5,6 +5,8 @@ import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -84,14 +86,16 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     override fun launchApp(app: Environment<App>, deeplink: String?) = context.launchApp(app, deeplink)
 
+    override fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) = context.launchAppConfig(app)
+
     override fun routeTo(block: Block, callback: ((Bundle) -> Unit)?) = context.routeTo(block, callback)
 
     override fun routeBack() {
         context.routeBack()
     }
 
-    override fun close() {
-        context.close()
+    override fun close(notifyShutdown: Boolean) {
+        context.close(notifyShutdown)
     }
 
     override fun minimize() {
@@ -164,13 +168,15 @@ interface Context {
 
     fun launchApp(app: Environment<App>, deeplink: String? = null)
 
+    fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>)
+
     fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null)
 
     fun routeBack()
 
     fun getBlock(): Block
 
-    fun close()
+    fun close(notifyShutdown: Boolean = true)
 
     fun minimize()
 

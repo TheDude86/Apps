@@ -42,15 +42,10 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
 
     private lateinit var appsConfigFeed: ListFeedView
     private lateinit var configureAppCallback: (ConfigurableEnvironment<*>) -> Unit
-    private lateinit var appsCallback: () -> List<ConfigurableEnvironment<*>>
 
     override fun updateConfigurableApps(configurableApps: List<ConfigurableEnvironment<*>>) {
-
-        log(Log.ASSERT, "Items=${configurableApps.size}")
-
         appsConfigFeed.updateView {
             configurableApps.forEach {
-                log(Log.ASSERT, it.name())
                 addViewContainer(
                     modifier = Modifier()
                         .size(MATCH_PARENT, 100),
@@ -137,10 +132,8 @@ class ConfigureAppsInteractor(
 
         presenter.updateConfigurableApps(applicationsRepository.getConfigurableApps())
 
-
         presenter.setConfigureAppsListener {
-//            val block = it.launchConfig()
-//            routeTo(block)
+            launchAppConfig(it)
         }
     }
 }
