@@ -1,9 +1,12 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
@@ -14,7 +17,9 @@ import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.info.EnabledApplicationModel
 import org.bukkit.ChatColor
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
 
 class ConfigureAppsBlock @Inject constructor(
@@ -36,12 +41,16 @@ class ConfigureAppsBlock @Inject constructor(
 class ConfigureAppsViewController(player: Player, origin: Location): NavigationViewController(player, origin), ConfigureAppsPresenter {
 
     private lateinit var appsConfigFeed: ListFeedView
-    private lateinit var configureAppCallback: (EnabledApplicationModel) -> Unit
-    private lateinit var appsCallback: () -> List<EnabledApplicationModel>
+    private lateinit var configureAppCallback: (ConfigurableEnvironment<*>) -> Unit
+    private lateinit var appsCallback: () -> List<ConfigurableEnvironment<*>>
 
-    private fun updateAppsFeed() {
+    override fun updateConfigurableApps(configurableApps: List<ConfigurableEnvironment<*>>) {
+
+        log(Log.ASSERT, "Items=${configurableApps.size}")
+
         appsConfigFeed.updateView {
-            appsCallback.invoke().forEach {
+            configurableApps.forEach {
+                log(Log.ASSERT, it.name())
                 addViewContainer(
                     modifier = Modifier()
                         .size(MATCH_PARENT, 100),
@@ -56,7 +65,7 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
                             .alignStartToStartOf(this)
                             .centerVertically()
                             .margins(start = 150),
-                        item = it.app.getAppIcon()
+                        item = it.getAppIcon()
                     )
 
                     val appName = addTextView(
@@ -65,7 +74,7 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
                             .alignStartToEndOf(icon)
                             .alignTopToTopOf(this)
                             .margins(start = 50, top = 20),
-                        text = it.app.name(),
+                        text = it.name(),
                         size = 6,
                     )
 
@@ -75,7 +84,7 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
                             .alignTopToBottomOf(appName)
                             .alignStartToStartOf(appName)
                             .margins(top = 10),
-                        text = it.app.summary(),
+                        text = it.summary(),
                         alignment = Alignment.LEFT,
                         lineWidth = 250,
                         size = 4,
@@ -83,6 +92,11 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
                 }
             }
         }
+
+    }
+
+    override fun setConfigureAppsListener(listener: (ConfigurableEnvironment<*>) -> Unit) {
+        configureAppCallback = listener
     }
 
     override fun createView() {
@@ -108,6 +122,8 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
 }
 
 interface ConfigureAppsPresenter: Presenter {
+    fun updateConfigurableApps(configurableApps: List<ConfigurableEnvironment<*>>)
+    fun setConfigureAppsListener(listener: (ConfigurableEnvironment<*>) -> Unit)
 }
 
 class ConfigureAppsInteractor(
@@ -119,6 +135,12 @@ class ConfigureAppsInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        applicationsRepository.getApps()
+        presenter.updateConfigurableApps(applicationsRepository.getConfigurableApps())
+
+
+        presenter.setConfigureAppsListener {
+//            val block = it.launchConfig()
+//            routeTo(block)
+        }
     }
 }

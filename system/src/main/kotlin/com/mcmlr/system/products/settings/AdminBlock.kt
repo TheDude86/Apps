@@ -38,7 +38,7 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
 
     override fun setEnabledAppsListener(listener: () -> Unit) = enabledAppsButton.addListener(listener)
 
-    override fun setConfigurableAppsListener(listener: () -> Unit) = enabledAppsButton.addListener(listener)
+    override fun setConfigurableAppsListener(listener: () -> Unit) = configureAppsButton.addListener(listener)
 
     override fun createView() {
         super.createView()
