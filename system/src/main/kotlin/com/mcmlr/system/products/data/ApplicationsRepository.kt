@@ -4,6 +4,8 @@ import com.mcmlr.blocks.api.*
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
@@ -58,6 +60,8 @@ class ApplicationsRepository @Inject constructor(
     fun getSystemApps(): List<Environment<App>> = environments.filter { systemApps.contains(it.name().lowercase()) }
 
     fun getApps(): List<Environment<App>> = enabledApps()
+
+    fun getConfigurableApps(): List<ConfigurableEnvironment<ConfigurableApp>> = enabledApps().mapNotNull { it as? ConfigurableEnvironment<*> }
 
     fun getApp(appName: String, player: Player): Environment<App>? {
         val environment = environments.find { it.name().lowercase() == appName.lowercase() } ?: return null

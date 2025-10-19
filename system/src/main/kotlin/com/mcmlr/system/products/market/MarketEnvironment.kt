@@ -1,15 +1,18 @@
 package com.mcmlr.system.products.market
 
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.MarketAppComponent
 import com.mcmlr.system.products.data.PermissionNode
+import com.mcmlr.system.products.settings.MarketConfigBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
-class MarketEnvironment(): Environment<MarketApp>() {
+class MarketEnvironment(): ConfigurableEnvironment<MarketApp>() {
     override fun build() {
         //Do nothing
     }
@@ -25,13 +28,18 @@ class MarketEnvironment(): Environment<MarketApp>() {
     override fun summary(): String = "A simple economy plugin where players can list in game items to sell for other players can purchase."
 }
 
-class MarketApp(player: Player): App(player) {
+class MarketApp(player: Player): ConfigurableApp(player) {
     private lateinit var appComponent: MarketAppComponent
 
     @Inject
     lateinit var marketBlock: MarketBlock
 
+    @Inject
+    lateinit var marketConfigBlock: MarketConfigBlock
+
     override fun root(): Block = marketBlock
+
+    override fun config(): Block = marketConfigBlock
 
     override fun onCreate(child: Boolean) {
         appComponent = (parentApp as SystemApp)

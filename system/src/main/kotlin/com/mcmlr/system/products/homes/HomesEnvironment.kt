@@ -1,15 +1,15 @@
 package com.mcmlr.system.products.homes
 
-import com.mcmlr.blocks.api.app.App
-import com.mcmlr.blocks.api.app.Environment
-import com.mcmlr.blocks.api.block.*
-import com.mcmlr.system.dagger.HomesAppComponent
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
+import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
+import com.mcmlr.system.dagger.HomesAppComponent
 import com.mcmlr.system.products.data.PermissionNode
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
-class HomesEnvironment(): Environment<HomesApp>() {
+class HomesEnvironment(): ConfigurableEnvironment<HomesApp>() {
     override fun build() {
         //Do nothing
     }
@@ -25,11 +25,14 @@ class HomesEnvironment(): Environment<HomesApp>() {
     override fun summary(): String = "This app allows players to save home locations on the server and teleport to those locations."
 }
 
-class HomesApp(player: Player): App(player) {
+class HomesApp(player: Player): ConfigurableApp(player) {
     private lateinit var appComponent: HomesAppComponent
 
     @Inject
     lateinit var homesBlock: HomesBlock
+
+    @Inject
+    lateinit var homesConfigBlock: HomeConfigBlock
 
     override fun onCreate(child: Boolean) {
         appComponent = (parentApp as SystemApp)
@@ -42,5 +45,7 @@ class HomesApp(player: Player): App(player) {
     }
 
     override fun root(): Block = homesBlock
+
+    override fun config(): Block = homesConfigBlock
 
 }

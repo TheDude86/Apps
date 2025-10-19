@@ -7,6 +7,8 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
@@ -199,6 +201,10 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         launch(app, deeplink)
     }
 
+    override fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) {
+        launchConfig(app)
+    }
+
     override fun setScrollState(isScrolling: Boolean) {
         inputRepository.updateUserScrollState(player.uniqueId, isScrolling)
     }
@@ -228,21 +234,40 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         foregroundApp = newApp
     }
 
-    override fun close() {
-        super.close()
+    override fun launchConfig(app: ConfigurableEnvironment<ConfigurableApp>) {
+        minimize()
+
+        val backgroundApp = backgroundApps[app.name()]
+        val newApp = if (backgroundApp == null) {
+            app.launchConfig(parentEnvironment, this, this, player, inputRepository, origin, deeplink)
+        } else {
+            backgroundApp.maximize()
+            backgroundApp
+        }
+
+        foregroundApp?.let {
+            it.minimize()
+            backgroundApps[it::class.java.name] = it
+        }
+
+        foregroundApp = newApp
+    }
+
+    override fun close(notifyShutdown: Boolean) {
+        super.close(notifyShutdown)
         inputRepository.updateUserScrollState(player.uniqueId, false)
         inputRepository.updateUserInputState(player.uniqueId, false)
         inputRepository.updateActivePlayer(player.uniqueId, false)
     }
 
     override fun shutdown() {
-        backgroundApps.values.forEach { it.close() }
-        foregroundApp?.close()
+        backgroundApps.values.forEach { it.close(false) }
+        foregroundApp?.close(false)
         close()
     }
 
     override fun notifyShutdown() {
-        backgroundApps.values.forEach { it.close() }
+        backgroundApps.values.forEach { it.close(false) }
         close()
     }
 

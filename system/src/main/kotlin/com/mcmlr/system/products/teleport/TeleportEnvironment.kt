@@ -1,15 +1,16 @@
 package com.mcmlr.system.products.teleport
 
-import com.mcmlr.blocks.api.app.App
-import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.ConfigurableApp
+import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.TeleportAppComponent
 import com.mcmlr.system.products.data.PermissionNode
+import com.mcmlr.system.products.settings.TeleportConfigBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
-class TeleportEnvironment(): Environment<TeleportApp>() {
+class TeleportEnvironment(): ConfigurableEnvironment<TeleportApp>() {
     override fun build() {
         //Do nothing
     }
@@ -25,13 +26,18 @@ class TeleportEnvironment(): Environment<TeleportApp>() {
     override fun summary(): String = "Allows players to teleport to other online players on the server."
 }
 
-class TeleportApp(player: Player): App(player) {
+class TeleportApp(player: Player): ConfigurableApp(player) {
     private lateinit var appComponent: TeleportAppComponent
 
     @Inject
     lateinit var teleportBlock: TeleportBlock
 
+    @Inject
+    lateinit var teleportConfigBlock: TeleportConfigBlock
+
     override fun root(): Block = teleportBlock
+
+    override fun config(): Block = teleportConfigBlock
 
     override fun onCreate(child: Boolean) {
         appComponent = (parentApp as SystemApp)

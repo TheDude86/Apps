@@ -47,7 +47,7 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         resources.server().pluginManager.registerEvents(eventHandler, resources.plugin())
     }
 
-    override fun close() {
+    override fun close(notifyShutdown: Boolean) {
         onClose()
         head.onClose()
         clear()
