@@ -36,6 +36,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
+    compileOnly("org.bstats:bstats-bukkit:3.0.2")
 
     //Dagger
     implementation("com.google.dagger:dagger:2.56.2")
