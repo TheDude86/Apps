@@ -1,9 +1,8 @@
 package com.mcmlr.blocks.api.views
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.log
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.core.MutablePair
 import org.bukkit.Color
 
@@ -15,7 +14,7 @@ open class FeedView(
 ): ViewContainer(modifier, false, background, height = height, backgroundHighlight = backgroundHighlight) {
 
     private val renderedChildren = mutableListOf<MutablePair<Viewable, Boolean>>()
-    private val scrollListeners = mutableListOf<(ScrollModel) -> Unit>()
+    private val scrollListeners = mutableListOf<ScrollListener>()
 
     private var isFocused = false
     private var scrollingEnabled = true
@@ -40,11 +39,11 @@ open class FeedView(
         }
     }
 
-    fun addScrollListener(listener: (ScrollModel) -> Unit) {
+    fun addScrollListener(listener: ScrollListener) {
         scrollListeners.add(listener)
     }
 
-    fun removeScrollListener(listener: (ScrollModel) -> Unit) {
+    fun removeScrollListener(listener: ScrollListener) {
         scrollListeners.remove(listener)
     }
 
@@ -52,7 +51,7 @@ open class FeedView(
         scrollingEnabled = enabled
     }
 
-    override fun updateView(content: ViewContainer.() -> Unit) {
+    override fun updateView(content: ContextListener<ViewContainer>) {
         childOffset = 0
         renderedChildren.forEach { it.first.clear() }
         renderedChildren.clear()
@@ -99,4 +98,8 @@ open class FeedView(
             previousHighlightedState = highlighted
         }
     }
+}
+
+interface ScrollListener {
+    fun invoke(model: ScrollModel)
 }

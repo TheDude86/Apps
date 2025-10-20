@@ -1,5 +1,7 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.Listener
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
@@ -16,7 +18,7 @@ class ListFeedView(
         modifier: Modifier,
         background: Color,
         height: Int,
-        content: ViewContainer.() -> Unit
+        content: ContextListener<ViewContainer>,
     ): FeedView {
         setListAlignment(modifier)
         return super.addFeedView(modifier, background, height, content)
@@ -29,8 +31,8 @@ class ListFeedView(
         backgroundHighlight: Color,
         teleportDuration: Int,
         height: Int,
-        listener: () -> Unit,
-        content: ViewContainer.() -> Unit
+        listener: Listener,
+        content: ContextListener<ViewContainer>,
     ): ViewContainer {
         setListAlignment(modifier)
         return super.addViewContainer(
@@ -139,7 +141,7 @@ class ListFeedView(
         background: Color,
         teleportDuration: Int,
         height: Int,
-        callback: () -> Unit,
+        callback: Listener,
     ): ButtonView {
         setListAlignment(modifier)
         return super.addButtonView(
@@ -163,7 +165,7 @@ class ListFeedView(
         visible: Boolean,
         teleportDuration: Int,
         height: Int,
-        callback: () -> Unit,
+        callback: Listener,
     ): ItemButtonView {
         setListAlignment(modifier)
         return super.addItemButtonView(modifier, material, visible, teleportDuration, height, callback)

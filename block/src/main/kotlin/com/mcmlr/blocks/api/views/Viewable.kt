@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.views
 
 import com.mcmlr.blocks.api.ScrollEvent
+import com.mcmlr.blocks.api.block.Listener
 import org.bukkit.Location
 
 interface Viewable {
@@ -26,7 +27,7 @@ interface Viewable {
 
     fun clear()
 
-    fun addDestroyListener(listener: () -> Unit)
+    fun addDestroyListener(listener: Listener)
 
     fun addDependant(viewable: Viewable)
 

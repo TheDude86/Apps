@@ -12,11 +12,11 @@ open class NavigationViewController(player: Player, origin: Location): ViewContr
     protected var backButton: ButtonView? = null
     protected lateinit var closeButton: ButtonView
 
-    override fun addBackListener(listener: () -> Unit) {
+    override fun addBackListener(listener: Listener) {
         backButton?.addListener(listener)
     }
 
-    override fun addCloseListener(listener: () -> Unit) = closeButton.addListener(listener)
+    override fun addCloseListener(listener: Listener) = closeButton.addListener(listener)
 
     override fun createView() {
         if (hasParent()) {
@@ -28,10 +28,13 @@ open class NavigationViewController(player: Player, origin: Location): ViewContr
                     .margins(top = 250, start = 500),
                 text = "←",
                 size = 14,
-                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}←"
-            ) {
-                routeBack()
-            }
+                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}←",
+                callback = object : Listener {
+                    override fun invoke() {
+                        routeBack()
+                    }
+                }
+            )
         }
 
         closeButton = addButtonView(
@@ -42,14 +45,17 @@ open class NavigationViewController(player: Player, origin: Location): ViewContr
                 .margins(top = 250, end = 500),
             text = "✖",
             size = 14,
-            highlightedText = "${ChatColor.RED}${ChatColor.BOLD}✖"
-        ) {
-            close()
-        }
+            highlightedText = "${ChatColor.RED}${ChatColor.BOLD}✖",
+            callback = object : Listener {
+                override fun invoke() {
+                    close()
+                }
+            }
+        )
     }
 }
 
 interface NavigationPresenter: Presenter {
-    fun addBackListener(listener: () -> Unit)
-    fun addCloseListener(listener: () -> Unit)
+    fun addBackListener(listener: Listener)
+    fun addCloseListener(listener: Listener)
 }

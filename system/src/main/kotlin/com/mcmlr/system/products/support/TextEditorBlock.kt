@@ -3,9 +3,12 @@ package com.mcmlr.system.products.support
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
@@ -52,17 +55,17 @@ class TextEditorBlockViewController(
 
     private var lineSelectedCallback: (Int) -> Unit = {}
 
-    override fun addFinishListener(listener: () -> Unit) = finishButton.addListener(listener)
+    override fun addFinishListener(listener: Listener) = finishButton.addListener(listener)
 
-    override fun addScrollListener(listener: (ScrollModel) -> Unit) = messageContainer.addScrollListener(listener)
+    override fun addScrollListener(listener: ScrollListener) = messageContainer.addScrollListener(listener)
 
-    override fun removeScrollListener(listener: (ScrollModel) -> Unit) = messageContainer.removeScrollListener(listener)
+    override fun removeScrollListener(listener: ScrollListener) = messageContainer.removeScrollListener(listener)
 
-    override fun setSendListener(listener: () -> Unit) = sendButtonView.addListener(listener)
+    override fun setSendListener(listener: Listener) = sendButtonView.addListener(listener)
 
-    override fun setEditLinesListener(listener: () -> Unit) = editLinesButton.addListener(listener)
+    override fun setEditLinesListener(listener: Listener) = editLinesButton.addListener(listener)
 
-    override fun setTextInputListener(listener: (String) -> Unit) = textInputView.addTextChangedListener(listener)
+    override fun setTextInputListener(listener: TextListener) = textInputView.addTextChangedListener(listener)
 
     override fun setEditingLineListener(listener: (Int) -> Unit) {
         lineSelectedCallback = listener
@@ -83,47 +86,54 @@ class TextEditorBlockViewController(
             editLinesButton.setTextView("${ChatColor.GOLD}Edit lines")
         }
 
-        messageContainer.updateView {
-            val text = if (lines.lines.isEmpty()) "${ChatColor.GRAY}${ChatColor.BOLD}Your message will be displayed here..." else lines.toMCFormattedText(selectedLine)
+        messageContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val text = if (lines.lines.isEmpty()) "${ChatColor.GRAY}${ChatColor.BOLD}Your message will be displayed here..." else lines.toMCFormattedText(selectedLine)
 
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .margins(start = 50, top = 50),
-                text = text,
-                alignment = Alignment.LEFT,
-                lineWidth = 500,
-                size = 6,
-            )
-        }
-
-        messageEditorContainer.updateView {
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .margins(start = 50, top = 50),
-                text = "${ChatColor.ITALIC}${ChatColor.BOLD}Edit Lines",
-                alignment = Alignment.LEFT,
-                size = 4,
-            )
-
-            lines.lines.forEachIndexed { index, _ ->
-                addButtonView(
+                addTextView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
-                        .margins(start = 50),
-                    text = "${index + 1}.${if (index == selectedLine) " (Editing)" else ""}",
-                    highlightedText = "${ChatColor.BOLD}${index + 1}.${if (index == selectedLine) " (Editing)" else ""}",
+                        .margins(start = 50, top = 50),
+                    text = text,
                     alignment = Alignment.LEFT,
-                    size = 8,
-                ) {
-                    lineSelectedCallback.invoke(index)
+                    lineWidth = 500,
+                    size = 6,
+                )
+            }
+        })
+
+        messageEditorContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToStartOf(this)
+                        .margins(start = 50, top = 50),
+                    text = "${ChatColor.ITALIC}${ChatColor.BOLD}Edit Lines",
+                    alignment = Alignment.LEFT,
+                    size = 4,
+                )
+
+                lines.lines.forEachIndexed { index, _ ->
+                    addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .margins(start = 50),
+                        text = "${index + 1}.${if (index == selectedLine) " (Editing)" else ""}",
+                        highlightedText = "${ChatColor.BOLD}${index + 1}.${if (index == selectedLine) " (Editing)" else ""}",
+                        alignment = Alignment.LEFT,
+                        size = 8,
+                        callback = object : Listener {
+                            override fun invoke() {
+                                lineSelectedCallback.invoke(index)
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {
@@ -148,18 +158,21 @@ class TextEditorBlockViewController(
                 .alignBottomToBottomOf(this)
                 .margins(start = 700, 50, 700, 700),
             background = Color.fromARGB(64, 64, 64, 64),
-        ) {
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .margins(start = 50, top = 50),
-                text = "${ChatColor.GRAY}${ChatColor.BOLD}Your message will be displayed here...",
-                alignment = Alignment.LEFT,
-                lineWidth = 500,
-                size = 6,
-            )
-        }
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .margins(start = 50, top = 50),
+                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Your message will be displayed here...",
+                        alignment = Alignment.LEFT,
+                        lineWidth = 500,
+                        size = 6,
+                    )
+                }
+            }
+        )
 
         messageEditorContainer = addListFeedView(
             modifier = Modifier()
@@ -168,17 +181,20 @@ class TextEditorBlockViewController(
                 .alignEndToStartOf(messageContainer)
                 .alignBottomToBottomOf(messageContainer)
                 .margins(bottom = 50),
-        ) {
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .margins(start = 50, top = 50),
-                text = "${ChatColor.ITALIC}${ChatColor.BOLD}Edit Lines",
-                alignment = Alignment.LEFT,
-                size = 4,
-            )
-        }
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .margins(start = 50, top = 50),
+                        text = "${ChatColor.ITALIC}${ChatColor.BOLD}Edit Lines",
+                        alignment = Alignment.LEFT,
+                        size = 4,
+                    )
+                }
+            }
+        )
 
         editLinesButton = addButtonView(
             modifier = Modifier()
@@ -197,29 +213,32 @@ class TextEditorBlockViewController(
                 .alignTopToBottomOf(messageContainer)
                 .alignStartToStartOf(messageContainer)
                 .alignEndToEndOf(messageContainer),
-        ) {
-            textInputView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .centerVertically()
-                    .margins(start = 50),
-                text = "Write message here...",
-                highlightedText = "${ChatColor.BOLD}Write message here...",
-                lineWidth = 430,
-                size = 6,
-            )
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    textInputView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .centerVertically()
+                            .margins(start = 50),
+                        text = "Write message here...",
+                        highlightedText = "${ChatColor.BOLD}Write message here...",
+                        lineWidth = 430,
+                        size = 6,
+                    )
 
-            sendButtonView = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignEndToEndOf(this)
-                    .centerVertically()
-                    .margins(end = 50),
-                text = "${ChatColor.GOLD}Add",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Add",
-            )
-        }
+                    sendButtonView = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignEndToEndOf(this)
+                            .centerVertically()
+                            .margins(end = 50),
+                        text = "${ChatColor.GOLD}Add",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Add",
+                    )
+                }
+            }
+        )
 
         finishButton = addButtonView(
             modifier = Modifier()
@@ -235,12 +254,12 @@ class TextEditorBlockViewController(
 }
 
 interface TextEditorPresenter: Presenter {
-    fun setSendListener(listener: () -> Unit)
-    fun setEditLinesListener(listener: () -> Unit)
-    fun addFinishListener(listener: () -> Unit)
-    fun setTextInputListener(listener: (String) -> Unit)
-    fun addScrollListener(listener: (ScrollModel) -> Unit)
-    fun removeScrollListener(listener: (ScrollModel) -> Unit)
+    fun setSendListener(listener: Listener)
+    fun setEditLinesListener(listener: Listener)
+    fun addFinishListener(listener: Listener)
+    fun setTextInputListener(listener: TextListener)
+    fun addScrollListener(listener: ScrollListener)
+    fun removeScrollListener(listener: ScrollListener)
     fun setEditingLineListener(listener: (Int) -> Unit)
 
     fun setFormattedInput(input: String)
@@ -257,10 +276,12 @@ class TextEditorInteractor(
     private var editLines: Boolean = false
     private var editingLine = -1
     private var input: String = ""
-    private var messageScrollListener: (ScrollModel) -> Unit = { event ->
-        val newLine = editingLine + if (event.event == ScrollEvent.UP) -1 else 1
-        editingLine = max(0, min(model.lines.size - 1, newLine))
-        presenter.setMessage(model, editingLine)
+    private val messageScrollListener= object : ScrollListener {
+        override fun invoke(model: ScrollModel) {
+            val newLine = editingLine + if (model.event == ScrollEvent.UP) -1 else 1
+            editingLine = max(0, min(this@TextEditorInteractor.model.lines.size - 1, newLine))
+            presenter.setMessage(this@TextEditorInteractor.model, editingLine)
+        }
     }
 
     override fun onCreate() {
@@ -269,49 +290,57 @@ class TextEditorInteractor(
         editLines = false
         presenter.setMessage(model)
 
-        presenter.setTextInputListener {
-            input = it.replace("\\n", "\n").colorize()
-            presenter.setFormattedInput(input)
-        }
+        presenter.setTextInputListener(object : TextListener {
+            override fun invoke(text: String) {
+                input = text.replace("\\n", "\n").colorize()
+                presenter.setFormattedInput(input)
+            }
+        })
 
         presenter.setEditingLineListener {
             editingLine = it
             presenter.setMessage(model, editingLine)
         }
 
-        presenter.setSendListener {
-            if (input.isEmpty()) {
-                return@setSendListener
+        presenter.setSendListener(object : Listener {
+            override fun invoke() {
+                if (input.isEmpty()) {
+                    return
+                }
+
+                if (editLines) {
+                    model.lines[editingLine] = input
+                } else {
+                    model.lines.add(input)
+                }
+
+                presenter.setMessage(model, editingLine)
+                presenter.resetInput()
+                input = ""
             }
+        })
 
-            if (editLines) {
-                model.lines[editingLine] = input
-            } else {
-                model.lines.add(input)
+        presenter.setEditLinesListener(object : Listener {
+            override fun invoke() {
+                editLines = !editLines
+                if (editLines) {
+                    editingLine = 0
+                    presenter.addScrollListener(messageScrollListener)
+                } else {
+                    editingLine = -1
+                    presenter.removeScrollListener(messageScrollListener)
+                }
+
+                presenter.setMessage(model, editingLine)
             }
+        })
 
-            presenter.setMessage(model, editingLine)
-            presenter.resetInput()
-            input = ""
-        }
-
-        presenter.setEditLinesListener {
-            editLines = !editLines
-            if (editLines) {
-                editingLine = 0
-                presenter.addScrollListener(messageScrollListener)
-            } else {
-                editingLine = -1
-                presenter.removeScrollListener(messageScrollListener)
+        presenter.addFinishListener(object : Listener {
+            override fun invoke() {
+                addBundleData(TextEditorBlock.TEXT_BUNDLE_KEY, model)
+                routeBack()
             }
-
-            presenter.setMessage(model, editingLine)
-        }
-
-        presenter.addFinishListener {
-            addBundleData(TextEditorBlock.TEXT_BUNDLE_KEY, model)
-            routeBack()
-        }
+        })
     }
 }
 

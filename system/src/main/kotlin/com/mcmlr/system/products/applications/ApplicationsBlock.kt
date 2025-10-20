@@ -5,7 +5,9 @@ import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -78,9 +80,12 @@ class ApplicationsViewController(
                 .margins(bottom = 200),
             text = "${ChatColor.GOLD}Home",
             highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
-        ) {
-            routeBack()
-        }
+            callback = object : Listener {
+                override fun invoke() {
+                    routeBack()
+                }
+            }
+        )
 
         appsButton = addButtonView(
             modifier = Modifier()
@@ -95,33 +100,41 @@ class ApplicationsViewController(
 
     override fun setApps(apps: List<Environment<App>>, callback: (Environment<App>) -> Unit) {
 
-        container.updateView {
-            apps.forEachIndexed { index, applicationModel ->
-                val appPosition = appPositions[index]
-                val appTitle = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(appPosition.x, appPosition.y),
-                    size = 7,
-                    text = "${ChatColor.GOLD}${applicationModel.name()}",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${applicationModel.name()}",
-                ) {
-                    callback.invoke(applicationModel)
-                }
+        container.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                apps.forEachIndexed { index, applicationModel ->
+                    val appPosition = appPositions[index]
+                    val appTitle = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(appPosition.x, appPosition.y),
+                        size = 7,
+                        text = "${ChatColor.GOLD}${applicationModel.name()}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${applicationModel.name()}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(applicationModel)
+                            }
+                        }
+                    )
 
-                addItemButtonView(
-                    modifier = Modifier()
-                        .size(80, 80)
-                        .alignStartToStartOf(appTitle)
-                        .alignEndToEndOf(appTitle)
-                        .alignBottomToTopOf(appTitle)
-                        .margins(bottom = 50),
-                    item = applicationModel.getAppIcon()
-                ) {
-                    callback.invoke(applicationModel)
+                    addItemButtonView(
+                        modifier = Modifier()
+                            .size(80, 80)
+                            .alignStartToStartOf(appTitle)
+                            .alignEndToEndOf(appTitle)
+                            .alignBottomToTopOf(appTitle)
+                            .margins(bottom = 50),
+                        item = applicationModel.getAppIcon(),
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(applicationModel)
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
 
     }
 

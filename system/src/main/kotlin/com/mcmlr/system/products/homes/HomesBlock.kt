@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.homes
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -9,6 +11,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -99,9 +102,9 @@ class HomesViewController(
         )
     }
 
-    override fun addNewHomeListener(listener: () -> Unit) = newHomeButton.addListener(listener)
+    override fun addNewHomeListener(listener: Listener) = newHomeButton.addListener(listener)
 
-    override fun addRemoveHomeListener(listener: () -> Unit) = removeHomeButton.addListener(listener)
+    override fun addRemoveHomeListener(listener: Listener) = removeHomeButton.addListener(listener)
 
     override fun setMessage(message: String) {
         messageView.text = message
@@ -117,79 +120,87 @@ class HomesViewController(
             removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove home"
         }
 
-        container.updateView {
-            if (homes.isEmpty()) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10),
-                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}You don't have any\nhomes yet...",
-                    size = 8,
-                )
+        container.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (homes.isEmpty()) {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 10),
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}You don't have any\nhomes yet...",
+                        size = 8,
+                    )
 
-                return@updateView
-            }
+                    return
+                }
 
-            var homeView: ButtonView? = null
-            homes.forEach { home ->
-                val modifier = if (homeView == null) {
-                    Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10)
-                } else {
-                    homeView?.let {
+                var homeView: ButtonView? = null
+                homes.forEach { home ->
+                    val modifier = if (homeView == null) {
                         Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(it)
+                            .alignTopToTopOf(this)
                             .centerHorizontally()
-                            .margins(top = 25)
-                    }
-                } ?: return@forEach
+                            .margins(top = 10)
+                    } else {
+                        homeView?.let {
+                            Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignTopToBottomOf(it)
+                                .centerHorizontally()
+                                .margins(top = 25)
+                        }
+                    } ?: return@forEach
 
 
-                homeView = addButtonView(
-                    modifier = modifier,
-                    text = home.name,
-                    highlightedText = "${ChatColor.BOLD}${home.name}"
-                ) {
-                    listener.teleport(home)
-                }
+                    homeView = addButtonView(
+                        modifier = modifier,
+                        text = home.name,
+                        highlightedText = "${ChatColor.BOLD}${home.name}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                listener.teleport(home)
+                            }
+                        }
+                    )
 
-                addItemView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignEndToStartOf(homeView!!)
-                        .alignTopToTopOf(homeView!!)
-                        .alignBottomToBottomOf(homeView!!)
-                        .margins(end = 64),
-                    item = home.icon,
-                )
+                    addItemView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignEndToStartOf(homeView!!)
+                            .alignTopToTopOf(homeView!!)
+                            .alignBottomToBottomOf(homeView!!)
+                            .margins(end = 64),
+                        item = home.icon,
+                    )
 
-                addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignStartToEndOf(homeView!!)
-                        .alignTopToTopOf(homeView!!)
-                        .alignBottomToBottomOf(homeView!!)
-                        .margins(start = 64),
-                    text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
-                    highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎"
-                ) {
-                    listener.edit(home, deleteMode)
+                    addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToEndOf(homeView!!)
+                            .alignTopToTopOf(homeView!!)
+                            .alignBottomToBottomOf(homeView!!)
+                            .margins(start = 64),
+                        text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
+                        highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                listener.edit(home, deleteMode)
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
     }
 }
 
 interface HomesPresenter: Presenter {
     fun setHomes(homes: List<HomeModel>, deleteMode: Boolean, listener: HomeActionListener)
-    fun addNewHomeListener(listener: () -> Unit)
-    fun addRemoveHomeListener(listener: () -> Unit)
+    fun addNewHomeListener(listener: Listener)
+    fun addRemoveHomeListener(listener: Listener)
     fun setMessage(message: String)
 }
 
@@ -211,22 +222,26 @@ class HomesInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.addNewHomeListener {
-            val model = homesRepository.latest(player) ?: return@addNewHomeListener
-            val maxHomes = homesConfigRepository.model.maxHomes
-            if (model.homes.size >= maxHomes) {
-                presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
-                return@addNewHomeListener
+        presenter.addNewHomeListener(object : Listener {
+            override fun invoke() {
+                val model = homesRepository.latest(player) ?: return
+                val maxHomes = homesConfigRepository.model.maxHomes
+                if (model.homes.size >= maxHomes) {
+                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
+                    return
+                }
+
+                routeTo(addHomeBlock)
             }
+        })
 
-            routeTo(addHomeBlock)
-        }
-
-        presenter.addRemoveHomeListener {
-            val model = homesRepository.latest(player) ?: return@addRemoveHomeListener
-            deleteMode = !deleteMode
-            presenter.setHomes(model.homes, deleteMode, this)
-        }
+        presenter.addRemoveHomeListener(object : Listener {
+            override fun invoke() {
+                val model = homesRepository.latest(player) ?: return
+                deleteMode = !deleteMode
+                presenter.setHomes(model.homes, deleteMode, this@HomesInteractor)
+            }
+        })
 
         getHomes()
     }

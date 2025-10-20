@@ -3,7 +3,9 @@ package com.mcmlr.system.products.preferences
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -40,64 +42,74 @@ class SelectFavoriteViewController(
     private lateinit var selectedContainer: ViewContainer
     private var clearButton: ButtonView? = null
 
-    override fun setRemoveListener(listener: () -> Unit) { clearButton?.addListener(listener) }
+    override fun setRemoveListener(listener: Listener) { clearButton?.addListener(listener) }
 
     override fun setSelectedApp(app: BaseEnvironment<BaseApp>?) {
-        selectedContainer.updateView {
-            val app = app ?: return@updateView
-            val appIcon = addItemView(
-                modifier = Modifier()
-                    .size(75, 75)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 30),
-                item = app.getAppIcon()
-            )
+        selectedContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val app = app ?: return
+                val appIcon = addItemView(
+                    modifier = Modifier()
+                        .size(75, 75)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally()
+                        .margins(top = 30),
+                    item = app.getAppIcon()
+                )
 
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(appIcon)
-                    .centerHorizontally()
-                    .margins(top = 10),
-                text = "${ChatColor.GOLD}${app.name()}",
-                size = 6,
-            )
-        }
+                addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(appIcon)
+                        .centerHorizontally()
+                        .margins(top = 10),
+                    text = "${ChatColor.GOLD}${app.name()}",
+                    size = 6,
+                )
+            }
+        })
     }
 
     override fun setAppsList(apps: List<BaseEnvironment<BaseApp>>, callback: (BaseEnvironment<BaseApp>) -> Unit) {
-        appsFeedView.updateView {
-            apps.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    background = Color.fromARGB(0, 0, 0, 0)
-                ) {
-                    val icon = addItemView(
+        appsFeedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                apps.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(60, 60)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 50),
-                        item = it.getAppIcon()
-                    )
+                            .size(MATCH_PARENT, 100),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(60, 60)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 50),
+                                    item = it.getAppIcon()
+                                )
 
-                    addButtonView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(icon)
-                            .alignBottomToBottomOf(icon)
-                            .margins(start = 50),
-                        text = "${ChatColor.GOLD}${it.name()}",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
-                    ) {
-                        callback.invoke(it)
-                    }
+                                addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(icon)
+                                        .alignBottomToBottomOf(icon)
+                                        .margins(start = 50),
+                                    text = "${ChatColor.GOLD}${it.name()}",
+                                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            callback.invoke(it)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {
@@ -146,7 +158,7 @@ interface SelectFavoritePresenter: Presenter {
 
     fun setSelectedApp(app: BaseEnvironment<BaseApp>?)
 
-    fun setRemoveListener(listener: () -> Unit)
+    fun setRemoveListener(listener: Listener)
 }
 
 class SelectFavoriteInteractor(
@@ -165,9 +177,11 @@ class SelectFavoriteInteractor(
             routeBack()
         }
 
-        presenter.setRemoveListener {
-            preferencesRepository.removeFavorite()
-            presenter.setSelectedApp(preferencesRepository.getSelectedFavorite(player))
-        }
+        presenter.setRemoveListener(object : Listener {
+            override fun invoke() {
+                preferencesRepository.removeFavorite()
+                presenter.setSelectedApp(preferencesRepository.getSelectedFavorite(player))
+            }
+        })
     }
 }

@@ -65,7 +65,7 @@ class RootView(
 
     override fun updateDisplay() {}
 
-    override fun addDestroyListener(listener: () -> Unit) {}
+    override fun addDestroyListener(listener: Listener) {}
 
     override fun addDependant(viewable: Viewable) {}
 
