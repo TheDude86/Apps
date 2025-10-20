@@ -76,7 +76,7 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
     override fun hasParent(): Boolean = false
 
-    override fun routeTo(block: Block, callback: ((Bundle) -> Unit)?) {
+    override fun routeTo(block: Block, callback: RouteToCallback?) {
         block.parent = head
         head.onClose()
         head = block
@@ -98,4 +98,8 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     }
 
     override fun getBlock(): Block = head
+}
+
+interface RouteToCallback {
+    fun invoke(bundle: Bundle)
 }

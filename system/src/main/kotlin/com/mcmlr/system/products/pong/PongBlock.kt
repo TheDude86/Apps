@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.pong
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -9,6 +11,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ItemView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -51,7 +54,7 @@ class PongViewController(
     private lateinit var opponentPaddle: ItemView
     private lateinit var ball: ItemView
 
-    override fun addStartListener(listener: () -> Unit) = play.addListener(listener)
+    override fun addStartListener(listener: Listener) = play.addListener(listener)
 
     override fun setPaddlePosition(y: Int) {
         playerPaddle.setPositionView(y = y)
@@ -65,7 +68,7 @@ class PongViewController(
         ball.setPositionView(x, y)
     }
 
-    override fun playPoint(score: PongScore, callback: () -> Unit) {
+    override fun playPoint(score: PongScore, callback: Listener) {
         val title = if (score == PongScore.PLAYER) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL..."
         point.setTextView(title)
 
@@ -79,7 +82,7 @@ class PongViewController(
         }
     }
 
-    override fun playGameOver(winner: Boolean, callback: () -> Unit) {
+    override fun playGameOver(winner: Boolean, callback: Listener) {
         val title = if (winner) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}Winner!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}You Lost..."
         point.setTextView(title)
 
@@ -123,61 +126,65 @@ class PongViewController(
                 .size(700, 700)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 300),
-        ) {
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    score = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally(),
+                        text = "${ChatColor.BOLD}0 - 0",
+                    )
 
-            score = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally(),
-                text = "${ChatColor.BOLD}0 - 0",
-            )
+                    play = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "Play",
+                        size = 24,
+                        callback = object : Listener {
+                            override fun invoke() {
+                                startGame()
+                            }
+                        }
+                    )
 
-            play = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                text = "Play",
-                size = 24,
-            ) {
-                startGame()
+                    point = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "",
+                        size = 24,
+                    )
+
+                    playerPaddle = addItemView(
+                        modifier = Modifier()
+                            .size(10, 100)
+                            .alignStartToStartOf(this)
+                            .centerVertically()
+                            .margins(start = 100),
+                        item = Material.SMOOTH_QUARTZ,
+                        teleportDuration = 2,
+                    )
+
+                    opponentPaddle = addItemView(
+                        modifier = Modifier()
+                            .size(10, 100)
+                            .alignEndToEndOf(this)
+                            .centerVertically()
+                            .margins(end = 100),
+                        item = Material.SMOOTH_QUARTZ
+                    )
+
+                    ball = addItemView(
+                        modifier = Modifier()
+                            .size(40, 40)
+                            .position(0, 450),
+                        item = Material.LIME_CONCRETE,
+                    )
+                }
             }
-
-            point = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                text = "",
-                size = 24,
-            )
-
-            playerPaddle = addItemView(
-                modifier = Modifier()
-                    .size(10, 100)
-                    .alignStartToStartOf(this)
-                    .centerVertically()
-                    .margins(start = 100),
-                item = Material.SMOOTH_QUARTZ,
-                teleportDuration = 2,
-            )
-
-            opponentPaddle = addItemView(
-                modifier = Modifier()
-                    .size(10, 100)
-                    .alignEndToEndOf(this)
-                    .centerVertically()
-                    .margins(end = 100),
-                item = Material.SMOOTH_QUARTZ
-            )
-
-            ball = addItemView(
-                modifier = Modifier()
-                    .size(40, 40)
-                    .position(0, 450),
-                item = Material.LIME_CONCRETE,
-            )
-
-        }
+        )
     }
 
     private fun startGame() {
@@ -186,12 +193,12 @@ class PongViewController(
 }
 
 interface PongPresenter: Presenter {
-    fun addStartListener(listener: () -> Unit)
+    fun addStartListener(listener: Listener)
     fun setPaddlePosition(y: Int)
     fun setOpponentPaddlePosition(y: Int)
     fun setBallPosition(x: Int, y: Int)
-    fun playPoint(score: PongScore, callback: () -> Unit)
-    fun playGameOver(winner: Boolean, callback: () -> Unit)
+    fun playPoint(score: PongScore, callback: Listener)
+    fun playGameOver(winner: Boolean, callback: Listener)
     fun setScore(score: Pair<Int, Int>)
     fun restart()
 }
@@ -208,10 +215,12 @@ class PongInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.addStartListener {
-            pongRepository.startGame(player, 0, 450)
-            startGame()
-        }
+        presenter.addStartListener(object : Listener {
+            override fun invoke() {
+                pongRepository.startGame(player, 0, 450)
+                startGame()
+            }
+        })
     }
 
     private fun startGame() {
@@ -248,15 +257,19 @@ class PongInteractor(
             .collectLatest {
                 if (it == PongGameState.POINT) {
                     val score = pongRepository.score ?: return@collectLatest
-                    presenter.playPoint(score) {
-                        pongRepository.startNextPoint(0, 450, if (score == PongScore.PLAYER) 1 else -1)
-                    }
+                    presenter.playPoint(score, object : Listener {
+                        override fun invoke() {
+                            pongRepository.startNextPoint(0, 450, if (score == PongScore.PLAYER) 1 else -1)
+                        }
+                    })
                 } else if (it == PongGameState.FINISH) {
-                    presenter.playGameOver(pongRepository.scoreStream().first().first == 10) {
-                        clear(GAME_DISPOSAL)
-                        pongRepository.restart()
-                        presenter.restart()
-                    }
+                    presenter.playGameOver(pongRepository.scoreStream().first().first == 10, object : Listener {
+                        override fun invoke() {
+                            clear(GAME_DISPOSAL)
+                            pongRepository.restart()
+                            presenter.restart()
+                        }
+                    })
                 }
 
             }

@@ -1,5 +1,6 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.RootView.Companion.ITEM_VIEW_MULTIPLIER
 import org.bukkit.Color
 import org.bukkit.inventory.ItemStack
@@ -12,7 +13,7 @@ class ItemButtonView(
     parent: Viewable,
     var item: ItemStack?,
     close: Boolean = false,
-    listeners: MutableList<() -> Unit>,
+    listeners: MutableList<Listener>,
     visible: Boolean = true,
     teleportDuration: Int = 3,
     height: Int = 0,

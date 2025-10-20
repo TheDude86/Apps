@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.Alignment
@@ -10,6 +12,7 @@ import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -40,7 +43,7 @@ class EnabledAppsBlock @Inject constructor(
 class EnabledAppsViewController(player: Player, origin: Location): NavigationViewController(player, origin), EnabledAppsPresenter {
 
     private lateinit var appsFeed: ListFeedView
-    private lateinit var enabledAppCallback: (EnabledApplicationModel) -> Unit
+    private lateinit var enabledAppCallback: EnabledAppsListener
 
     private var appList: List<EnabledApplicationModel> = listOf()
     private var appFeedContainers: HashMap<String, TextView> = HashMap()
@@ -55,65 +58,72 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
         appFeedContainers[app.app.name()]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
-    override fun setEnabledAppsListener(listener: (EnabledApplicationModel) -> Unit) {
+    override fun setEnabledAppsListener(listener: EnabledAppsListener) {
         enabledAppCallback = listener
     }
 
     private fun updateAppsFeed() {
-        appsFeed.updateView {
-            appList.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    clickable = true,
-                    listener = {
-                        enabledAppCallback.invoke(it)
-                    }
-                ) {
-                    val selected = addTextView(
+        appsFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                appList.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 50),
-                        text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
-                    )
+                            .size(MATCH_PARENT, 100),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                enabledAppCallback.invoke(it)
+                            }
+                        },
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val selected = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 50),
+                                    text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
+                                )
 
-                    appFeedContainers[it.app.name()] = selected
+                                appFeedContainers[it.app.name()] = selected
 
-                    val icon = addItemView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 150),
-                        item = it.app.getAppIcon()
-                    )
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 150),
+                                    item = it.app.getAppIcon()
+                                )
 
-                    val appName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(this)
-                            .margins(start = 50, top = 20),
-                        text = it.app.name(),
-                        size = 6,
-                    )
+                                val appName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(this)
+                                        .margins(start = 50, top = 20),
+                                    text = it.app.name(),
+                                    size = 6,
+                                )
 
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(appName)
-                            .alignStartToStartOf(appName)
-                            .margins(top = 10),
-                        text = it.app.summary(),
-                        alignment = Alignment.LEFT,
-                        lineWidth = 250,
-                        size = 4,
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignTopToBottomOf(appName)
+                                        .alignStartToStartOf(appName)
+                                        .margins(top = 10),
+                                    text = it.app.summary(),
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 250,
+                                    size = 4,
+                                )
+                            }
+                        }
                     )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {
@@ -141,7 +151,11 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
 interface EnabledAppsPresenter: Presenter {
     fun setApps(apps: List<EnabledApplicationModel>)
     fun setAppEnabled(app: EnabledApplicationModel)
-    fun setEnabledAppsListener(listener: (EnabledApplicationModel) -> Unit)
+    fun setEnabledAppsListener(listener: EnabledAppsListener)
+}
+
+interface EnabledAppsListener {
+    fun invoke(model: EnabledApplicationModel)
 }
 
 class EnabledAppsInteractor(
@@ -167,12 +181,14 @@ class EnabledAppsInteractor(
 
         presenter.setApps(enabledAppsList)
 
-        presenter.setEnabledAppsListener {
-            if (!it.alwaysEnabled) it.enabled = !it.enabled
-            presenter.setAppEnabled(it)
+        presenter.setEnabledAppsListener(object : EnabledAppsListener {
+            override fun invoke(model: EnabledApplicationModel) {
+                if (!model.alwaysEnabled) model.enabled = !model.enabled
+                presenter.setAppEnabled(model)
 
-            val enabledAppNames = enabledAppsList.filter { it.enabled }.map { it.app.name().lowercase() }
-            systemConfigRepository.saveEnabledApps(enabledAppNames)
-        }
+                val enabledAppNames = enabledAppsList.filter { it.enabled }.map { it.app.name().lowercase() }
+                systemConfigRepository.saveEnabledApps(enabledAppNames)
+            }
+        })
     }
 }

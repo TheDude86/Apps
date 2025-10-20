@@ -1,5 +1,6 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.font.reduceToLength
 import org.bukkit.Color
@@ -16,7 +17,7 @@ open class ButtonView(
     var highlightedText: String?,
     override var highlighted: Boolean = false,
     val close: Boolean = false,
-    override var listeners: MutableList<() -> Unit>,
+    override var listeners: MutableList<Listener>,
     visible: Boolean = true,
     teleportDuration: Int = 3,
     height: Int = 0,
@@ -38,7 +39,7 @@ open class ButtonView(
         this.highlightedText = this.highlightedText?.reduceToLength(maxLength)
     }
 
-    fun addListener(listener: () -> Unit) {
+    fun addListener(listener: Listener) {
         listeners.add(listener)
     }
 
@@ -59,7 +60,7 @@ open class ButtonView(
 
 interface ClickableView {
     var highlighted: Boolean
-    var listeners: MutableList<() -> Unit>
+    var listeners: MutableList<Listener>
     var dudeDisplay: DudeDisplay?
     var visible: Boolean
 

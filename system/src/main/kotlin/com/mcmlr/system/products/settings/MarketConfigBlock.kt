@@ -1,13 +1,17 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.market.MarketConfigRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -35,7 +39,7 @@ class MarketConfigViewController(player: Player, origin: Location): NavigationVi
     private lateinit var maxOrdersView: TextInputView
     private lateinit var messageView: TextView
 
-    override fun setMaxOrdersListener(listener: (String) -> Unit) = maxOrdersView.addTextChangedListener(listener)
+    override fun setMaxOrdersListener(listener: TextListener) = maxOrdersView.addTextChangedListener(listener)
 
     override fun createView() {
         super.createView()
@@ -57,49 +61,52 @@ class MarketConfigViewController(player: Player, origin: Location): NavigationVi
                 .alignBottomToBottomOf(this)
                 .centerHorizontally()
                 .margins(top = 600),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            val maxOrdersTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .alignStartToStartOf(this),
-                size = 6,
-                text = "Max Orders",
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    val maxOrdersTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this),
+                        size = 6,
+                        text = "Max Orders",
+                    )
 
-            val maxOrdersMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(maxOrdersTitle)
-                    .alignStartToStartOf(maxOrdersTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The maximum number of orders a player can have at once.  Setting it to 0 means players can create unlimited orders.",
-            )
+                    val maxOrdersMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(maxOrdersTitle)
+                            .alignStartToStartOf(maxOrdersTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The maximum number of orders a player can have at once.  Setting it to 0 means players can create unlimited orders.",
+                    )
 
-            maxOrdersView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(maxOrdersTitle)
-                    .alignBottomToTopOf(maxOrdersMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}0 Orders",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Orders",
-            )
+                    maxOrdersView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(maxOrdersTitle)
+                            .alignBottomToTopOf(maxOrdersMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}0 Orders",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Orders",
+                    )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(maxOrdersMessage)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                size = 4,
-                text = ""
-            )
-        }
+                    messageView = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(maxOrdersMessage)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        size = 4,
+                        text = ""
+                    )
+                }
+            }
+        )
     }
 
     override fun updateMaxOrdersText(text: String) {
@@ -115,7 +122,7 @@ class MarketConfigViewController(player: Player, origin: Location): NavigationVi
 
 interface MarketConfigPresenter: Presenter {
     fun updateMaxOrdersText(text: String)
-    fun setMaxOrdersListener(listener: (String) -> Unit)
+    fun setMaxOrdersListener(listener: TextListener)
     fun setMessage(message: String)
 }
 
@@ -129,20 +136,22 @@ class MarketConfigInteractor(
         val defaultOrders = marketConfigRepository.maxOrders()
         presenter.updateMaxOrdersText("$defaultOrders Order${if (defaultOrders != 1) "s" else ""}")
 
-        presenter.setMaxOrdersListener {
-            val maxOrders = it.toIntOrNull()
-            if (maxOrders == null) {
-                val defaultMaxOrders = marketConfigRepository.maxOrders()
-                presenter.setMessage("${ChatColor.RED}Max order values must be whole numbers!")
-                presenter.updateMaxOrdersText("$defaultMaxOrders Order${if (defaultMaxOrders != 1) "s" else ""}")
-                return@setMaxOrdersListener
+        presenter.setMaxOrdersListener(object : TextListener {
+            override fun invoke(text: String) {
+                val maxOrders = text.toIntOrNull()
+                if (maxOrders == null) {
+                    val defaultMaxOrders = marketConfigRepository.maxOrders()
+                    presenter.setMessage("${ChatColor.RED}Max order values must be whole numbers!")
+                    presenter.updateMaxOrdersText("$defaultMaxOrders Order${if (defaultMaxOrders != 1) "s" else ""}")
+                    return
+                }
+
+                val orders = max(0, maxOrders)
+                marketConfigRepository.updateMarketMaxOrders(orders)
+                presenter.updateMaxOrdersText("$orders Order${if (orders != 1) "s" else ""}")
+
+                presenter.setMessage("")
             }
-
-            val orders = max(0, maxOrders)
-            marketConfigRepository.updateMarketMaxOrders(orders)
-            presenter.updateMaxOrdersText("$orders Order${if (orders != 1) "s" else ""}")
-
-            presenter.setMessage("")
-        }
+        })
     }
 }

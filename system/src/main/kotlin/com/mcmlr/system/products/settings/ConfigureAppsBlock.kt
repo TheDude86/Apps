@@ -1,36 +1,30 @@
 package com.mcmlr.system.products.settings
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
-import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
-import com.mcmlr.system.SystemConfigRepository
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.data.ApplicationsRepository
-import com.mcmlr.system.products.info.EnabledApplicationModel
 import org.bukkit.ChatColor
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
 
 class ConfigureAppsBlock @Inject constructor(
     player: Player,
     origin: Location,
-    systemConfigRepository: SystemConfigRepository,
     applicationsRepository: ApplicationsRepository,
 ): Block(player, origin) {
 
     private val view: ConfigureAppsViewController = ConfigureAppsViewController(player, origin)
-    private val interactor: ConfigureAppsInteractor = ConfigureAppsInteractor(view, systemConfigRepository, applicationsRepository)
+    private val interactor: ConfigureAppsInteractor = ConfigureAppsInteractor(view, applicationsRepository)
 
     override fun interactor(): Interactor = interactor
 
@@ -44,49 +38,56 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
     private lateinit var configureAppCallback: (ConfigurableEnvironment<*>) -> Unit
 
     override fun updateConfigurableApps(configurableApps: List<ConfigurableEnvironment<*>>) {
-        appsConfigFeed.updateView {
-            configurableApps.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    clickable = true,
-                    listener = {
-                        configureAppCallback.invoke(it)
-                    }
-                ) {
-                    val icon = addItemView(
+        appsConfigFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                configurableApps.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 150),
-                        item = it.getAppIcon()
-                    )
+                            .size(MATCH_PARENT, 100),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                configureAppCallback.invoke(it)
+                            }
+                        },
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 150),
+                                    item = it.getAppIcon()
+                                )
 
-                    val appName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(this)
-                            .margins(start = 50, top = 20),
-                        text = it.name(),
-                        size = 6,
-                    )
+                                val appName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(this)
+                                        .margins(start = 50, top = 20),
+                                    text = it.name(),
+                                    size = 6,
+                                )
 
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(appName)
-                            .alignStartToStartOf(appName)
-                            .margins(top = 10),
-                        text = it.summary(),
-                        alignment = Alignment.LEFT,
-                        lineWidth = 250,
-                        size = 4,
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignTopToBottomOf(appName)
+                                        .alignStartToStartOf(appName)
+                                        .margins(top = 10),
+                                    text = it.summary(),
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 250,
+                                    size = 4,
+                                )
+                            }
+                        }
                     )
                 }
             }
-        }
+        })
 
     }
 
@@ -123,7 +124,6 @@ interface ConfigureAppsPresenter: Presenter {
 
 class ConfigureAppsInteractor(
     private val presenter: ConfigureAppsPresenter,
-    private val systemConfigRepository: SystemConfigRepository,
     private val applicationsRepository: ApplicationsRepository,
 ): Interactor(presenter) {
 

@@ -2,6 +2,7 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.Alignment
@@ -39,7 +40,7 @@ class PermissionsViewController(player: Player, origin: Location): NavigationVie
         updateTextDisplay(permissionsButton)
     }
 
-    override fun setPermissionsListener(listener: () -> Unit) = permissionsButton.addListener(listener)
+    override fun setPermissionsListener(listener: Listener) = permissionsButton.addListener(listener)
 
     override fun createView() {
         super.createView()
@@ -90,7 +91,7 @@ class PermissionsViewController(player: Player, origin: Location): NavigationVie
 
 interface PermissionsPresenter: Presenter {
     fun setPermissionsState(active: Boolean)
-    fun setPermissionsListener(listener: () -> Unit)
+    fun setPermissionsListener(listener: Listener)
 }
 
 class PermissionsInteractor(
@@ -101,9 +102,11 @@ class PermissionsInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setPermissionsListener {
-            systemConfigRepository.toggleUsePermissions()
-            presenter.setPermissionsState(systemConfigRepository.model.usePermissions)
-        }
+        presenter.setPermissionsListener(object : Listener {
+            override fun invoke() {
+                systemConfigRepository.toggleUsePermissions()
+                presenter.setPermissionsState(systemConfigRepository.model.usePermissions)
+            }
+        })
     }
 }

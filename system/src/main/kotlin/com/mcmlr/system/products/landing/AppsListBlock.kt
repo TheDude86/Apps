@@ -5,11 +5,14 @@ import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.preferences.PreferencesRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -41,36 +44,44 @@ class AppsListViewController(
 
         listView.updateDimensions(MATCH_PARENT, 50 * favoriteApps.size)
 
-        listView.updateView {
-            favoriteApps.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 50),
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val appIcon = addItemView(
+        listView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                favoriteApps.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(50, 50)
-                            .alignStartToStartOf(this)
-                            .centerVertically(),
-                        item = it.getAppIcon()
-                    )
+                            .size(MATCH_PARENT, 50),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val appIcon = addItemView(
+                                    modifier = Modifier()
+                                        .size(50, 50)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically(),
+                                    item = it.getAppIcon()
+                                )
 
-                    addButtonView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(appIcon)
-                            .alignTopToTopOf(appIcon)
-                            .alignBottomToBottomOf(appIcon),
-                        text = "${ChatColor.GOLD}${it.name()}",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
-                        size = 8,
-                    ) {
-                        callback.invoke(it)
-                    }
+                                addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(appIcon)
+                                        .alignTopToTopOf(appIcon)
+                                        .alignBottomToBottomOf(appIcon),
+                                    text = "${ChatColor.GOLD}${it.name()}",
+                                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
+                                    size = 8,
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            callback.invoke(it)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {

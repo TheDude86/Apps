@@ -1,8 +1,10 @@
 package com.mcmlr.apps
 
-import com.comphenix.protocol.metrics.Metrics
+import com.mcmlr.blocks.api.AppInjectionListener
 import com.mcmlr.blocks.api.AppInjector
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
@@ -25,7 +27,6 @@ import com.mcmlr.system.products.settings.AdminEnvironment
 import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
-import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -90,9 +91,11 @@ class Apps : JavaPlugin() {
         systemEnvironment.configure(inputRepository, resources)
         systemEnvironment.build()
 
-        AppInjector.setInjectorListener {
-            systemEnvironment.register(it)
-        }
+        AppInjector.setInjectorListener(object : AppInjectionListener {
+            override fun invoke(environment: Environment<App>) {
+                systemEnvironment.register(environment)
+            }
+        })
 
         AppInjector.register(AdminEnvironment())
         AppInjector.register(AnnouncementsEnvironment())

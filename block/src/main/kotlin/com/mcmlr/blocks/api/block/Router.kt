@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.Location
@@ -16,7 +17,7 @@ import org.bukkit.entity.Entity
 open class Router {
     private val childNodes = mutableListOf<Block>()
     private lateinit var context: Context
-    private var callback: ((Bundle) -> Unit)? = null
+    private var callback: RouteToCallback? = null
 
     val bundle = Bundle()
 
@@ -37,7 +38,7 @@ open class Router {
         context.maximize()
     }
 
-    fun setCallback(callback: ((Bundle) -> Unit)? = null) {
+    fun setCallback(callback: RouteToCallback? = null) {
         this.callback = callback
     }
 
@@ -54,7 +55,7 @@ open class Router {
         this.callback?.invoke(bundle)
     }
 
-    fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null) {
+    fun routeTo(block: Block, callback: RouteToCallback? = null) {
         context.routeTo(block, callback)
     }
 

@@ -2,6 +2,7 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.ButtonView
@@ -34,11 +35,11 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
 
     private lateinit var configureAppsButton: ButtonView
 
-    override fun setPermissionsListener(listener: () -> Unit) = permissionsButton.addListener(listener)
+    override fun setPermissionsListener(listener: Listener) = permissionsButton.addListener(listener)
 
-    override fun setEnabledAppsListener(listener: () -> Unit) = enabledAppsButton.addListener(listener)
+    override fun setEnabledAppsListener(listener: Listener) = enabledAppsButton.addListener(listener)
 
-    override fun setConfigurableAppsListener(listener: () -> Unit) = configureAppsButton.addListener(listener)
+    override fun setConfigurableAppsListener(listener: Listener) = configureAppsButton.addListener(listener)
 
     override fun createView() {
         super.createView()
@@ -86,11 +87,11 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
 }
 
 interface AdminPresenter: Presenter {
-    fun setPermissionsListener(listener: () -> Unit)
+    fun setPermissionsListener(listener: Listener)
 
-    fun setEnabledAppsListener(listener: () -> Unit)
+    fun setEnabledAppsListener(listener: Listener)
 
-    fun setConfigurableAppsListener(listener: () -> Unit)
+    fun setConfigurableAppsListener(listener: Listener)
 }
 
 class AdminInteractor(
@@ -102,16 +103,22 @@ class AdminInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setPermissionsListener {
-            routeTo(permissionsBlock)
-        }
+        presenter.setPermissionsListener(object : Listener {
+            override fun invoke() {
+                routeTo(permissionsBlock)
+            }
+        })
 
-        presenter.setEnabledAppsListener {
-            routeTo(enabledAppsBlock)
-        }
+        presenter.setEnabledAppsListener(object : Listener {
+            override fun invoke() {
+                routeTo(enabledAppsBlock)
+            }
+        })
 
-        presenter.setConfigurableAppsListener {
-            routeTo(configureAppsBlock)
-        }
+        presenter.setConfigurableAppsListener(object : Listener {
+            override fun invoke() {
+                routeTo(configureAppsBlock)
+            }
+        })
     }
 }
