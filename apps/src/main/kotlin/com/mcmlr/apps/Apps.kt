@@ -1,5 +1,6 @@
 package com.mcmlr.apps
 
+import com.comphenix.protocol.metrics.Metrics
 import com.mcmlr.blocks.api.AppInjector
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.InputRepository
@@ -72,6 +73,8 @@ class Apps : JavaPlugin() {
     lateinit var systemConfigRepository: SystemConfigRepository
 
     override fun onEnable() {
+        Metrics(this, 27644)
+
         instance = this
 
         managerComponent = DaggerManagerComponent.builder()
