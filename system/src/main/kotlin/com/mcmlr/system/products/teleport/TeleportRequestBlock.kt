@@ -2,6 +2,7 @@ package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -118,11 +119,11 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
         updateTextDisplay(name)
     }
 
-    override fun setTpaCallback(callback: () -> Unit) {
+    override fun setTpaCallback(callback: Listener) {
         tpa.addListener(callback)
     }
 
-    override fun setTpaHereCallback(callback: () -> Unit) {
+    override fun setTpaHereCallback(callback: Listener) {
         tpahere.addListener(callback)
     }
 
@@ -141,9 +142,9 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
 interface TeleportRequestPresenter: Presenter {
     fun setPlayer(playerHead: ItemStack, playerName: String)
 
-    fun setTpaCallback(callback: () -> Unit)
+    fun setTpaCallback(callback: Listener)
 
-    fun setTpaHereCallback(callback: () -> Unit)
+    fun setTpaHereCallback(callback: Listener)
 
     fun updateRequestStatus(status: TeleportStatus)
 }
@@ -167,16 +168,20 @@ class TeleportRequestInteractor(
 
         presenter.setPlayer(head, player.displayName)
 
-        presenter.setTpaCallback {
-            val status = teleportRepository.sendRequest(this.player, player, TeleportRequestType.GOTO)
-            presenter.updateRequestStatus(status)
-            if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${this.player.displayName} requested to teleport to you", "Open the teleport menu", "Click to respond", "/. teleport://")
-        }
+        presenter.setTpaCallback(object : Listener {
+            override fun invoke() {
+                val status = teleportRepository.sendRequest(player, player, TeleportRequestType.GOTO)
+                presenter.updateRequestStatus(status)
+                if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${player.displayName} requested to teleport to you", "Open the teleport menu", "Click to respond", "/. teleport://")
+            }
+        })
 
-        presenter.setTpaHereCallback {
-            val status = teleportRepository.sendRequest(this.player, player, TeleportRequestType.COME)
-            presenter.updateRequestStatus(status)
-            if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${this.player.displayName} requested you to teleport to them", "Open the teleport menu", "Click to respond", "/. teleport://")
-        }
+        presenter.setTpaHereCallback(object : Listener {
+            override fun invoke() {
+                val status = teleportRepository.sendRequest(player, player, TeleportRequestType.COME)
+                presenter.updateRequestStatus(status)
+                if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${player.displayName} requested you to teleport to them", "Open the teleport menu", "Click to respond", "/. teleport://")
+            }
+        })
     }
 }

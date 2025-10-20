@@ -1,9 +1,13 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
@@ -175,7 +179,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
         }
     }
 
-    override fun setItemListener(listener: () -> Unit) = name.addListener(listener)
+    override fun setItemListener(listener: Listener) = name.addListener(listener)
 
     override fun setItem(item: ItemStack) {
         val prettyName = item.type.name.fromMCItem()
@@ -188,19 +192,19 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
         updateTextDisplay(name)
     }
 
-    override fun setPriceListener(listener: (String) -> Unit) = price.addTextChangedListener(listener)
+    override fun setPriceListener(listener: TextListener) = price.addTextChangedListener(listener)
 
-    override fun setQuantityListener(listener: (String) -> Unit) = quantity.addTextChangedListener(listener)
+    override fun setQuantityListener(listener: TextListener) = quantity.addTextChangedListener(listener)
 
-    override fun setZeroListener(listener: () -> Unit) = zero.addListener(listener)
+    override fun setZeroListener(listener: Listener) = zero.addListener(listener)
 
-    override fun setSubtractListener(listener: () -> Unit) = subtract.addListener(listener)
+    override fun setSubtractListener(listener: Listener) = subtract.addListener(listener)
 
-    override fun setMaxListener(listener: () -> Unit) = max.addListener(listener)
+    override fun setMaxListener(listener: Listener) = max.addListener(listener)
 
-    override fun setAddListener(listener: () -> Unit) = add.addListener(listener)
+    override fun setAddListener(listener: Listener) = add.addListener(listener)
 
-    override fun setCreateListener(listener: () -> Unit) = create.addListener(listener)
+    override fun setCreateListener(listener: Listener) = create.addListener(listener)
 
     override fun updatePriceText(text: String) {
         price.text = text
@@ -225,7 +229,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
         updateTextDisplay(this.message)
     }
 
-    override fun animateOrderSuccess(material: Material, order: Order, onFinish: () -> Unit) {
+    override fun animateOrderSuccess(material: Material, order: Order, onFinish: Listener) {
         var materialView: ItemView
         var titleView: TextView
         var materialNameView: TextView
@@ -322,23 +326,23 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
 }
 
 interface OfferCreatorPresenter: Presenter {
-    fun setItemListener(listener: () -> Unit)
+    fun setItemListener(listener: Listener)
 
-    fun setZeroListener(listener: () -> Unit)
+    fun setZeroListener(listener: Listener)
 
-    fun setSubtractListener(listener: () -> Unit)
+    fun setSubtractListener(listener: Listener)
 
-    fun setMaxListener(listener: () -> Unit)
+    fun setMaxListener(listener: Listener)
 
-    fun setAddListener(listener: () -> Unit)
+    fun setAddListener(listener: Listener)
 
-    fun setCreateListener(listener: () -> Unit)
+    fun setCreateListener(listener: Listener)
 
     fun setItem(item: ItemStack)
 
-    fun setPriceListener(listener: (String) -> Unit)
+    fun setPriceListener(listener: TextListener)
 
-    fun setQuantityListener(listener: (String) -> Unit)
+    fun setQuantityListener(listener: TextListener)
 
     fun updatePriceText(text: String)
 
@@ -348,7 +352,7 @@ interface OfferCreatorPresenter: Presenter {
 
     fun hideMessage()
 
-    fun animateOrderSuccess(material: Material, order: Order, onFinish: () -> Unit)
+    fun animateOrderSuccess(material: Material, order: Order, onFinish: Listener)
 }
 
 class OfferCreatorInteractor(
@@ -367,106 +371,125 @@ class OfferCreatorInteractor(
         builder = Order.Builder()
         selectedMaterial = null
 
-        presenter.setItemListener {
-            iconSelectionBlock.setInventory(player.inventory)
-            routeTo(iconSelectionBlock) { bundle ->
-                val item = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY) ?: return@routeTo
-                presenter.setItem(item)
-                selectedMaterial = item
-                builder.meta(item.itemMeta?.asComponentString)
+        presenter.setItemListener(object : Listener {
+            override fun invoke() {
+                iconSelectionBlock.setInventory(player.inventory)
+                routeTo(iconSelectionBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val item = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY) ?: return
+                        presenter.setItem(item)
+                        selectedMaterial = item
+                        builder.meta(item.itemMeta?.asComponentString)
+                    }
+                })
             }
-        }
+        })
 
-        presenter.setPriceListener {
-            if (it.toDoubleOrNull() == null) {
-                presenter.updatePriceText("$0")
-                presenter.setMessage("${ChatColor.RED}Prices must be a valid number!")
-                builder.price(0)
-            } else {
-                presenter.updatePriceText("$${it.priceFormat()}")
-                val price = ((it.toDouble() * 100) + 0.5).toInt()
-                builder.price(price)
+        presenter.setPriceListener(object : TextListener {
+            override fun invoke(text: String) {
+                if (text.toDoubleOrNull() == null) {
+                    presenter.updatePriceText("$0")
+                    presenter.setMessage("${ChatColor.RED}Prices must be a valid number!")
+                    builder.price(0)
+                } else {
+                    presenter.updatePriceText("$${text.priceFormat()}")
+                    val price = ((text.toDouble() * 100) + 0.5).toInt()
+                    builder.price(price)
+                }
             }
-        }
+        })
 
-        presenter.setQuantityListener {
-            if (it.toIntOrNull() == null) {
-                presenter.updateQuantityText("0")
-                presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
-                builder.quantity(0)
-            } else {
-                builder.quantity(it.toInt())
-                checkValidQuantity()
-            }
-        }
-
-        presenter.setZeroListener {
-            presenter.updateQuantityText("0")
-            builder.quantity(0)
-            checkValidQuantity()
-        }
-
-        presenter.setSubtractListener {
-            builder.quantity?.let { quantity ->
-                if (quantity > 0) {
-                    builder.quantity(quantity - 1)
-                    presenter.updateQuantityText(builder.quantity.toString())
+        presenter.setQuantityListener(object : TextListener {
+            override fun invoke(text: String) {
+                if (text.toIntOrNull() == null) {
+                    presenter.updateQuantityText("0")
+                    presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
+                    builder.quantity(0)
+                } else {
+                    builder.quantity(text.toInt())
                     checkValidQuantity()
                 }
             }
+        })
 
-        }
-
-        presenter.setMaxListener {
-            var count = 0
-            player.inventory.filterNotNull().forEach {
-                if (it.type == selectedMaterial?.type && it.itemMeta == selectedMaterial?.itemMeta) {
-                    count += it.amount
-                }
+        presenter.setZeroListener(object : Listener {
+            override fun invoke() {
+                presenter.updateQuantityText("0")
+                builder.quantity(0)
+                checkValidQuantity()
             }
+        })
 
-            builder.quantity(count)
-            presenter.updateQuantityText(builder.quantity.toString())
-            checkValidQuantity()
-        }
-
-        presenter.setAddListener {
-            builder.quantity((builder.quantity ?: 0) + 1)
-            presenter.updateQuantityText(builder.quantity.toString())
-            checkValidQuantity()
-        }
-
-        presenter.setCreateListener {
-            if (selectedMaterial == null) {
-                presenter.setMessage("${ChatColor.RED}You need to select an item to sell first!")
-                return@setCreateListener
-            }
-
-            if (builder.price == null) {
-                presenter.setMessage("${ChatColor.RED}You need to specify the price of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
-                return@setCreateListener
-            }
-
-            if (builder.quantity == null) {
-                presenter.setMessage("${ChatColor.RED}You need to specify the amount of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
-                return@setCreateListener
-            }
-
-            selectedMaterial?.let { material ->
-                val order = builder.playerId(player.uniqueId).build() ?: return@setCreateListener
-                if (checkValidQuantity()) {
-                    orderRepository.setOrder(material, order).collectFirst(DudeDispatcher()) {
-                        val type = material.type
-                        player.inventory.remove(type, material.itemMeta?.asComponentString, order.quantity)
-                        presenter.animateOrderSuccess(type, order) {
-                            routeBack()
-                        }
+        presenter.setSubtractListener(object : Listener {
+            override fun invoke() {
+                builder.quantity?.let { quantity ->
+                    if (quantity > 0) {
+                        builder.quantity(quantity - 1)
+                        presenter.updateQuantityText(builder.quantity.toString())
+                        checkValidQuantity()
                     }
-                } else {
-                    presenter.setMessage("${ChatColor.RED}You don't have enough ${selectedMaterial?.type?.name?.fromMCItem()} in your inventory!")
                 }
             }
-        }
+        })
+
+        presenter.setMaxListener(object : Listener {
+            override fun invoke() {
+                var count = 0
+                player.inventory.filterNotNull().forEach {
+                    if (it.type == selectedMaterial?.type && it.itemMeta == selectedMaterial?.itemMeta) {
+                        count += it.amount
+                    }
+                }
+
+                builder.quantity(count)
+                presenter.updateQuantityText(builder.quantity.toString())
+                checkValidQuantity()
+            }
+        })
+
+        presenter.setAddListener(object : Listener {
+            override fun invoke() {
+                builder.quantity((builder.quantity ?: 0) + 1)
+                presenter.updateQuantityText(builder.quantity.toString())
+                checkValidQuantity()
+            }
+        })
+
+        presenter.setCreateListener(object : Listener {
+            override fun invoke() {
+                if (selectedMaterial == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to select an item to sell first!")
+                    return
+                }
+
+                if (builder.price == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to specify the price of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
+                    return
+                }
+
+                if (builder.quantity == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to specify the amount of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
+                    return
+                }
+
+                selectedMaterial?.let { material ->
+                    val order = builder.playerId(player.uniqueId).build() ?: return
+                    if (checkValidQuantity()) {
+                        orderRepository.setOrder(material, order).collectFirst(DudeDispatcher()) {
+                            val type = material.type
+                            player.inventory.remove(type, material.itemMeta?.asComponentString, order.quantity)
+                            presenter.animateOrderSuccess(type, order, object : Listener {
+                                override fun invoke() {
+                                    routeBack()
+                                }
+                            })
+                        }
+                    } else {
+                        presenter.setMessage("${ChatColor.RED}You don't have enough ${selectedMaterial?.type?.name?.fromMCItem()} in your inventory!")
+                    }
+                }
+            }
+        })
     }
 
     private fun checkValidQuantity(): Boolean {

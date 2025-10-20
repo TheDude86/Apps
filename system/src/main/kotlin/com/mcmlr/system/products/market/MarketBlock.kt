@@ -2,8 +2,10 @@ package com.mcmlr.system.products.market
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
@@ -82,7 +84,7 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
         )
     }
 
-    override fun setMyOffersListener(listener: () -> Unit) = myOffersButton.addListener(listener)
+    override fun setMyOffersListener(listener: Listener) = myOffersButton.addListener(listener)
 
     override fun setFeed(orders: List<Pair<Material, Order>>, listener: (Pair<Material, Order>) -> Unit) {
         feedView.updateView {
@@ -104,7 +106,11 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                     clickable = true,
                     background = Color.fromARGB(0, 0, 255, 0),
                     backgroundHighlight = Color.fromARGB(64, 255, 255, 255),
-                    listener = { listener.invoke(model) },
+                    listener = object : Listener {
+                        override fun invoke() {
+                            listener.invoke(model)
+                        }
+                    },
                 ) {
 
                     val icon = addItemView(
@@ -165,15 +171,15 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
         }
     }
 
-    override fun setSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun setSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 }
 
 interface MarketPresenter: Presenter {
-    fun setMyOffersListener(listener: () -> Unit)
+    fun setMyOffersListener(listener: Listener)
 
     fun setFeed(orders: List<Pair<Material, Order>>, listener: (Pair<Material, Order>) -> Unit)
 
-    fun setSearchListener(listener: (String) -> Unit)
+    fun setSearchListener(listener: TextListener)
 }
 
 class MarketInteractor(
@@ -192,15 +198,19 @@ class MarketInteractor(
             routeTo(purchaseBlock)
         }
 
-        presenter.setSearchListener { searchTerm ->
-            presenter.setFeed(marketRepository.getOrders(searchTerm)) {
-                orderRepository.purchaseOrder = it
-                routeTo(purchaseBlock)
+        presenter.setSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                presenter.setFeed(marketRepository.getOrders(text)) {
+                    orderRepository.purchaseOrder = it
+                    routeTo(purchaseBlock)
+                }
             }
-        }
+        })
 
-        presenter.setMyOffersListener {
-            routeTo(myOffersBlock)
-        }
+        presenter.setMyOffersListener(object : Listener {
+            override fun invoke() {
+                routeTo(myOffersBlock)
+            }
+        })
     }
 }

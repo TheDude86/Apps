@@ -2,6 +2,7 @@ package com.mcmlr.system.products.landing
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.Alignment
@@ -127,11 +128,14 @@ class FeedViewController(
                             text = "${ChatColor.GOLD}${it.ctaText}",
                             highlightedText = "${ChatColor.GOLD}${it.ctaText.bolden()}",
                             size = 5,
-                        ) {
-                            if (!enableCTA) return@addButtonView
-                            val command = it.cta ?: return@addButtonView
-                            player.performCommand(command.placeholders(player))
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    if (!enableCTA) return
+                                    val command = it.cta ?: return
+                                    player.performCommand(command.placeholders(player))
+                                }
+                            }
+                        )
                     }
                 }
             }

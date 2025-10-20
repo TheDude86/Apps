@@ -3,8 +3,10 @@ package com.mcmlr.system.products.market
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
@@ -204,7 +206,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         }
     }
 
-    override fun setPurchaseResult(success: Boolean, material: Material, order: Order, onFinish: () -> Unit) {
+    override fun setPurchaseResult(success: Boolean, material: Material, order: Order, onFinish: Listener) {
         if (success) {
             showPurchaseSuccess(material, order, onFinish)
         } else {
@@ -213,7 +215,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
     }
 
 
-    private fun showPurchaseFailure(onFinish: () -> Unit) {
+    private fun showPurchaseFailure(onFinish: Listener) {
         var titleView: TextView
         var errorMessageView: TextView
 
@@ -251,7 +253,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         }
     }
 
-    private fun showPurchaseSuccess(material: Material, order: Order, onFinish: () -> Unit) {
+    private fun showPurchaseSuccess(material: Material, order: Order, onFinish: Listener) {
         var materialView: ItemView
         var titleView: TextView
         var materialNameView: TextView
@@ -345,17 +347,17 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         updateTextDisplay(price)
     }
 
-    override fun setZeroListener(listener: () -> Unit) = zero.addListener(listener)
+    override fun setZeroListener(listener: Listener) = zero.addListener(listener)
 
-    override fun setSubtractListener(listener: () -> Unit) = subtract.addListener(listener)
+    override fun setSubtractListener(listener: Listener) = subtract.addListener(listener)
 
-    override fun setMaxListener(listener: () -> Unit) = max.addListener(listener)
+    override fun setMaxListener(listener: Listener) = max.addListener(listener)
 
-    override fun setAddListener(listener: () -> Unit) = add.addListener(listener)
+    override fun setAddListener(listener: Listener) = add.addListener(listener)
 
-    override fun setQuantityListener(listener: (String) -> Unit) = quantityInput.addTextChangedListener(listener)
+    override fun setQuantityListener(listener: TextListener) = quantityInput.addTextChangedListener(listener)
 
-    override fun setPurchaseListener(listener: () -> Unit) = purchase.addListener(listener)
+    override fun setPurchaseListener(listener: Listener) = purchase.addListener(listener)
 
     override fun setMessage(message: String) {
         this.message.text = message
@@ -377,17 +379,17 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
 interface PurchasePresenter: Presenter {
     fun setOrder(material: Material, order: Order)
 
-    fun setZeroListener(listener: () -> Unit)
+    fun setZeroListener(listener: Listener)
 
-    fun setSubtractListener(listener: () -> Unit)
+    fun setSubtractListener(listener: Listener)
 
-    fun setMaxListener(listener: () -> Unit)
+    fun setMaxListener(listener: Listener)
 
-    fun setAddListener(listener: () -> Unit)
+    fun setAddListener(listener: Listener)
 
-    fun setQuantityListener(listener: (String) -> Unit)
+    fun setQuantityListener(listener: TextListener)
 
-    fun setPurchaseListener(listener: () -> Unit)
+    fun setPurchaseListener(listener: Listener)
 
     fun setMessage(message: String)
 
@@ -395,7 +397,7 @@ interface PurchasePresenter: Presenter {
 
     fun updateQuantityText(text: String)
 
-    fun setPurchaseResult(success: Boolean, material: Material, order: Order, onFinish: () -> Unit)
+    fun setPurchaseResult(success: Boolean, material: Material, order: Order, onFinish: Listener)
 }
 
 class PurchaseInteractor(
@@ -414,55 +416,69 @@ class PurchaseInteractor(
         val order = orderRepository.purchaseOrder
         quantity = 0
 
-        presenter.setQuantityListener {
-            val quantityInput = it.toIntOrNull()
-            if (quantityInput == null) {
-                presenter.updateQuantityText("0")
-                presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
-            } else {
-                quantity = quantityInput
+        presenter.setQuantityListener(object : TextListener {
+            override fun invoke(text: String) {
+                val quantityInput = text.toIntOrNull()
+                if (quantityInput == null) {
+                    presenter.updateQuantityText("0")
+                    presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
+                } else {
+                    quantity = quantityInput
+                    updateOrder()
+                }
+            }
+        })
+
+        presenter.setZeroListener(object : Listener {
+            override fun invoke() {
+                quantity = 0
                 updateOrder()
             }
-        }
+        })
 
-        presenter.setZeroListener {
-            quantity = 0
-            updateOrder()
-        }
+        presenter.setSubtractListener(object : Listener {
+            override fun invoke() {
+                quantity = max(quantity - 1, 0)
+                updateOrder()
+            }
+        })
 
-        presenter.setSubtractListener {
-            quantity = max(quantity - 1, 0)
-            updateOrder()
-        }
+        presenter.setAddListener(object : Listener {
+            override fun invoke() {
+                quantity++
+                updateOrder()
+            }
+        })
 
-        presenter.setAddListener {
-            quantity++
-            updateOrder()
-        }
+        presenter.setMaxListener(object : Listener {
+            override fun invoke() {
+                quantity = order?.second?.quantity ?: 0
+                updateOrder()
+            }
+        })
 
-        presenter.setMaxListener {
-            quantity = order?.second?.quantity ?: 0
-            updateOrder()
-        }
-
-        presenter.setPurchaseListener {
-            if (checkValidQuantity() && checkValidBalance()) {
-                if (quantity < 1) {
-                    presenter.setMessage("${ChatColor.RED}Quantities must be above zero!")
-                } else {
-                    val material = order?.first ?: return@setPurchaseListener
-                    val playerId = order.second.playerId
-                    val price = order.second.price
-                    val meta = order.second.meta
-                    val purchaseOrder = Order(playerId, quantity, price, meta)
-                    marketRepository.queuePurchase(player, material, purchaseOrder) {
-                        presenter.setPurchaseResult(it, material, purchaseOrder) {
-                            routeBack()
+        presenter.setPurchaseListener(object : Listener {
+            override fun invoke() {
+                if (checkValidQuantity() && checkValidBalance()) {
+                    if (quantity < 1) {
+                        presenter.setMessage("${ChatColor.RED}Quantities must be above zero!")
+                    } else {
+                        val material = order?.first ?: return
+                        val playerId = order.second.playerId
+                        val price = order.second.price
+                        val meta = order.second.meta
+                        val purchaseOrder = Order(playerId, quantity, price, meta)
+                        marketRepository.queuePurchase(player, material, purchaseOrder) {
+                            presenter.setPurchaseResult(it, material, purchaseOrder, object : Listener {
+                                override fun invoke() {
+                                    routeBack()
+                                }
+                            })
                         }
                     }
                 }
             }
-        }
+        })
 
         if (order != null) {
             presenter.setOrder(order.first, order.second)

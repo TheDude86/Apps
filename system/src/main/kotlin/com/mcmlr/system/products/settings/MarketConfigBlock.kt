@@ -2,8 +2,10 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -35,7 +37,7 @@ class MarketConfigViewController(player: Player, origin: Location): NavigationVi
     private lateinit var maxOrdersView: TextInputView
     private lateinit var messageView: TextView
 
-    override fun setMaxOrdersListener(listener: (String) -> Unit) = maxOrdersView.addTextChangedListener(listener)
+    override fun setMaxOrdersListener(listener: TextListener) = maxOrdersView.addTextChangedListener(listener)
 
     override fun createView() {
         super.createView()
@@ -115,7 +117,7 @@ class MarketConfigViewController(player: Player, origin: Location): NavigationVi
 
 interface MarketConfigPresenter: Presenter {
     fun updateMaxOrdersText(text: String)
-    fun setMaxOrdersListener(listener: (String) -> Unit)
+    fun setMaxOrdersListener(listener: TextListener)
     fun setMessage(message: String)
 }
 
@@ -129,20 +131,22 @@ class MarketConfigInteractor(
         val defaultOrders = marketConfigRepository.maxOrders()
         presenter.updateMaxOrdersText("$defaultOrders Order${if (defaultOrders != 1) "s" else ""}")
 
-        presenter.setMaxOrdersListener {
-            val maxOrders = it.toIntOrNull()
-            if (maxOrders == null) {
-                val defaultMaxOrders = marketConfigRepository.maxOrders()
-                presenter.setMessage("${ChatColor.RED}Max order values must be whole numbers!")
-                presenter.updateMaxOrdersText("$defaultMaxOrders Order${if (defaultMaxOrders != 1) "s" else ""}")
-                return@setMaxOrdersListener
+        presenter.setMaxOrdersListener(object : TextListener {
+            override fun invoke(text: String) {
+                val maxOrders = text.toIntOrNull()
+                if (maxOrders == null) {
+                    val defaultMaxOrders = marketConfigRepository.maxOrders()
+                    presenter.setMessage("${ChatColor.RED}Max order values must be whole numbers!")
+                    presenter.updateMaxOrdersText("$defaultMaxOrders Order${if (defaultMaxOrders != 1) "s" else ""}")
+                    return
+                }
+
+                val orders = max(0, maxOrders)
+                marketConfigRepository.updateMarketMaxOrders(orders)
+                presenter.updateMaxOrdersText("$orders Order${if (orders != 1) "s" else ""}")
+
+                presenter.setMessage("")
             }
-
-            val orders = max(0, maxOrders)
-            marketConfigRepository.updateMarketMaxOrders(orders)
-            presenter.updateMaxOrdersText("$orders Order${if (orders != 1) "s" else ""}")
-
-            presenter.setMessage("")
-        }
+        })
     }
 }

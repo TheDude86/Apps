@@ -2,6 +2,7 @@ package com.mcmlr.system.products.cheats.children
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
@@ -53,9 +54,12 @@ class SpawnerViewController(
                                 text = "${ChatColor.GOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
                                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
                                 size = 5,
-                            ) {
-                                callback.invoke(mob)
-                            }
+                                callback = object : Listener {
+                                    override fun invoke() {
+                                        callback.invoke(mob)
+                                    }
+                                }
+                            )
                         }
                     }
                 }

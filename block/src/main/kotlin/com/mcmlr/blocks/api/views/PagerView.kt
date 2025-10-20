@@ -1,5 +1,6 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,22 +43,24 @@ class PagerView(
                 .centerVertically(),
             background = Color.fromARGB(0, 0, 255, 0),
             clickable = true,
-            listener = {
-                rightView.updateView {  }
-                centerView.height = 0
-                leftView.height = 4
-                centerView.setPositionView(dimensions.width * 2 / 3)
+            listener = object : Listener {
+                override fun invoke() {
+                    rightView.updateView {  }
+                    centerView.height = 0
+                    leftView.height = 4
+                    centerView.setPositionView(dimensions.width * 2 / 3)
 
-                centerView.dudeDisplay?.setTeleportDuration(0)
-                leftView.dudeDisplay?.setTeleportDuration(0)
-                rightView.dudeDisplay?.setTeleportDuration(0)
+                    centerView.dudeDisplay?.setTeleportDuration(0)
+                    leftView.dudeDisplay?.setTeleportDuration(0)
+                    rightView.dudeDisplay?.setTeleportDuration(0)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(150)
-                    CoroutineScope(DudeDispatcher()).launch {
-                        index = if (index == 0) (adapter?.getCount() ?: 1) - 1 else index - 1
-                        pageListeners.forEach { it.invoke(index) }
-                        reset()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(150)
+                        CoroutineScope(DudeDispatcher()).launch {
+                            index = if (index == 0) (adapter?.getCount() ?: 1) - 1 else index - 1
+                            pageListeners.forEach { it.invoke(index) }
+                            reset()
+                        }
                     }
                 }
             },
@@ -70,22 +73,24 @@ class PagerView(
                 .centerVertically(),
             background = Color.fromARGB(0, 0, 0, 255),
             clickable = true,
-            listener = {
-                leftView.updateView {  }
-                centerView.height = 0
-                rightView.height = 4
-                centerView.setPositionView(- (dimensions.width * 2 / 3))
+            listener = object : Listener {
+                override fun invoke() {
+                    leftView.updateView {  }
+                    centerView.height = 0
+                    rightView.height = 4
+                    centerView.setPositionView(- (dimensions.width * 2 / 3))
 
-                centerView.dudeDisplay?.setTeleportDuration(0)
-                leftView.dudeDisplay?.setTeleportDuration(0)
-                rightView.dudeDisplay?.setTeleportDuration(0)
+                    centerView.dudeDisplay?.setTeleportDuration(0)
+                    leftView.dudeDisplay?.setTeleportDuration(0)
+                    rightView.dudeDisplay?.setTeleportDuration(0)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(150)
-                    CoroutineScope(DudeDispatcher()).launch {
-                        index = if (index == (adapter?.getCount() ?: 1) - 1) 0 else index + 1
-                        pageListeners.forEach { it.invoke(index) }
-                        reset()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(150)
+                        CoroutineScope(DudeDispatcher()).launch {
+                            index = if (index == (adapter?.getCount() ?: 1) - 1) 0 else index + 1
+                            pageListeners.forEach { it.invoke(index) }
+                            reset()
+                        }
                     }
                 }
             },

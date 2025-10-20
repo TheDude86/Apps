@@ -9,3 +9,26 @@ interface Presenter {
 
     fun createView()
 }
+
+@FunctionalInterface
+interface Listener {
+    fun invoke()
+}
+
+@FunctionalInterface
+interface TextListener {
+    fun invoke(text: String)
+}
+
+@FunctionalInterface
+interface ContextListener<T> {
+    fun T.invoke()
+}
+
+class EmptyListener: Listener {
+    override fun invoke() {}
+}
+
+class EmptyTextListener: TextListener {
+    override fun invoke(text: String) {}
+}

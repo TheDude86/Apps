@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.info
 
+import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock.Companion.ANNOUNCEMENT_POST_BUNDLE_KEY
 import com.mcmlr.system.products.announcements.AnnouncementModel
@@ -9,11 +11,14 @@ import com.mcmlr.system.products.announcements.AnnouncementsRepository
 import com.mcmlr.system.products.landing.FeedBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
+import com.mcmlr.system.IconSelectionBlock.Companion.MATERIAL_BUNDLE_KEY
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -29,6 +34,7 @@ import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
 
 class SetupBlock @Inject constructor(
@@ -85,7 +91,7 @@ class SetupViewController(
     private lateinit var nextCallback: () -> Unit
     private lateinit var finishCallback: () -> Unit
     private lateinit var previousCallback: () -> Unit
-    private lateinit var serverNameCallback: (String) -> Unit
+    private lateinit var serverNameCallback: TextListener
     private lateinit var tutorialCallback: () -> Unit
     private lateinit var createPostCallback: () -> Unit
     private lateinit var enabledAppCallback: (EnabledApplicationModel) -> Unit
@@ -126,7 +132,7 @@ class SetupViewController(
         createPostCallback = listener
     }
 
-    override fun setServerNameListener(listener: (String) -> Unit) {
+    override fun setServerNameListener(listener: TextListener) {
         serverNameCallback = listener
     }
 
@@ -212,9 +218,12 @@ class SetupViewController(
                     .margins(top = 150),
                 text = "${ChatColor.GOLD}Back",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-            ) {
-                previousCallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        previousCallback.invoke()
+                    }
+                }
+            )
 
             addButtonView(
                 modifier = Modifier()
@@ -224,9 +233,12 @@ class SetupViewController(
                     .margins( top = 150),
                 text = "${ChatColor.GOLD}Finish",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish",
-            ) {
-                finishCallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        finishCallback.invoke()
+                    }
+                }
+            )
         }
     }
 
@@ -271,9 +283,12 @@ class SetupViewController(
                         .margins(start = 100, top = 50),
                     text = "${ChatColor.GOLD}Next ➡",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-                ) {
-                    nextCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            nextCallback.invoke()
+                        }
+                    }
+                )
 
                 addButtonView(
                     modifier = Modifier()
@@ -283,9 +298,12 @@ class SetupViewController(
                         .margins(top = 50),
                     text = "${ChatColor.GOLD}Create Post",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Post",
-                ) {
-                    createPostCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            createPostCallback.invoke()
+                        }
+                    }
+                )
 
                 addButtonView(
                     modifier = Modifier()
@@ -295,9 +313,12 @@ class SetupViewController(
                         .margins(top = 50, end = 100),
                     text = "${ChatColor.GOLD}Back",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                ) {
-                    previousCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            previousCallback.invoke()
+                        }
+                    }
+                )
             }
         }
 
@@ -339,8 +360,10 @@ class SetupViewController(
                         modifier = Modifier()
                             .size(MATCH_PARENT, 100),
                         clickable = true,
-                        listener = {
-                            configureAppCallback.invoke(it)
+                        listener = object : Listener {
+                            override fun invoke() {
+                                configureAppCallback.invoke(it)
+                            }
                         }
                     ) {
                         val icon = addItemView(
@@ -386,9 +409,12 @@ class SetupViewController(
                         .margins(start = 100, top = 50),
                     text = "${ChatColor.GOLD}Next ➡",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-                ) {
-                    nextCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            nextCallback.invoke()
+                        }
+                    }
+                )
 
                 addButtonView(
                     modifier = Modifier()
@@ -398,9 +424,12 @@ class SetupViewController(
                         .margins(top = 50, end = 100),
                     text = "${ChatColor.GOLD}Back",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                ) {
-                    previousCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            previousCallback.invoke()
+                        }
+                    }
+                )
             }
         }
     }
@@ -440,8 +469,10 @@ class SetupViewController(
                         modifier = Modifier()
                             .size(MATCH_PARENT, 100),
                         clickable = true,
-                        listener = {
-                            enabledAppCallback.invoke(it)
+                        listener = object : Listener {
+                            override fun invoke() {
+                                enabledAppCallback.invoke(it)
+                            }
                         }
                     ) {
                         val selected = addTextView(
@@ -498,9 +529,12 @@ class SetupViewController(
                         .margins(start = 100, top = 50),
                     text = "${ChatColor.GOLD}Next ➡",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-                ) {
-                    nextCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            nextCallback.invoke()
+                        }
+                    }
+                )
 
                 addButtonView(
                     modifier = Modifier()
@@ -510,9 +544,12 @@ class SetupViewController(
                         .margins(top = 50, end = 100),
                     text = "${ChatColor.GOLD}Back",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                ) {
-                    previousCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            previousCallback.invoke()
+                        }
+                    }
+                )
             }
         }
     }
@@ -559,9 +596,12 @@ class SetupViewController(
                         .margins(start = 100, top = 250),
                     text = "${ChatColor.GOLD}Next ➡",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-                ) {
-                    nextCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            nextCallback.invoke()
+                        }
+                    }
+                )
 
                 addButtonView(
                     modifier = Modifier()
@@ -571,9 +611,12 @@ class SetupViewController(
                         .margins(top = 250, end = 100),
                     text = "${ChatColor.GOLD}Back",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                ) {
-                    previousCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            previousCallback.invoke()
+                        }
+                    }
+                )
             }
         }
 
@@ -611,9 +654,12 @@ class SetupViewController(
                     .margins(top = 100),
                 text = "${ChatColor.GOLD}Tutorial",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Tutorial",
-            ) {
-                tutorialCallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        tutorialCallback.invoke()
+                    }
+                }
+            )
 
             tutorialButton?.let {
                 setupButton = addButtonView(
@@ -624,9 +670,12 @@ class SetupViewController(
                         .margins(top = 100),
                     text = "${ChatColor.GOLD}Setup",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Setup",
-                ) {
-                    nextCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            nextCallback.invoke()
+                        }
+                    }
+                )
             }
 
             setupButton?.let {
@@ -650,11 +699,14 @@ class SetupViewController(
                         .margins(top = 100),
                     text = "${ChatColor.GOLD}Get Support Links",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Get Support Links",
-                ) {
-                    player.sendMessage("${ChatColor.DARK_BLUE}[${ChatColor.BLUE}Discord${ChatColor.DARK_BLUE}]${ChatColor.GRAY}: https://discord.gg/tXvpdc3cZv")
-                    player.sendMessage("${ChatColor.DARK_GREEN}[${ChatColor.GREEN}Modrinth${ChatColor.DARK_GREEN}]${ChatColor.GRAY}: https://modrinth.com/plugin/apps!-beta")
-                    player.sendMessage("${ChatColor.GOLD}[${ChatColor.YELLOW}Spigot${ChatColor.GOLD}]${ChatColor.GRAY}: https://www.spigotmc.org/resources/apps-beta.126555/")
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            player.sendMessage("${ChatColor.DARK_BLUE}[${ChatColor.BLUE}Discord${ChatColor.DARK_BLUE}]${ChatColor.GRAY}: https://discord.gg/tXvpdc3cZv")
+                            player.sendMessage("${ChatColor.DARK_GREEN}[${ChatColor.GREEN}Modrinth${ChatColor.DARK_GREEN}]${ChatColor.GRAY}: https://modrinth.com/plugin/apps!-beta")
+                            player.sendMessage("${ChatColor.GOLD}[${ChatColor.YELLOW}Spigot${ChatColor.GOLD}]${ChatColor.GRAY}: https://www.spigotmc.org/resources/apps-beta.126555/")
+                        }
+                    }
+                )
             }
         }
     }
@@ -669,7 +721,7 @@ interface SetupPresenter: Presenter {
     fun setNextPageListener(listener: () -> Unit)
     fun setFinishPageListener(listener: () -> Unit)
     fun setPreviousPageListener(listener: () -> Unit)
-    fun setServerNameListener(listener: (String) -> Unit)
+    fun setServerNameListener(listener: TextListener)
     fun setTutorialListener(listener: () -> Unit)
     fun setCreatePostListener(listener: () -> Unit)
     fun setEnabledAppsListener(listener: (EnabledApplicationModel) -> Unit)
@@ -747,10 +799,12 @@ class SetupInteractor(
             routeTo(tutorialBlock)
         }
 
-        presenter.setServerNameListener {
-            serverTitle = it.colorize()
-            presenter.setServerName(it.colorize())
-        }
+        presenter.setServerNameListener(object : TextListener {
+            override fun invoke(text: String) {
+                serverTitle = text.colorize()
+                presenter.setServerName(text.colorize())
+            }
+        })
 
         presenter.setEnabledAppsListener {
             if (!it.alwaysEnabled) it.enabled = !it.enabled
@@ -764,11 +818,13 @@ class SetupInteractor(
         presenter.setCreatePostListener {
             announcementEditorBlock.setSavePost(false)
             announcementEditorBlock.setSelectedAnnouncement(announcementPost)
-            routeTo(announcementEditorBlock) { bundle ->
-                announcementPost = bundle.getData<AnnouncementModel>(ANNOUNCEMENT_POST_BUNDLE_KEY)
-                val post = announcementPost ?: return@routeTo
-                feedBlock.setCustomFeed(listOf(post))
-            }
+            routeTo(announcementEditorBlock, object : RouteToCallback {
+                override fun invoke(bundle: Bundle) {
+                    announcementPost = bundle.getData<AnnouncementModel>(ANNOUNCEMENT_POST_BUNDLE_KEY)
+                    val post = announcementPost ?: return
+                    feedBlock.setCustomFeed(listOf(post))
+                }
+            })
         }
 
         presenter.getConfigurableApps {

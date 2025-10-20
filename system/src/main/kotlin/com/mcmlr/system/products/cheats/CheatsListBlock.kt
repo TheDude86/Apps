@@ -2,6 +2,7 @@ package com.mcmlr.system.products.cheats
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
@@ -48,9 +49,12 @@ class CheatsListViewController(
                         .margins(top = 50, bottom = 50),
                     text = it.title,
                     highlightedText = "${ChatColor.BOLD}${it.title}",
-                ) {
-                    callback.invoke(it)
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            callback.invoke(it)
+                        }
+                    }
+                )
             }
         }
     }

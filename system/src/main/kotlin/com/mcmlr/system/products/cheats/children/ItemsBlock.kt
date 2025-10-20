@@ -2,7 +2,9 @@ package com.mcmlr.system.products.cheats.children
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -41,7 +43,7 @@ class ItemsViewController(
     private lateinit var searchButton: TextInputView
     private lateinit var feedView: ListFeedView
 
-    override fun addSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
     override fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit) {
         feedView.updateView {
@@ -63,9 +65,12 @@ class ItemsViewController(
                                 .size(73, 73),
                             item = material,
                             visible = true,
-                        ) {
-                            itemCallback.invoke(material)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    itemCallback.invoke(material)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -131,7 +136,7 @@ class ItemsViewController(
 }
 
 interface ItemsPresenter: Presenter {
-    fun addSearchListener(listener: (String) -> Unit)
+    fun addSearchListener(listener: TextListener)
 
     fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit)
 
@@ -159,14 +164,16 @@ class ItemsInteractor(
             }
         }
 
-        presenter.addSearchListener { searchTerm ->
-            materialsRepository.searchMaterialsStream(searchTerm).collectFirst {
-                collectOn(DudeDispatcher()) { materials ->
-                    presenter.setFeed(materials) {
+        presenter.addSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                materialsRepository.searchMaterialsStream(text).collectFirst {
+                    collectOn(DudeDispatcher()) { materials ->
+                        presenter.setFeed(materials) {
 
+                        }
                     }
                 }
             }
-        }
+        })
     }
 }

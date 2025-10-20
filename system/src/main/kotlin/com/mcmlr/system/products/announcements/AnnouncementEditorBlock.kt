@@ -1,9 +1,15 @@
 package com.mcmlr.system.products.announcements
 
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.EmptyListener
+import com.mcmlr.blocks.api.block.EmptyTextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
@@ -64,13 +70,13 @@ class AnnouncementEditorViewController(
     private var ctaActionView: TextInputView? = null
     private var ctaActionTypeView: ButtonView? = null
 
-    private var titleViewCallback: (String) -> Unit = {}
-    private var ctaTextViewCallback: (String) -> Unit = {}
-    private var ctaActionViewCallback: (String) -> Unit = {}
-    private var ctaActionTypeCallback: () -> Unit = {}
-    private var messageViewCallback: () -> Unit = {}
-    private var enabledCTACallback: () -> Unit = {}
-    private var deletePostCallback: () -> Unit = {}
+    private var titleViewCallback: TextListener = EmptyTextListener()
+    private var ctaTextViewCallback: TextListener = EmptyTextListener()
+    private var ctaActionViewCallback: TextListener = EmptyTextListener()
+    private var ctaActionTypeCallback: Listener = EmptyListener()
+    private var messageViewCallback: Listener = EmptyListener()
+    private var enabledCTACallback: Listener = EmptyListener()
+    private var deletePostCallback: Listener = EmptyListener()
 
     override fun setErrorMessage(message: String) {
         errorMessageView.setTextView(message)
@@ -92,35 +98,35 @@ class AnnouncementEditorViewController(
         ctaTextView?.setTextView(text)
     }
 
-    override fun setCreatePostListener(listener: () -> Unit) {
+    override fun setCreatePostListener(listener: Listener) {
         createPostView.addListener(listener)
     }
 
-    override fun setDeletePostListener(listener: () -> Unit) {
+    override fun setDeletePostListener(listener: Listener) {
         deletePostCallback = listener
     }
 
-    override fun setTitleListener(listener: (String) -> Unit) {
+    override fun setTitleListener(listener: TextListener) {
         titleViewCallback = listener
     }
 
-    override fun setMessageListener(listener: () -> Unit) {
+    override fun setMessageListener(listener: Listener) {
         messageViewCallback = listener
     }
 
-    override fun setCTATextListener(listener: (String) -> Unit) {
+    override fun setCTATextListener(listener: TextListener) {
         ctaTextViewCallback = listener
     }
 
-    override fun setCTAActionListener(listener: (String) -> Unit) {
+    override fun setCTAActionListener(listener: TextListener) {
         ctaActionViewCallback = listener
     }
 
-    override fun setCTAActionTypeListener(listener: () -> Unit) {
+    override fun setCTAActionTypeListener(listener: Listener) {
         ctaActionTypeCallback = listener
     }
 
-    override fun setEnableCTAListener(listener: () -> Unit) {
+    override fun setEnableCTAListener(listener: Listener) {
         enabledCTACallback = listener
     }
 
@@ -198,9 +204,12 @@ class AnnouncementEditorViewController(
                         .alignTopToTopOf(this),
                     text = "${ChatColor.RED}Delete Post",
                     highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete Post",
-                ) {
-                    deletePostCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            deletePostCallback.invoke()
+                        }
+                    }
+                )
 
                 errorMessageView = addTextView(
                     modifier = Modifier()
@@ -269,9 +278,11 @@ class AnnouncementEditorViewController(
                 highlightedText = "${ChatColor.GOLD}${titleText.bolden()}",
             )
 
-            titleView.addTextChangedListener {
-                titleViewCallback.invoke(it)
-            }
+            titleView.addTextChangedListener(object : TextListener {
+                override fun invoke(text: String) {
+                    titleViewCallback.invoke(text)
+                }
+            })
 
             val postMessageTitle = addTextView(
                 modifier = Modifier()
@@ -305,9 +316,12 @@ class AnnouncementEditorViewController(
                 maxLength = 1000,
                 text = messageText,
                 highlightedText = messageText.bolden(),
-            ) {
-                messageViewCallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        messageViewCallback.invoke()
+                    }
+                }
+            )
 
             val enableCTATitle = addTextView(
                 modifier = Modifier()
@@ -339,9 +353,12 @@ class AnnouncementEditorViewController(
                 size = 6,
                 text = "${ChatColor.GOLD}${if (ctaEnabled) "On" else "Off"}",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${if (ctaEnabled) "On" else "Off"}",
-            ) {
-                enabledCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        enabledCTACallback.invoke()
+                    }
+                }
+            )
 
             if (ctaEnabled) {
                 val ctaTextTitle = addTextView(
@@ -377,9 +394,11 @@ class AnnouncementEditorViewController(
                     highlightedText = "${ChatColor.GOLD}${ctaText.bolden()}",
                 )
 
-                ctaTextView?.addTextChangedListener {
-                    ctaTextViewCallback.invoke(it)
-                }
+                ctaTextView?.addTextChangedListener(object : TextListener {
+                    override fun invoke(text: String) {
+                        ctaTextViewCallback.invoke(text)
+                    }
+                })
 
                 val ctaActionTitle = addTextView(
                     modifier = Modifier()
@@ -447,9 +466,12 @@ class AnnouncementEditorViewController(
                     size = 6,
                     text = "${ChatColor.GOLD}$ctaActionTypeText",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}$ctaActionTypeText",
-                ) {
-                    ctaActionTypeCallback.invoke()
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            ctaActionTypeCallback.invoke()
+                        }
+                    }
+                )
             }
         }
     }
@@ -465,14 +487,14 @@ interface AnnouncementEditorPresenter: Presenter {
     fun setErrorMessage(message: String)
     fun setIsUpdating(isUpdating: Boolean)
 
-    fun setTitleListener(listener: (String) -> Unit)
-    fun setCTATextListener(listener: (String) -> Unit)
-    fun setCTAActionListener(listener: (String) -> Unit)
-    fun setMessageListener(listener: () -> Unit)
-    fun setCTAActionTypeListener(listener: () -> Unit)
-    fun setEnableCTAListener(listener: () -> Unit)
-    fun setCreatePostListener(listener: () -> Unit)
-    fun setDeletePostListener(listener: () -> Unit)
+    fun setTitleListener(listener: TextListener)
+    fun setCTATextListener(listener: TextListener)
+    fun setCTAActionListener(listener: TextListener)
+    fun setMessageListener(listener: Listener)
+    fun setCTAActionTypeListener(listener: Listener)
+    fun setEnableCTAListener(listener: Listener)
+    fun setCreatePostListener(listener: Listener)
+    fun setDeletePostListener(listener: Listener)
 }
 
 class AnnouncementEditorInteractor(
@@ -495,77 +517,95 @@ class AnnouncementEditorInteractor(
         presenter.setIsUpdating(isUpdating)
         if (builder.authorId == null) builder.authorId = player.uniqueId.toString()
 
-        presenter.setCreatePostListener {
-            val errorMessage = when {
-                builder.title == null -> "You need to set a title first!"
-                builder.message == null -> "You need to set a message first!"
-                ctaEnabled && builder.ctaText == null -> "You need to set the CTA text first or disable the CTA!"
-                ctaEnabled && builder.cta == null -> "You need to set the CTA action first or disable the CTA!"
-                else -> null
-            }
-
-            if (errorMessage == null) {
-                val announcement = builder.build() ?: return@setCreatePostListener
-
-                if (savePost) {
-                    if (isUpdating) {
-                        announcementsRepository.updateAnnouncement(announcement)
-                    } else {
-                        announcementsRepository.addAnnouncement(announcement)
-                    }
-                    addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_BUNDLE_KEY, if (isUpdating) AnnouncementEditorResult.UPDATE else AnnouncementEditorResult.CREATE)
-                } else {
-                    addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_POST_BUNDLE_KEY, announcement)
+        presenter.setCreatePostListener(object : Listener {
+            override fun invoke() {
+                val errorMessage = when {
+                    builder.title == null -> "You need to set a title first!"
+                    builder.message == null -> "You need to set a message first!"
+                    ctaEnabled && builder.ctaText == null -> "You need to set the CTA text first or disable the CTA!"
+                    ctaEnabled && builder.cta == null -> "You need to set the CTA action first or disable the CTA!"
+                    else -> null
                 }
 
-                routeBack()
-            } else {
-                presenter.setErrorMessage("${ChatColor.RED}$errorMessage")
+                if (errorMessage == null) {
+                    val announcement = builder.build() ?: return
+
+                    if (savePost) {
+                        if (isUpdating) {
+                            announcementsRepository.updateAnnouncement(announcement)
+                        } else {
+                            announcementsRepository.addAnnouncement(announcement)
+                        }
+                        addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_BUNDLE_KEY, if (isUpdating) AnnouncementEditorResult.UPDATE else AnnouncementEditorResult.CREATE)
+                    } else {
+                        addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_POST_BUNDLE_KEY, announcement)
+                    }
+
+                    routeBack()
+                } else {
+                    presenter.setErrorMessage("${ChatColor.RED}$errorMessage")
+                }
             }
-        }
+        })
 
-        presenter.setDeletePostListener {
-            val announcement = builder.build() ?: return@setDeletePostListener
-            announcementsRepository.removeAnnouncement(announcement)
-            addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_BUNDLE_KEY, AnnouncementEditorResult.DELETE)
-            routeBack()
-        }
+        presenter.setDeletePostListener(object : Listener {
+            override fun invoke() {
+                val announcement = builder.build() ?: return
+                announcementsRepository.removeAnnouncement(announcement)
+                addBundleData(AnnouncementEditorBlock.ANNOUNCEMENT_BUNDLE_KEY, AnnouncementEditorResult.DELETE)
+                routeBack()
+            }
+        })
 
-        presenter.setTitleListener {
-            val title = it.placeholders(player).colorize()
-            presenter.setTitleText(title)
-            builder.title = title
-        }
+        presenter.setTitleListener(object : TextListener {
+            override fun invoke(text: String) {
+                val title = text.placeholders(player).colorize()
+                presenter.setTitleText(title)
+                builder.title = title
+            }
+        })
 
-        presenter.setMessageListener {
-            textEditorBlock.setTextModel(builder.message)
-            routeTo(textEditorBlock) { bundle ->
-                val model = bundle.getData<TextModel>(TEXT_BUNDLE_KEY) ?: return@routeTo
-                builder.message = model
+        presenter.setMessageListener(object : Listener {
+            override fun invoke() {
+                textEditorBlock.setTextModel(builder.message)
+                routeTo(textEditorBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val model = bundle.getData<TextModel>(TEXT_BUNDLE_KEY) ?: return
+                        builder.message = model
+                        presenter.setEditorFeed(builder, ctaEnabled)
+                    }
+                })
+            }
+        })
+
+        presenter.setCTATextListener(object : TextListener {
+            override fun invoke(text: String) {
+                val message = text.placeholders(player).colorize()
+                builder.ctaText = message
+                presenter.setCTAText(message)
+            }
+        })
+
+        presenter.setCTAActionListener(object : TextListener {
+            override fun invoke(text: String) {
+                builder.cta = text
+            }
+        })
+
+        presenter.setCTAActionTypeListener(object : Listener {
+            override fun invoke() {
+                val newType = AnnouncementCTAType.entries[((builder.ctaType.ordinal) + 1) % AnnouncementCTAType.entries.size]
+                builder.ctaType = newType
+                presenter.setCTAActionType("${ChatColor.GOLD}${newType.toString().titlecase()}")
+            }
+        })
+
+        presenter.setEnableCTAListener(object : Listener {
+            override fun invoke() {
+                ctaEnabled = !ctaEnabled
                 presenter.setEditorFeed(builder, ctaEnabled)
             }
-        }
-
-        presenter.setCTATextListener {
-            val message = it.placeholders(player).colorize()
-            builder.ctaText = message
-            presenter.setCTAText(message)
-        }
-
-        presenter.setCTAActionListener {
-            builder.cta = it
-        }
-
-        presenter.setCTAActionTypeListener {
-            val newType = AnnouncementCTAType.entries[((builder.ctaType.ordinal) + 1) % AnnouncementCTAType.entries.size]
-            builder.ctaType = newType
-            presenter.setCTAActionType("${ChatColor.GOLD}${newType.toString().titlecase()}")
-        }
-
-        presenter.setEnableCTAListener {
-            ctaEnabled = !ctaEnabled
-            presenter.setEditorFeed(builder, ctaEnabled)
-        }
+        })
     }
 }
 

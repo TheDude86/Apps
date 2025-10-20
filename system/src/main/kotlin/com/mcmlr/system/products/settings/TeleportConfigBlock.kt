@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -37,9 +38,9 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
     private lateinit var cooldownView: TextInputView
     private lateinit var messageView: TextView
 
-    override fun setDelayListener(listener: (String) -> Unit) = delayView.addTextChangedListener(listener)
+    override fun setDelayListener(listener: TextListener) = delayView.addTextChangedListener(listener)
 
-    override fun setCooldownListener(listener: (String) -> Unit) = cooldownView.addTextChangedListener(listener)
+    override fun setCooldownListener(listener: TextListener) = cooldownView.addTextChangedListener(listener)
 
     override fun createView() {
         super.createView()
@@ -157,8 +158,8 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
 interface TeleportConfigPresenter: Presenter {
     fun updateDelayText(text: String)
     fun updateCooldownText(text: String)
-    fun setDelayListener(listener: (String) -> Unit)
-    fun setCooldownListener(listener: (String) -> Unit)
+    fun setDelayListener(listener: TextListener)
+    fun setCooldownListener(listener: TextListener)
     fun setMessage(message: String)
 }
 
@@ -175,36 +176,40 @@ class TeleportConfigInteractor(
         presenter.updateDelayText("$teleportDelay Second${if (teleportDelay != 1) "s" else ""}")
         presenter.updateCooldownText("$cooldown Second${if (cooldown != 1) "s" else ""}")
 
-        presenter.setDelayListener {
-            val delay = it.toIntOrNull()
-            if (delay == null) {
-                val defaultDelay = teleportConfigRepository.delay()
-                presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
-                presenter.updateDelayText("$defaultDelay Second${if (defaultDelay != 1) "s" else ""}")
-                return@setDelayListener
+        presenter.setDelayListener(object : TextListener {
+            override fun invoke(text: String) {
+                val delay = text.toIntOrNull()
+                if (delay == null) {
+                    val defaultDelay = teleportConfigRepository.delay()
+                    presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
+                    presenter.updateDelayText("$defaultDelay Second${if (defaultDelay != 1) "s" else ""}")
+                    return
+                }
+
+                val delaySeconds = max(0, delay)
+                teleportConfigRepository.updateTeleportDelay(delaySeconds)
+                presenter.updateDelayText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
+
+                presenter.setMessage("")
             }
+        })
 
-            val delaySeconds = max(0, delay)
-            teleportConfigRepository.updateTeleportDelay(delaySeconds)
-            presenter.updateDelayText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
+        presenter.setCooldownListener(object : TextListener {
+            override fun invoke(text: String) {
+                val delay = text.toIntOrNull()
+                if (delay == null) {
+                    val defaultCooldown = teleportConfigRepository.cooldown()
+                    presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
+                    presenter.updateCooldownText("$defaultCooldown Second${if (defaultCooldown != 1) "s" else ""}")
+                    return
+                }
 
-            presenter.setMessage("")
-        }
+                val delaySeconds = max(0, delay)
+                teleportConfigRepository.updateTeleportCooldown(delaySeconds)
+                presenter.updateCooldownText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
 
-        presenter.setCooldownListener {
-            val delay = it.toIntOrNull()
-            if (delay == null) {
-                val defaultCooldown = teleportConfigRepository.cooldown()
-                presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
-                presenter.updateCooldownText("$defaultCooldown Second${if (defaultCooldown != 1) "s" else ""}")
-                return@setCooldownListener
+                presenter.setMessage("")
             }
-
-            val delaySeconds = max(0, delay)
-            teleportConfigRepository.updateTeleportCooldown(delaySeconds)
-            presenter.updateCooldownText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
-
-            presenter.setMessage("")
-        }
+        })
     }
 }

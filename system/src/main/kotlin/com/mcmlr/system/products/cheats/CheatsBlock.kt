@@ -4,6 +4,7 @@ import com.mcmlr.system.products.cheats.children.ItemsBlock
 import com.mcmlr.system.products.cheats.children.SpawnerBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -101,9 +102,12 @@ class CheatsViewController(
                     .margins(top = 50),
                 text = "${ChatColor.GOLD}${selectedCheat.cta}",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${selectedCheat.cta}",
-            ) {
-                selectedPluginListener.invoke(selectedCheat)
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        selectedPluginListener.invoke(selectedCheat)
+                    }
+                }
+            )
         }
     }
 

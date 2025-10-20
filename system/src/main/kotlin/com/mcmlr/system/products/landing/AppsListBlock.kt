@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListView
@@ -65,9 +66,12 @@ class AppsListViewController(
                         text = "${ChatColor.GOLD}${it.name()}",
                         highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
                         size = 8,
-                    ) {
-                        callback.invoke(it)
-                    }
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(it)
+                            }
+                        }
+                    )
                 }
             }
         }

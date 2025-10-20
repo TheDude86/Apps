@@ -2,8 +2,10 @@ package com.mcmlr.system.products.recipe
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -42,7 +44,7 @@ class RecipesViewController(
     private lateinit var searchButton: TextInputView
     private lateinit var feedView: ListFeedView
 
-    override fun addSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
     override fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit) {
         feedView.updateView {
@@ -61,9 +63,12 @@ class RecipesViewController(
                                 .position(-500 + (200 * j), 0)
                                 .size(73, 73),
                             item = recipe.result,
-                        ) {
-                            itemCallback.invoke(recipe)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    itemCallback.invoke(recipe)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -226,7 +231,7 @@ class RecipesViewController(
 }
 
 interface RecipesPresenter: Presenter {
-    fun addSearchListener(listener: (String) -> Unit)
+    fun addSearchListener(listener: TextListener)
 
     fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit)
 
@@ -260,9 +265,11 @@ class RecipesInteractor(
             if (it is ShapedRecipe || it is ShapelessRecipe) recipes.add(it)
         }
 
-        presenter.addSearchListener { searchTerm ->
-            presenter.setFeed(recipes.filter { it.result.type.name.fromMCItem().lowercase().contains(searchTerm.lowercase()) }, feedCallback)
-        }
+        presenter.addSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                presenter.setFeed(recipes.filter { it.result.type.name.fromMCItem().lowercase().contains(text.lowercase()) }, feedCallback)
+            }
+        })
 
         presenter.setFeed(recipes, feedCallback)
     }

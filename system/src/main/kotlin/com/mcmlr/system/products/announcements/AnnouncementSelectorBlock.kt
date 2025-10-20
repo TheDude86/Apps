@@ -3,6 +3,7 @@ package com.mcmlr.system.products.announcements
 import com.mcmlr.system.products.announcements.AnnouncementSelectorBlock.Companion.ANNOUNCEMENT_SELECT_BUNDLE_KEY
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -115,9 +116,11 @@ class AnnouncementSelectorViewController(
                     }
                 }
 
-                postView.addListener {
-                    selectedPostCallback.invoke(it.id)
-                }
+                postView.addListener(object : Listener {
+                    override fun invoke() {
+                        selectedPostCallback.invoke(it.id)
+                    }
+                })
             }
         }
     }

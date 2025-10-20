@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -40,7 +41,7 @@ class SelectFavoriteViewController(
     private lateinit var selectedContainer: ViewContainer
     private var clearButton: ButtonView? = null
 
-    override fun setRemoveListener(listener: () -> Unit) { clearButton?.addListener(listener) }
+    override fun setRemoveListener(listener: Listener) { clearButton?.addListener(listener) }
 
     override fun setSelectedApp(app: BaseEnvironment<BaseApp>?) {
         selectedContainer.updateView {
@@ -92,9 +93,12 @@ class SelectFavoriteViewController(
                             .margins(start = 50),
                         text = "${ChatColor.GOLD}${it.name()}",
                         highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${it.name()}",
-                    ) {
-                        callback.invoke(it)
-                    }
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(it)
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -146,7 +150,7 @@ interface SelectFavoritePresenter: Presenter {
 
     fun setSelectedApp(app: BaseEnvironment<BaseApp>?)
 
-    fun setRemoveListener(listener: () -> Unit)
+    fun setRemoveListener(listener: Listener)
 }
 
 class SelectFavoriteInteractor(
@@ -165,9 +169,11 @@ class SelectFavoriteInteractor(
             routeBack()
         }
 
-        presenter.setRemoveListener {
-            preferencesRepository.removeFavorite()
-            presenter.setSelectedApp(preferencesRepository.getSelectedFavorite(player))
-        }
+        presenter.setRemoveListener(object : Listener {
+            override fun invoke() {
+                preferencesRepository.removeFavorite()
+                presenter.setSelectedApp(preferencesRepository.getSelectedFavorite(player))
+            }
+        })
     }
 }

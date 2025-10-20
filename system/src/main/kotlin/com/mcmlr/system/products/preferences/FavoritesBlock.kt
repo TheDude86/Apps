@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.Alignment
@@ -96,8 +97,10 @@ class FavoritesViewController(
                 .margins(top = 60),
             height = -2,
             clickable = true,
-            listener = {
-                slotListener.invoke(0)
+            listener = object : Listener {
+                override fun invoke() {
+                    slotListener.invoke(0)
+                }
             }
         )
 
@@ -108,8 +111,10 @@ class FavoritesViewController(
                 .alignStartToEndOf(favoriteAppsSlotOne)
                 .margins(start = 60),
             clickable = true,
-            listener = {
-                slotListener.invoke(1)
+            listener = object : Listener {
+                override fun invoke() {
+                    slotListener.invoke(1)
+                }
             }
         )
 
@@ -120,8 +125,10 @@ class FavoritesViewController(
                 .alignStartToEndOf(favoriteAppsSlotTwo)
                 .margins(start = 60),
             clickable = true,
-            listener = {
-                slotListener.invoke(2)
+            listener = object : Listener {
+                override fun invoke() {
+                    slotListener.invoke(2)
+                }
             }
         )
 
@@ -132,8 +139,10 @@ class FavoritesViewController(
                 .alignStartToEndOf(favoriteAppsSlotThree)
                 .margins(start = 60),
             clickable = true,
-            listener = {
-                slotListener.invoke(3)
+            listener = object : Listener {
+                override fun invoke() {
+                    slotListener.invoke(3)
+                }
             }
         )
 
@@ -144,8 +153,10 @@ class FavoritesViewController(
                 .alignStartToEndOf(favoriteAppsSlotFour)
                 .margins(start = 60),
             clickable = true,
-            listener = {
-                slotListener.invoke(4)
+            listener = object : Listener {
+                override fun invoke() {
+                    slotListener.invoke(4)
+                }
             }
         )
 

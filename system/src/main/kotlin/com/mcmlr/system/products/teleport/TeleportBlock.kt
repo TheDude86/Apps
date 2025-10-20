@@ -2,6 +2,7 @@ package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -79,9 +80,9 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
         )
     }
 
-    override fun setPlayersButtonCallback(callback: () -> Unit) = players.addListener(callback)
+    override fun setPlayersButtonCallback(callback: Listener) = players.addListener(callback)
 
-    override fun setRequestsButtonCallback(callback: () -> Unit) = requests.addListener(callback)
+    override fun setRequestsButtonCallback(callback: Listener) = requests.addListener(callback)
 
     override fun setRequestList(requests: List<TeleportRequestModel>, callback: (TeleportRequestModel) -> Unit) {
         this.players.text = "${ChatColor.BLUE}Players"
@@ -139,10 +140,13 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
                         text = rowModel.sender.displayName,
-                        highlightedText = "${ChatColor.BOLD}${rowModel.sender.displayName}"
-                    ) {
-                        callback.invoke(rowModel)
-                    }
+                        highlightedText = "${ChatColor.BOLD}${rowModel.sender.displayName}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(rowModel)
+                            }
+                        }
+                    )
 
                     addItemView(
                         modifier = Modifier()
@@ -216,10 +220,13 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
                         text = rowModel.first.displayName,
-                        highlightedText = "${ChatColor.BOLD}${rowModel.first.displayName}"
-                    ) {
-                        callback.invoke(rowModel.first)
-                    }
+                        highlightedText = "${ChatColor.BOLD}${rowModel.first.displayName}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(rowModel.first)
+                            }
+                        }
+                    )
 
                     addItemView(
                         modifier = Modifier()
@@ -240,9 +247,9 @@ interface TeleportPresenter: Presenter {
 
     fun setRequestList(requests: List<TeleportRequestModel>, callback: (TeleportRequestModel) -> Unit)
 
-    fun setPlayersButtonCallback(callback: () -> Unit)
+    fun setPlayersButtonCallback(callback: Listener)
 
-    fun setRequestsButtonCallback(callback: () -> Unit)
+    fun setRequestsButtonCallback(callback: Listener)
 }
 
 class TeleportInteractor(
@@ -259,13 +266,17 @@ class TeleportInteractor(
 
         gotoPlayerList()
 
-        presenter.setPlayersButtonCallback {
-            gotoPlayerList()
-        }
+        presenter.setPlayersButtonCallback(object : Listener {
+            override fun invoke() {
+                gotoPlayerList()
+            }
+        })
 
-        presenter.setRequestsButtonCallback {
-            gotoRequestList()
-        }
+        presenter.setRequestsButtonCallback(object : Listener {
+            override fun invoke() {
+                gotoRequestList()
+            }
+        })
     }
 
     private fun gotoRequestList() {

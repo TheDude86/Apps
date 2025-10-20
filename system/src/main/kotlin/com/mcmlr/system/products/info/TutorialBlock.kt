@@ -121,9 +121,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Finish ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish ➡",
-            ) {
-                routeBack()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        routeBack()
+                    }
+                }
+            )
         }
     }
 
@@ -169,9 +172,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Next ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-            ) {
-                nextCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        nextCTACallback.invoke()
+                    }
+                }
+            )
         }
     }
 
@@ -255,9 +261,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Next ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-            ) {
-                nextCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        nextCTACallback.invoke()
+                    }
+                }
+            )
         }
     }
 
@@ -309,9 +318,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Next ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-            ) {
-                nextCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        nextCTACallback.invoke()
+                    }
+                }
+            )
         }
     }
 
@@ -347,10 +359,13 @@ class TutorialViewController(
                     .alignTopToBottomOf(paragraphOne)
                     .margins(start = 500, top = 100),
                 item = ItemStack(Material.DIAMOND),
-            ) {
-                clicks++
-                demoItemText?.setTextView("${ChatColor.GREEN}Item button clicked $clicks time${if (clicks != 1) "s" else ""}")
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        clicks++
+                        demoItemText?.setTextView("${ChatColor.GREEN}Item button clicked $clicks time${if (clicks != 1) "s" else ""}")
+                    }
+                }
+            )
 
             demoItemText = addTextView(
                 modifier = Modifier()
@@ -382,9 +397,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Next ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-            ) {
-                nextCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        nextCTACallback.invoke()
+                    }
+                }
+            )
         }
     }
 
@@ -442,9 +460,12 @@ class TutorialViewController(
                     .alignBottomToBottomOf(this),
                 text = "${ChatColor.GOLD}Next ➡",
                 highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
-            ) {
-                nextCTACallback.invoke()
-            }
+                callback = object : Listener {
+                    override fun invoke() {
+                        nextCTACallback.invoke()
+                    }
+                }
+            )
         }
     }
 

@@ -2,6 +2,7 @@ package com.mcmlr.system.products.kits
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -124,11 +125,11 @@ class KitsViewController(
         kitsPager.attachAdapter(adapter)
     }
 
-    override fun setGetKitListener(listener: () -> Unit) = kitPurchase.addListener(listener)
+    override fun setGetKitListener(listener: Listener) = kitPurchase.addListener(listener)
 
-    override fun setCreateKitListener(listener: () -> Unit) { kitCreate?.addListener(listener) }
+    override fun setCreateKitListener(listener: Listener) { kitCreate?.addListener(listener) }
 
-    override fun setEditKitListener(listener: () -> Unit) { kitEdit?.addListener(listener) }
+    override fun setEditKitListener(listener: Listener) { kitEdit?.addListener(listener) }
 
     override fun createView() {
         super.createView()
@@ -268,11 +269,11 @@ class KitsViewController(
 }
 
 interface KitsPresenter: Presenter {
-    fun setGetKitListener(listener: () -> Unit)
+    fun setGetKitListener(listener: Listener)
 
-    fun setCreateKitListener(listener: () -> Unit)
+    fun setCreateKitListener(listener: Listener)
 
-    fun setEditKitListener(listener: () -> Unit)
+    fun setEditKitListener(listener: Listener)
 
     fun setKitAdapter(adapter: PagerViewAdapter)
 
@@ -323,10 +324,12 @@ class KitsInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setCreateKitListener {
-            createKitBlock.setSelectedKit(null)
-            routeTo(createKitBlock)
-        }
+        presenter.setCreateKitListener(object : Listener {
+            override fun invoke() {
+                createKitBlock.setSelectedKit(null)
+                routeTo(createKitBlock)
+            }
+        })
 
         selectedKit = kitRepository.getKits().firstOrNull()
         val selectedKit = selectedKit ?: return
@@ -334,32 +337,36 @@ class KitsInteractor(
         presenter.setKitAdapter(KitsPagerAdapter(kitRepository))
         updateSelectedKit()
 
-        presenter.setGetKitListener {
-            kitRepository.getCooldown(player, selectedKit)
-                .collectFirst(DudeDispatcher()) {
-                    val cooldown = it ?: 0
-                    val balance = vaultRepository.economy?.getBalance(player) ?: 0.0
+        presenter.setGetKitListener(object : Listener {
+            override fun invoke() {
+                kitRepository.getCooldown(player, selectedKit)
+                    .collectFirst(DudeDispatcher()) {
+                        val cooldown = it ?: 0
+                        val balance = vaultRepository.economy?.getBalance(player) ?: 0.0
 
-                    if (cooldown > 0) {
-                        presenter.setErrorMessage("${ChatColor.RED}You need to wait for the cooldown to finish before collecting this kit again!")
-                    } else if (balance < selectedKit.kitPrice / 100.0) {
-                        presenter.setErrorMessage("${ChatColor.RED}You don't have enough money to buy this kit!")
-                    } else {
-                        kitRepository.givePlayerKit(player, selectedKit)
-                        updateSelectedKit()
+                        if (cooldown > 0) {
+                            presenter.setErrorMessage("${ChatColor.RED}You need to wait for the cooldown to finish before collecting this kit again!")
+                        } else if (balance < selectedKit.kitPrice / 100.0) {
+                            presenter.setErrorMessage("${ChatColor.RED}You don't have enough money to buy this kit!")
+                        } else {
+                            kitRepository.givePlayerKit(player, selectedKit)
+                            updateSelectedKit()
+                        }
                     }
-                }
-        }
+            }
+        })
 
         presenter.setPagerListener {
             this.selectedKit = kitRepository.getKits()[it]
             updateSelectedKit()
         }
 
-        presenter.setEditKitListener {
-            createKitBlock.setSelectedKit(selectedKit)
-            routeTo(createKitBlock)
-        }
+        presenter.setEditKitListener(object : Listener {
+            override fun invoke() {
+                createKitBlock.setSelectedKit(selectedKit)
+                routeTo(createKitBlock)
+            }
+        })
     }
 
     private fun updateSelectedKit() {

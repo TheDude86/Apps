@@ -2,6 +2,7 @@ package com.mcmlr.system.products.warps
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -146,10 +147,13 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                 homeView = addButtonView(
                     modifier = modifier,
                     text = home.name,
-                    highlightedText = "${ChatColor.BOLD}${home.name}"
-                ) {
-                    listener.teleport(home)
-                }
+                    highlightedText = "${ChatColor.BOLD}${home.name}",
+                    callback = object : Listener {
+                        override fun invoke() {
+                            listener.teleport(home)
+                        }
+                    }
+                )
 
                 addItemView(
                     modifier = Modifier()
@@ -170,20 +174,23 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                             .alignBottomToBottomOf(homeView!!)
                             .margins(start = 64),
                         text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
-                        highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎"
-                    ) {
-                        listener.edit(home, deleteMode)
-                    }
+                        highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                listener.edit(home, deleteMode)
+                            }
+                        }
+                    )
                 }
             }
         }
     }
 
-    override fun addNewWarpListener(listener: () -> Unit) {
+    override fun addNewWarpListener(listener: Listener) {
         newWarpButton?.addListener(listener)
     }
 
-    override fun addRemoveWarpListener(listener: () -> Unit) {
+    override fun addRemoveWarpListener(listener: Listener) {
         removeWarpButton?.addListener(listener)
     }
 
@@ -195,8 +202,8 @@ class WarpsViewController(private val player: Player, origin: Location, private 
 
 interface WarpsPresenter: Presenter {
     fun setWarps(warps: List<WarpModel>, deleteMode: Boolean, listener: WarpActionListener)
-    fun addNewWarpListener(listener: () -> Unit)
-    fun addRemoveWarpListener(listener: () -> Unit)
+    fun addNewWarpListener(listener: Listener)
+    fun addRemoveWarpListener(listener: Listener)
     fun setMessage(message: String)
 }
 
@@ -218,15 +225,19 @@ class WarpsInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.addNewWarpListener {
-            routeTo(addWarpsBlock)
-        }
+        presenter.addNewWarpListener(object : Listener {
+            override fun invoke() {
+                routeTo(addWarpsBlock)
+            }
+        })
 
-        presenter.addRemoveWarpListener {
-            val model = warpsRepository.getWarps()
-            deleteMode = !deleteMode
-            presenter.setWarps(model, deleteMode, this)
-        }
+        presenter.addRemoveWarpListener(object : Listener {
+            override fun invoke() {
+                val model = warpsRepository.getWarps()
+                deleteMode = !deleteMode
+                presenter.setWarps(model, deleteMode, this@WarpsInteractor)
+            }
+        })
 
         getWarps()
     }

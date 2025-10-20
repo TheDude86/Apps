@@ -2,8 +2,10 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.products.kits.KitRepository
@@ -59,34 +61,34 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     private var cancelButton: ButtonView? = null
     private var kitsPager: PagerView? = null
 
-    override fun setEnableSpawnListener(listener: () -> Unit) = enableSpawnButton.addListener(listener)
-    override fun setSpawnLocationListener(listener: () -> Unit) = setSpawnLocationView.addListener(listener)
-    override fun setSetWelcomeMessageListener(listener: (String) -> Unit) = setWelcomeMessageView.addTextChangedListener(listener)
-    override fun setSetFirstKitListener(listener: () -> Unit) = setFirstTimeKitView.addListener(listener)
-    override fun setRespawnLocationListListener(listener: () -> Unit) = setRespawnLocationOrderView.addListener(listener)
-    override fun setSpawnOnJoinListener(listener: () -> Unit) = setSpawnOnJoinView.addListener(listener)
-    override fun setJoinMessageListener(listener: (String) -> Unit) = joinServerView.addTextChangedListener(listener)
-    override fun setQuitMessageListener(listener: (String) -> Unit) = quitServerView.addTextChangedListener(listener)
-    override fun setCooldownListener(listener: (String) -> Unit) = cooldownView.addTextChangedListener(listener)
-    override fun setDelayListener(listener: (String) -> Unit) = delayView.addTextChangedListener(listener)
+    override fun setEnableSpawnListener(listener: Listener) = enableSpawnButton.addListener(listener)
+    override fun setSpawnLocationListener(listener: Listener) = setSpawnLocationView.addListener(listener)
+    override fun setSetWelcomeMessageListener(listener: TextListener) = setWelcomeMessageView.addTextChangedListener(listener)
+    override fun setSetFirstKitListener(listener: Listener) = setFirstTimeKitView.addListener(listener)
+    override fun setRespawnLocationListListener(listener: Listener) = setRespawnLocationOrderView.addListener(listener)
+    override fun setSpawnOnJoinListener(listener: Listener) = setSpawnOnJoinView.addListener(listener)
+    override fun setJoinMessageListener(listener: TextListener) = joinServerView.addTextChangedListener(listener)
+    override fun setQuitMessageListener(listener: TextListener) = quitServerView.addTextChangedListener(listener)
+    override fun setCooldownListener(listener: TextListener) = cooldownView.addTextChangedListener(listener)
+    override fun setDelayListener(listener: TextListener) = delayView.addTextChangedListener(listener)
 
-    override fun setConfirmLocationListener(listener: () -> Unit) {
+    override fun setConfirmLocationListener(listener: Listener) {
         confirmLocationButton?.addListener(listener)
     }
 
-    override fun setTryAgainListener(listener: () -> Unit) {
+    override fun setTryAgainListener(listener: Listener) {
         tryAgainButton?.addListener(listener)
     }
 
-    override fun setCancelListener(listener: () -> Unit) {
+    override fun setCancelListener(listener: Listener) {
         cancelButton?.addListener(listener)
     }
 
-    override fun setCaptureSpawnListener(listener: () -> Unit) {
+    override fun setCaptureSpawnListener(listener: Listener) {
         captureButton?.addListener(listener)
     }
 
-    override fun setSelectKitListener(listener: () -> Unit) {
+    override fun setSelectKitListener(listener: Listener) {
         kitSelectButton?.addListener(listener)
     }
 
@@ -134,7 +136,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
         )
     }
 
-    override fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: () -> Unit) {
+    override fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: Listener) {
         contentView.updateView {
             val title = addTextView(
                 modifier = Modifier()
@@ -187,9 +189,12 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
                                 .alignBottomToBottomOf(location)
                                 .margins(start = 50),
                             item = getPlayerHead("http://textures.minecraft.net/texture/365fc0426230a2e88df29d2d8ec4512e6dbdbc0777b4b83cdda2ede81864d6"),
-                        ) {
-                            priorityCallback.invoke(it, PriorityDirection.UP)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    priorityCallback.invoke(it, PriorityDirection.UP)
+                                }
+                            }
+                        )
 
                         addItemButtonView(
                             modifier = Modifier()
@@ -198,9 +203,12 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
                                 .alignTopToTopOf(arrowUp)
                                 .alignBottomToBottomOf(arrowUp),
                             item = getPlayerHead("http://textures.minecraft.net/texture/4e8ba7863b15a5e40fa7da9629bb866aa22699553e931df1f693cbb1c9f3b6"),
-                        ) {
-                            priorityCallback.invoke(it, PriorityDirection.DOWN)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    priorityCallback.invoke(it, PriorityDirection.DOWN)
+                                }
+                            }
+                        )
 
                         addItemButtonView(
                             modifier = Modifier()
@@ -210,9 +218,12 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
                                 .alignBottomToBottomOf(location)
                                 .margins(start = 30),
                             item = ItemStack(Material.BARRIER),
-                        ) {
-                            enableCallback.invoke(it, false)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    enableCallback.invoke(it, false)
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -244,9 +255,12 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
                                 .alignBottomToBottomOf(location)
                                 .margins(start = 30),
                             item = ItemStack(Material.KELP),
-                        ) {
-                            enableCallback.invoke(it, true)
-                        }
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    enableCallback.invoke(it, true)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -817,31 +831,31 @@ interface SpawnConfigPresenter: Presenter {
     fun setCooldownText(text: String)
     fun setDelayText(text: String)
     fun setEnabledText(text: String)
-    fun setEnableSpawnListener(listener: () -> Unit)
-    fun setSpawnLocationListener(listener: () -> Unit)
-    fun setSetWelcomeMessageListener(listener: (String) -> Unit)
-    fun setSetFirstKitListener(listener: () -> Unit)
-    fun setRespawnLocationListListener(listener: () -> Unit)
-    fun setSpawnOnJoinListener(listener: () -> Unit)
-    fun setJoinMessageListener(listener: (String) -> Unit)
-    fun setQuitMessageListener(listener: (String) -> Unit)
-    fun setDelayListener(listener: (String) -> Unit)
-    fun setCooldownListener(listener: (String) -> Unit)
+    fun setEnableSpawnListener(listener: Listener)
+    fun setSpawnLocationListener(listener: Listener)
+    fun setSetWelcomeMessageListener(listener: TextListener)
+    fun setSetFirstKitListener(listener: Listener)
+    fun setRespawnLocationListListener(listener: Listener)
+    fun setSpawnOnJoinListener(listener: Listener)
+    fun setJoinMessageListener(listener: TextListener)
+    fun setQuitMessageListener(listener: TextListener)
+    fun setDelayListener(listener: TextListener)
+    fun setCooldownListener(listener: TextListener)
     fun setMessage(message: String)
 
     fun setSettingsState()
     fun setLocationDirectionsState(newSpawn: Location? = null)
-    fun setCaptureSpawnListener(listener: () -> Unit)
-    fun setConfirmLocationListener(listener: () -> Unit)
-    fun setTryAgainListener(listener: () -> Unit)
-    fun setCancelListener(listener: () -> Unit)
+    fun setCaptureSpawnListener(listener: Listener)
+    fun setConfirmLocationListener(listener: Listener)
+    fun setTryAgainListener(listener: Listener)
+    fun setCancelListener(listener: Listener)
     fun setKitState()
-    fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: () -> Unit)
+    fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: Listener)
     fun setRespawnCallbacks(priorityCallback: (RespawnType, PriorityDirection) -> Unit, enableCallback: (RespawnType, Boolean) -> Unit)
     fun setKitAdapter(adapter: PagerViewAdapter)
     fun setPagerListener(listener: (Int) -> Unit)
     fun setKitTitle(title: String)
-    fun setSelectKitListener(listener: () -> Unit)
+    fun setSelectKitListener(listener: Listener)
 }
 
 class SpawnConfigInteractor(
@@ -875,29 +889,37 @@ class SpawnConfigInteractor(
 
     private fun setLocationState() {
         presenter.setLocationDirectionsState(newSpawn)
-        presenter.setCaptureSpawnListener {
-            state = SpawnConfigState.LOCATION
-            countdown()
-        }
+        presenter.setCaptureSpawnListener(object : Listener {
+            override fun invoke() {
+                state = SpawnConfigState.LOCATION
+                countdown()
+            }
+        })
 
-        presenter.setTryAgainListener {
-            state = SpawnConfigState.LOCATION
-            countdown()
-        }
+        presenter.setTryAgainListener(object : Listener {
+            override fun invoke() {
+                state = SpawnConfigState.LOCATION
+                countdown()
+            }
+        })
 
-        presenter.setCancelListener {
-            state = SpawnConfigState.SETTINGS
-            newSpawn = null
-            setSettingsState()
-        }
+        presenter.setCancelListener(object : Listener {
+            override fun invoke() {
+                state = SpawnConfigState.SETTINGS
+                newSpawn = null
+                setSettingsState()
+            }
+        })
 
-        presenter.setConfirmLocationListener {
-            val newSpawn = newSpawn ?: return@setConfirmLocationListener
-            spawnRepository.setSpawn(newSpawn)
-            state = SpawnConfigState.SETTINGS
-            this.newSpawn = null
-            setSettingsState()
-        }
+        presenter.setConfirmLocationListener(object : Listener {
+            override fun invoke() {
+                val newSpawn = newSpawn ?: return
+                spawnRepository.setSpawn(newSpawn)
+                state = SpawnConfigState.SETTINGS
+                this@SpawnConfigInteractor.newSpawn = null
+                setSettingsState()
+            }
+        })
     }
 
     private fun setSettingsState() {
@@ -929,92 +951,119 @@ class SpawnConfigInteractor(
             presenter.updateSetFirstKitText(kit.name)
         }
 
-        presenter.setEnableSpawnListener {
-            val isEnabled = !spawnRepository.model.enabled
-            spawnRepository.setEnabled(isEnabled)
-            presenter.setEnabledText(isEnabled.toString().titlecase())
-        }
-
-        presenter.setJoinMessageListener {
-            val newJoinMessage = it.colorize()
-            spawnRepository.setPlayerJoinMessage(newJoinMessage)
-            presenter.setJoinMessageText(newJoinMessage)
-        }
-
-        presenter.setQuitMessageListener {
-            val newQuitMessage = it.colorize()
-            spawnRepository.setPlayerQuitMessage(newQuitMessage)
-            presenter.setQuitMessageText(newQuitMessage)
-        }
-
-        presenter.setCooldownListener {
-            val cooldown = it.toIntOrNull()
-            if (cooldown == null) {
-                presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
-                presenter.setCooldownText("0 Seconds")
-                return@setCooldownListener
+        presenter.setEnableSpawnListener(object : Listener {
+            override fun invoke() {
+                val isEnabled = !spawnRepository.model.enabled
+                spawnRepository.setEnabled(isEnabled)
+                presenter.setEnabledText(isEnabled.toString().titlecase())
             }
+        })
 
-            spawnRepository.setCooldown(cooldown)
-        }
-
-        presenter.setDelayListener {
-            val delay = it.toIntOrNull()
-            if (delay == null) {
-                presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
-                presenter.setDelayText("0 Seconds")
-                return@setDelayListener
+        presenter.setJoinMessageListener(object : TextListener {
+            override fun invoke(text: String) {
+                val newJoinMessage = text.colorize()
+                spawnRepository.setPlayerJoinMessage(newJoinMessage)
+                presenter.setJoinMessageText(newJoinMessage)
             }
+        })
 
-            spawnRepository.setDelay(delay)
-        }
+        presenter.setQuitMessageListener(object : TextListener {
+            override fun invoke(text: String) {
+                val newQuitMessage = text.colorize()
+                spawnRepository.setPlayerQuitMessage(newQuitMessage)
+                presenter.setQuitMessageText(newQuitMessage)
+            }
+        })
 
-        presenter.setSpawnLocationListener {
-            setLocationState()
-        }
+        presenter.setCooldownListener(object : TextListener {
+            override fun invoke(text: String) {
+                val cooldown = text.toIntOrNull()
+                if (cooldown == null) {
+                    presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
+                    presenter.setCooldownText("0 Seconds")
+                    return
+                }
 
-        presenter.setSetWelcomeMessageListener {
-            val newMessage = it.colorize()
-            presenter.updateSetWelcomeMessageText(newMessage)
-            spawnRepository.setWelcomeMessage(newMessage)
-        }
 
-        presenter.setSetFirstKitListener {
-            presenter.setKitState()
-            presenter.setKitAdapter(SpawnKitPagerAdapter(kitRepository))
-            var selectedKit = kitRepository.getKits().firstOrNull() ?: return@setSetFirstKitListener
+                spawnRepository.setCooldown(cooldown)
+            }
+        })
 
-            presenter.setKitTitle(selectedKit.name)
+        presenter.setDelayListener(object : TextListener {
+            override fun invoke(text: String) {
+                val delay = text.toIntOrNull()
+                if (delay == null) {
+                    presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
+                    presenter.setDelayText("0 Seconds")
+                    return
+                }
 
-            presenter.setPagerListener {
-                selectedKit = kitRepository.getKits()[it]
+                spawnRepository.setDelay(delay)
+            }
+        })
+
+        presenter.setSpawnLocationListener(object : Listener {
+            override fun invoke() {
+                setLocationState()
+            }
+        })
+
+        presenter.setSetWelcomeMessageListener(object : TextListener {
+            override fun invoke(text: String) {
+                val newMessage = text.colorize()
+                presenter.updateSetWelcomeMessageText(newMessage)
+                spawnRepository.setWelcomeMessage(newMessage)
+            }
+        })
+
+        presenter.setSetFirstKitListener(object : Listener {
+            override fun invoke() {
+                presenter.setKitState()
+                presenter.setKitAdapter(SpawnKitPagerAdapter(kitRepository))
+                var selectedKit = kitRepository.getKits().firstOrNull() ?: return
+
                 presenter.setKitTitle(selectedKit.name)
-            }
 
-            presenter.setSelectKitListener {
-                spawnRepository.setSpawnKit(selectedKit)
-                setSettingsState()
-            }
-        }
+                presenter.setPagerListener {
+                    selectedKit = kitRepository.getKits()[it]
+                    presenter.setKitTitle(selectedKit.name)
+                }
 
-        presenter.setRespawnLocationListListener {
-            presenter.setRespawnListState(spawnRepository.model.respawnLocation) {
-                setSettingsState()
+                presenter.setSelectKitListener(object : Listener {
+                    override fun invoke() {
+                        spawnRepository.setSpawnKit(selectedKit)
+                        setSettingsState()
+                    }
+                })
             }
-        }
+        })
 
-        presenter.setSpawnOnJoinListener {
-            val newValue = !spawnRepository.model.spawnOnJoin
-            presenter.updateSpawnOnJoinText(newValue.toString().titlecase())
-            spawnRepository.setSpawnOnJoin(newValue)
-        }
+        presenter.setRespawnLocationListListener(object : Listener {
+            override fun invoke() {
+                presenter.setRespawnListState(spawnRepository.model.respawnLocation, object : Listener {
+                    override fun invoke() {
+                        setSettingsState()
+                    }
+                })
+            }
+        })
+
+        presenter.setSpawnOnJoinListener(object : Listener {
+            override fun invoke() {
+                val newValue = !spawnRepository.model.spawnOnJoin
+                presenter.updateSpawnOnJoinText(newValue.toString().titlecase())
+                spawnRepository.setSpawnOnJoin(newValue)
+            }
+        })
 
         presenter.setRespawnCallbacks(
             priorityCallback = { respawn, priority ->
                 if (spawnRepository.updateRespawnPriority(respawn, priority)) {
-                    presenter.setRespawnListState(spawnRepository.model.respawnLocation) {
-                        setSettingsState()
-                    }
+                    presenter.setRespawnListState(spawnRepository.model.respawnLocation, object : Listener {
+                        override fun invoke() {
+                            setSettingsState()
+                        }
+                    })
                 }
             },
             enableCallback = { respawn, enabled ->
@@ -1024,9 +1073,11 @@ class SpawnConfigInteractor(
                     spawnRepository.removeRespawnLocation(respawn)
                 }
 
-                presenter.setRespawnListState(spawnRepository.model.respawnLocation) {
-                    setSettingsState()
-                }
+                presenter.setRespawnListState(spawnRepository.model.respawnLocation, object : Listener {
+                    override fun invoke() {
+                        setSettingsState()
+                    }
+                })
             }
         )
     }

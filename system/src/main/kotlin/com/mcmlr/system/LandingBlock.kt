@@ -15,6 +15,7 @@ import com.mcmlr.system.products.warps.WarpsBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Context
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.ButtonView
@@ -83,7 +84,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
 
     override fun getFeedBlockContainer(): ViewContainer = feedContainer
 
-    override fun addAppsListener(listener: () -> Unit) = appsButton.addListener(listener)
+    override fun addAppsListener(listener: Listener) = appsButton.addListener(listener)
 
     override fun getAppsBlockContainer(): ViewContainer = appsContainer
 
@@ -163,7 +164,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
 interface LandingPresenter: Presenter {
     fun getAppsBlockContainer(): ViewContainer
     fun getSpawnBlockContainer(): ViewContainer
-    fun addAppsListener(listener: () -> Unit)
+    fun addAppsListener(listener: Listener)
     fun getFeedBlockContainer(): ViewContainer
 }
 
@@ -228,8 +229,10 @@ class LandingInteractor(
             attachChild(spawnShortcutBlock, presenter.getSpawnBlockContainer())
         }
 
-        presenter.addAppsListener {
-            routeTo(applicationsBlock)
-        }
+        presenter.addAppsListener(object : Listener {
+            override fun invoke() {
+                routeTo(applicationsBlock)
+            }
+        })
     }
 }

@@ -1,9 +1,15 @@
 package com.mcmlr.system.products.kits
 
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.EmptyListener
+import com.mcmlr.blocks.api.block.EmptyTextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationPresenter
 import com.mcmlr.blocks.api.block.NavigationViewController
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
@@ -63,9 +69,9 @@ class CreateKitViewController(
     private var editKitButton: ButtonView? = null
     private var deleteKitButton: ButtonView? = null
 
-    private var iconListener: () -> Unit = {}
+    private var iconListener: Listener = EmptyListener()
     private var itemListener: (KitItem) -> Unit = {}
-    private var commandListener: (String) -> Unit = {}
+    private var commandListener: TextListener = EmptyTextListener()
 
     override fun setIsEditing(isEditing: Boolean) {
         ctaContainer.updateView {
@@ -100,15 +106,15 @@ class CreateKitViewController(
         }
     }
 
-    override fun setCreateKitListener(listener: () -> Unit) {
+    override fun setCreateKitListener(listener: Listener) {
         createKitButton?.addListener(listener)
     }
 
-    override fun setUpdateKitListener(listener: () -> Unit) {
+    override fun setUpdateKitListener(listener: Listener) {
         editKitButton?.addListener(listener)
     }
 
-    override fun setDeleteKitListener(listener: () -> Unit) {
+    override fun setDeleteKitListener(listener: Listener) {
         deleteKitButton?.addListener(listener)
     }
 
@@ -116,7 +122,7 @@ class CreateKitViewController(
 
     override fun hideErrorMessage() = errorMessage.setTextView("")
 
-    override fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: (String) -> Unit) {
+    override fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: TextListener) {
         itemListener = removeItemCallback
         commandListener = removeCommandCallback
     }
@@ -166,9 +172,12 @@ class CreateKitViewController(
                         text = "✖",
                         highlightedText = "${ChatColor.RED}✖",
                         size = 4,
-                    ) {
-                        itemListener.invoke(it)
-                    }
+                        callback = object : Listener {
+                            override fun invoke() {
+                                itemListener.invoke(it)
+                            }
+                        }
+                    )
                 }
             }
 
@@ -198,38 +207,41 @@ class CreateKitViewController(
                         text = "✖",
                         highlightedText = "${ChatColor.RED}✖",
                         size = 4,
-                    ) {
-                        commandListener.invoke(it)
-                    }
+                        callback = object : Listener {
+                            override fun invoke() {
+                                commandListener.invoke(it)
+                            }
+                        }
+                    )
                 }
             }
         }
 
     }
 
-    override fun setAddCommandListener(listener: () -> Unit) = addCommandButton.addListener(listener)
+    override fun setAddCommandListener(listener: Listener) = addCommandButton.addListener(listener)
 
-    override fun setAddItemListener(listener: () -> Unit) = addItemButton.addListener(listener)
+    override fun setAddItemListener(listener: Listener) = addItemButton.addListener(listener)
 
-    override fun setDescriptionListener(listener: (String) -> Unit) = kitDescription.addTextChangedListener(listener)
+    override fun setDescriptionListener(listener: TextListener) = kitDescription.addTextChangedListener(listener)
 
     override fun setDescription(description: String) {
         kitDescription.updateText(description)
     }
 
-    override fun setCooldownListener(listener: (String) -> Unit) = kitCooldown.addTextChangedListener(listener)
+    override fun setCooldownListener(listener: TextListener) = kitCooldown.addTextChangedListener(listener)
 
     override fun setCooldown(cooldown: String) {
         kitCooldown.updateText(cooldown)
     }
 
-    override fun setPriceListener(listener: (String) -> Unit) = kitPrice.addTextChangedListener(listener)
+    override fun setPriceListener(listener: TextListener) = kitPrice.addTextChangedListener(listener)
 
     override fun setPrice(price: String) {
         kitPrice.updateText(price)
     }
 
-    override fun setIconListener(listener: () -> Unit) {
+    override fun setIconListener(listener: Listener) {
         iconListener = listener
     }
 
@@ -254,7 +266,7 @@ class CreateKitViewController(
         }
     }
 
-    override fun setNameListener(listener: (String) -> Unit) = kitName.addTextChangedListener(listener)
+    override fun setNameListener(listener: TextListener) = kitName.addTextChangedListener(listener)
 
     override fun setName(name: String) {
         kitName.updateText(name)
@@ -279,8 +291,10 @@ class CreateKitViewController(
                 .centerHorizontally()
                 .margins(top = 50),
             clickable = true,
-            listener = {
-                iconListener.invoke()
+            listener = object : Listener {
+                override fun invoke() {
+                    iconListener.invoke()
+                }
             }
         ) {
             addTextView(
@@ -413,39 +427,39 @@ class CreateKitViewController(
 }
 
 interface CreateKitPresenter: NavigationPresenter {
-    fun setIconListener(listener: () -> Unit)
+    fun setIconListener(listener: Listener)
 
     fun setIcon(icon: Material?)
 
-    fun setNameListener(listener: (String) -> Unit)
+    fun setNameListener(listener: TextListener)
 
     fun setName(name: String)
 
-    fun setPriceListener(listener: (String) -> Unit)
+    fun setPriceListener(listener: TextListener)
 
     fun setPrice(price: String)
 
-    fun setCooldownListener(listener: (String) -> Unit)
+    fun setCooldownListener(listener: TextListener)
 
     fun setCooldown(cooldown: String)
 
-    fun setDescriptionListener(listener: (String) -> Unit)
+    fun setDescriptionListener(listener: TextListener)
 
     fun setDescription(description: String)
 
-    fun setAddItemListener(listener: () -> Unit)
+    fun setAddItemListener(listener: Listener)
 
-    fun setAddCommandListener(listener: () -> Unit)
+    fun setAddCommandListener(listener: Listener)
 
     fun setKitContents(items: List<KitItem>, commands: List<String>)
 
-    fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: (String) -> Unit)
+    fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: TextListener)
 
-    fun setCreateKitListener(listener: () -> Unit)
+    fun setCreateKitListener(listener: Listener)
 
-    fun setUpdateKitListener(listener: () -> Unit)
+    fun setUpdateKitListener(listener: Listener)
 
-    fun setDeleteKitListener(listener: () -> Unit)
+    fun setDeleteKitListener(listener: Listener)
 
     fun setErrorMessage(message: String)
 
@@ -466,48 +480,60 @@ class CreateKitInteractor(
 
         presenter.setIsEditing(kitRepository.builder.uuid != null)
 
-        presenter.setCreateKitListener {
-            val validCheckMessage = kitRepository.builder.checkValid()
-            if (validCheckMessage != null) {
-                presenter.setErrorMessage("${ChatColor.RED}$validCheckMessage")
-                return@setCreateKitListener
+        presenter.setCreateKitListener(object : Listener {
+            override fun invoke() {
+                val validCheckMessage = kitRepository.builder.checkValid()
+                if (validCheckMessage != null) {
+                    presenter.setErrorMessage("${ChatColor.RED}$validCheckMessage")
+                    return
+                }
+
+                val kit = kitRepository.builder.build() ?: return
+                kitRepository.addKit(kit)
+                routeBack()
             }
+        })
 
-            val kit = kitRepository.builder.build() ?: return@setCreateKitListener
-            kitRepository.addKit(kit)
-            routeBack()
-        }
+        presenter.setUpdateKitListener(object : Listener {
+            override fun invoke() {
+                val validCheckMessage = kitRepository.builder.checkValid()
+                if (validCheckMessage != null) {
+                    presenter.setErrorMessage("${ChatColor.RED}$validCheckMessage")
+                    return
+                }
 
-        presenter.setUpdateKitListener {
-            val validCheckMessage = kitRepository.builder.checkValid()
-            if (validCheckMessage != null) {
-                presenter.setErrorMessage("${ChatColor.RED}$validCheckMessage")
-                return@setUpdateKitListener
+                val kit = kitRepository.builder.build() ?: return
+                kitRepository.updateKit(kit)
+                routeBack()
             }
+        })
 
-            val kit = kitRepository.builder.build() ?: return@setUpdateKitListener
-            kitRepository.updateKit(kit)
-            routeBack()
-        }
+        presenter.setDeleteKitListener(object : Listener {
+            override fun invoke() {
+                kitRepository.deleteKit()
+                routeBack()
+            }
+        })
 
-        presenter.setDeleteKitListener {
-            kitRepository.deleteKit()
-            routeBack()
-        }
+        presenter.addBackListener(object : Listener {
+            override fun invoke() {
+                kitRepository.builder.reset()
+            }
+        })
 
-        presenter.addBackListener {
-            kitRepository.builder.reset()
-        }
+        presenter.setAddItemListener(object : Listener {
+            override fun invoke() {
+                addKitContentBlock.addItemContent()
+                routeTo(addKitContentBlock)
+            }
+        })
 
-        presenter.setAddItemListener {
-            addKitContentBlock.addItemContent()
-            routeTo(addKitContentBlock)
-        }
-
-        presenter.setAddCommandListener {
-            addKitContentBlock.addCommandContent()
-            routeTo(addKitContentBlock)
-        }
+        presenter.setAddCommandListener(object : Listener {
+            override fun invoke() {
+                addKitContentBlock.addCommandContent()
+                routeTo(addKitContentBlock)
+            }
+        })
 
         if (kitRepository.builder.items.isNotEmpty() || kitRepository.builder.commands.isNotEmpty()) {
             presenter.setKitContents(kitRepository.builder.items, kitRepository.builder.commands)
@@ -516,10 +542,12 @@ class CreateKitInteractor(
         presenter.setKitCallbacks({
             kitRepository.builder.items.remove(it)
             presenter.setKitContents(kitRepository.builder.items, kitRepository.builder.commands)
-        }) {
-            kitRepository.builder.commands.remove(it)
-            presenter.setKitContents(kitRepository.builder.items, kitRepository.builder.commands)
-        }
+        }, object : TextListener {
+            override fun invoke(text: String) {
+                kitRepository.builder.commands.remove(text)
+                presenter.setKitContents(kitRepository.builder.items, kitRepository.builder.commands)
+            }
+        })
 
         kitRepository.builder.icon?.let {
             presenter.setIcon(Material.valueOf(it))
@@ -529,26 +557,30 @@ class CreateKitInteractor(
             presenter.setName(it)
         }
 
-        presenter.setNameListener {
-            kitRepository.builder.name = it
-        }
+        presenter.setNameListener(object : TextListener {
+            override fun invoke(text: String) {
+                kitRepository.builder.name = text
+            }
+        })
 
         kitRepository.builder.kitPrice?.let {
             presenter.setPrice("$${"%.2f".format(it / 100f)}")
         }
 
-        presenter.setPriceListener {
-            val price = it.toDoubleOrNull()
-            if (price == null) {
-                presenter.setPrice("Set Kit Price")
-                kitRepository.builder.kitPrice = null
-                return@setPriceListener
-            }
+        presenter.setPriceListener(object : TextListener {
+            override fun invoke(text: String) {
+                val price = text.toDoubleOrNull()
+                if (price == null) {
+                    presenter.setPrice("Set Kit Price")
+                    kitRepository.builder.kitPrice = null
+                    return
+                }
 
-            val convertedPrice = ((price * 100) + 0.5).toInt()
-            presenter.setPrice("$${"%.2f".format(convertedPrice / 100f)}")
-            kitRepository.builder.kitPrice = convertedPrice
-        }
+                val convertedPrice = ((price * 100) + 0.5).toInt()
+                presenter.setPrice("$${"%.2f".format(convertedPrice / 100f)}")
+                kitRepository.builder.kitPrice = convertedPrice
+            }
+        })
 
         kitRepository.builder.kitCooldown?.let {
             if (it < 0) {
@@ -558,38 +590,46 @@ class CreateKitInteractor(
             }
         }
 
-        presenter.setCooldownListener {
-            val cooldown = it.toIntOrNull()
-            if (cooldown == null) {
-                presenter.setCooldown("Set Kit Cooldown")
-                kitRepository.builder.kitCooldown = null
-                return@setCooldownListener
-            }
+        presenter.setCooldownListener(object : TextListener {
+            override fun invoke(text: String) {
+                val cooldown = text.toIntOrNull()
+                if (cooldown == null) {
+                    presenter.setCooldown("Set Kit Cooldown")
+                    kitRepository.builder.kitCooldown = null
+                    return
+                }
 
-            if (cooldown < 0) {
-                presenter.setCooldown("Single Use")
-            } else {
-                presenter.setCooldown("$cooldown Seconds")
-            }
+                if (cooldown < 0) {
+                    presenter.setCooldown("Single Use")
+                } else {
+                    presenter.setCooldown("$cooldown Seconds")
+                }
 
-            kitRepository.builder.kitCooldown = cooldown
-        }
+                kitRepository.builder.kitCooldown = cooldown
+            }
+        })
 
         kitRepository.builder.description?.let {
             presenter.setDescription(it)
         }
 
-        presenter.setDescriptionListener {
-            kitRepository.builder.description = it
-        }
-
-        presenter.setIconListener {
-            iconSelectionBlock.resetInventory()
-            routeTo(iconSelectionBlock) { bundle ->
-                val icon = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY)
-                kitRepository.builder.icon = icon?.type?.name
-                presenter.setIcon(icon?.type)
+        presenter.setDescriptionListener(object : TextListener {
+            override fun invoke(text: String) {
+                kitRepository.builder.description = text
             }
-        }
+        })
+
+        presenter.setIconListener(object : Listener {
+            override fun invoke() {
+                iconSelectionBlock.resetInventory()
+                routeTo(iconSelectionBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val icon = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY)
+                        kitRepository.builder.icon = icon?.type?.name
+                        presenter.setIcon(icon?.type)
+                    }
+                })
+            }
+        })
     }
 }

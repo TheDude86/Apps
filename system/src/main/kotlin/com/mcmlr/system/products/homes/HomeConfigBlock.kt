@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -36,11 +37,11 @@ class HomeConfigViewController(player: Player, origin: Location): NavigationView
     private lateinit var cooldownView: TextInputView
     private lateinit var messageView: TextView
 
-    override fun setMaxHomesListener(listener: (String) -> Unit) = maxHomesView.addTextChangedListener(listener)
+    override fun setMaxHomesListener(listener: TextListener) = maxHomesView.addTextChangedListener(listener)
 
-    override fun setDelayListener(listener: (String) -> Unit) = delayView.addTextChangedListener(listener)
+    override fun setDelayListener(listener: TextListener) = delayView.addTextChangedListener(listener)
 
-    override fun setCooldownListener(listener: (String) -> Unit) = cooldownView.addTextChangedListener(listener)
+    override fun setCooldownListener(listener: TextListener) = cooldownView.addTextChangedListener(listener)
 
     override fun createView() {
         super.createView()
@@ -196,9 +197,9 @@ interface HomeConfigPresenter: Presenter {
     fun updateMaxHomesText(text: String)
     fun updateDelayText(text: String)
     fun updateCooldownText(text: String)
-    fun setMaxHomesListener(listener: (String) -> Unit)
-    fun setDelayListener(listener: (String) -> Unit)
-    fun setCooldownListener(listener: (String) -> Unit)
+    fun setMaxHomesListener(listener: TextListener)
+    fun setDelayListener(listener: TextListener)
+    fun setCooldownListener(listener: TextListener)
     fun setMessage(message: String)
 }
 
@@ -217,52 +218,58 @@ class HomeConfigInteractor(
         presenter.updateDelayText("$teleportDelay Second${if (teleportDelay != 1) "s" else ""}")
         presenter.updateCooldownText("$cooldown Second${if (cooldown != 1) "s" else ""}")
 
-        presenter.setMaxHomesListener {
-            val max = it.toIntOrNull()
-            if (max == null) {
-                val homes = homesConfigRepository.maxHomes()
-                presenter.setMessage("${ChatColor.RED}Max home values must be whole numbers!")
+        presenter.setMaxHomesListener(object : TextListener {
+            override fun invoke(text: String) {
+                val max = text.toIntOrNull()
+                if (max == null) {
+                    val homes = homesConfigRepository.maxHomes()
+                    presenter.setMessage("${ChatColor.RED}Max home values must be whole numbers!")
+                    presenter.updateMaxHomesText("$homes Home${if (homes != 1) "s" else ""}")
+                    return
+                }
+
+                val homes = max(1, max)
+                homesConfigRepository.updateMaxHomes(max(1, max))
                 presenter.updateMaxHomesText("$homes Home${if (homes != 1) "s" else ""}")
-                return@setMaxHomesListener
+
+                presenter.setMessage("")
             }
+        })
 
-            val homes = max(1, max)
-            homesConfigRepository.updateMaxHomes(max(1, max))
-            presenter.updateMaxHomesText("$homes Home${if (homes != 1) "s" else ""}")
+        presenter.setDelayListener(object : TextListener {
+            override fun invoke(text: String) {
+                val delay = text.toIntOrNull()
+                if (delay == null) {
+                    val defaultDelay = homesConfigRepository.delay()
+                    presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
+                    presenter.updateDelayText("$defaultDelay Second${if (defaultDelay != 1) "s" else ""}")
+                    return
+                }
 
-            presenter.setMessage("")
-        }
+                val delaySeconds = max(0, delay)
+                homesConfigRepository.updateHomesDelay(delaySeconds)
+                presenter.updateDelayText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
 
-        presenter.setDelayListener {
-            val delay = it.toIntOrNull()
-            if (delay == null) {
-                val defaultDelay = homesConfigRepository.delay()
-                presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
-                presenter.updateDelayText("$defaultDelay Second${if (defaultDelay != 1) "s" else ""}")
-                return@setDelayListener
+                presenter.setMessage("")
             }
+        })
 
-            val delaySeconds = max(0, delay)
-            homesConfigRepository.updateHomesDelay(delaySeconds)
-            presenter.updateDelayText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
+        presenter.setCooldownListener(object : TextListener {
+            override fun invoke(text: String) {
+                val delay = text.toIntOrNull()
+                if (delay == null) {
+                    val defaultCooldown = homesConfigRepository.cooldown()
+                    presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
+                    presenter.updateCooldownText("$defaultCooldown Second${if (defaultCooldown != 1) "s" else ""}")
+                    return
+                }
 
-            presenter.setMessage("")
-        }
+                val delaySeconds = max(0, delay)
+                homesConfigRepository.updateHomesCooldown(delaySeconds)
+                presenter.updateCooldownText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
 
-        presenter.setCooldownListener {
-            val delay = it.toIntOrNull()
-            if (delay == null) {
-                val defaultCooldown = homesConfigRepository.cooldown()
-                presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
-                presenter.updateCooldownText("$defaultCooldown Second${if (defaultCooldown != 1) "s" else ""}")
-                return@setCooldownListener
+                presenter.setMessage("")
             }
-
-            val delaySeconds = max(0, delay)
-            homesConfigRepository.updateHomesCooldown(delaySeconds)
-            presenter.updateCooldownText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
-
-            presenter.setMessage("")
-        }
+        })
     }
 }

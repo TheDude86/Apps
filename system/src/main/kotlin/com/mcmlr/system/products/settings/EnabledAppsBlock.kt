@@ -2,6 +2,7 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.Alignment
@@ -40,7 +41,7 @@ class EnabledAppsBlock @Inject constructor(
 class EnabledAppsViewController(player: Player, origin: Location): NavigationViewController(player, origin), EnabledAppsPresenter {
 
     private lateinit var appsFeed: ListFeedView
-    private lateinit var enabledAppCallback: (EnabledApplicationModel) -> Unit
+    private lateinit var enabledAppCallback: EnabledAppsListener
 
     private var appList: List<EnabledApplicationModel> = listOf()
     private var appFeedContainers: HashMap<String, TextView> = HashMap()
@@ -55,7 +56,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
         appFeedContainers[app.app.name()]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
-    override fun setEnabledAppsListener(listener: (EnabledApplicationModel) -> Unit) {
+    override fun setEnabledAppsListener(listener: EnabledAppsListener) {
         enabledAppCallback = listener
     }
 
@@ -66,8 +67,10 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
                     modifier = Modifier()
                         .size(MATCH_PARENT, 100),
                     clickable = true,
-                    listener = {
-                        enabledAppCallback.invoke(it)
+                    listener = object : Listener {
+                        override fun invoke() {
+                            enabledAppCallback.invoke(it)
+                        }
                     }
                 ) {
                     val selected = addTextView(
@@ -141,7 +144,11 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
 interface EnabledAppsPresenter: Presenter {
     fun setApps(apps: List<EnabledApplicationModel>)
     fun setAppEnabled(app: EnabledApplicationModel)
-    fun setEnabledAppsListener(listener: (EnabledApplicationModel) -> Unit)
+    fun setEnabledAppsListener(listener: EnabledAppsListener)
+}
+
+interface EnabledAppsListener {
+    fun invoke(model: EnabledApplicationModel)
 }
 
 class EnabledAppsInteractor(
@@ -167,12 +174,14 @@ class EnabledAppsInteractor(
 
         presenter.setApps(enabledAppsList)
 
-        presenter.setEnabledAppsListener {
-            if (!it.alwaysEnabled) it.enabled = !it.enabled
-            presenter.setAppEnabled(it)
+        presenter.setEnabledAppsListener(object : EnabledAppsListener {
+            override fun invoke(model: EnabledApplicationModel) {
+                if (!model.alwaysEnabled) model.enabled = !model.enabled
+                presenter.setAppEnabled(model)
 
-            val enabledAppNames = enabledAppsList.filter { it.enabled }.map { it.app.name().lowercase() }
-            systemConfigRepository.saveEnabledApps(enabledAppNames)
-        }
+                val enabledAppNames = enabledAppsList.filter { it.enabled }.map { it.app.name().lowercase() }
+                systemConfigRepository.saveEnabledApps(enabledAppNames)
+            }
+        })
     }
 }

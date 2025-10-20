@@ -2,6 +2,7 @@ package com.mcmlr.system.products.homes
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -99,9 +100,9 @@ class HomesViewController(
         )
     }
 
-    override fun addNewHomeListener(listener: () -> Unit) = newHomeButton.addListener(listener)
+    override fun addNewHomeListener(listener: Listener) = newHomeButton.addListener(listener)
 
-    override fun addRemoveHomeListener(listener: () -> Unit) = removeHomeButton.addListener(listener)
+    override fun addRemoveHomeListener(listener: Listener) = removeHomeButton.addListener(listener)
 
     override fun setMessage(message: String) {
         messageView.text = message
@@ -154,10 +155,13 @@ class HomesViewController(
                 homeView = addButtonView(
                     modifier = modifier,
                     text = home.name,
-                    highlightedText = "${ChatColor.BOLD}${home.name}"
-                ) {
-                    listener.teleport(home)
-                }
+                    highlightedText = "${ChatColor.BOLD}${home.name}",
+                    callback = object : Listener {
+                        override fun invoke() {
+                            listener.teleport(home)
+                        }
+                    }
+                )
 
                 addItemView(
                     modifier = Modifier()
@@ -177,10 +181,13 @@ class HomesViewController(
                         .alignBottomToBottomOf(homeView!!)
                         .margins(start = 64),
                     text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
-                    highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎"
-                ) {
-                    listener.edit(home, deleteMode)
-                }
+                    highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
+                    callback = object : Listener {
+                        override fun invoke() {
+                            listener.edit(home, deleteMode)
+                        }
+                    }
+                )
             }
         }
     }
@@ -188,8 +195,8 @@ class HomesViewController(
 
 interface HomesPresenter: Presenter {
     fun setHomes(homes: List<HomeModel>, deleteMode: Boolean, listener: HomeActionListener)
-    fun addNewHomeListener(listener: () -> Unit)
-    fun addRemoveHomeListener(listener: () -> Unit)
+    fun addNewHomeListener(listener: Listener)
+    fun addRemoveHomeListener(listener: Listener)
     fun setMessage(message: String)
 }
 
@@ -211,22 +218,26 @@ class HomesInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.addNewHomeListener {
-            val model = homesRepository.latest(player) ?: return@addNewHomeListener
-            val maxHomes = homesConfigRepository.model.maxHomes
-            if (model.homes.size >= maxHomes) {
-                presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
-                return@addNewHomeListener
+        presenter.addNewHomeListener(object : Listener {
+            override fun invoke() {
+                val model = homesRepository.latest(player) ?: return
+                val maxHomes = homesConfigRepository.model.maxHomes
+                if (model.homes.size >= maxHomes) {
+                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
+                    return
+                }
+
+                routeTo(addHomeBlock)
             }
+        })
 
-            routeTo(addHomeBlock)
-        }
-
-        presenter.addRemoveHomeListener {
-            val model = homesRepository.latest(player) ?: return@addRemoveHomeListener
-            deleteMode = !deleteMode
-            presenter.setHomes(model.homes, deleteMode, this)
-        }
+        presenter.addRemoveHomeListener(object : Listener {
+            override fun invoke() {
+                val model = homesRepository.latest(player) ?: return
+                deleteMode = !deleteMode
+                presenter.setHomes(model.homes, deleteMode, this@HomesInteractor)
+            }
+        })
 
         getHomes()
     }

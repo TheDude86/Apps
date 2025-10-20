@@ -2,6 +2,7 @@ package com.mcmlr.system.products.market
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -98,7 +99,11 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
                     clickable = true,
                     background = Color.fromARGB(0, 0, 255, 0),
                     backgroundHighlight = Color.fromARGB(64, 255, 255, 255),
-                    listener = { listener.invoke(model) },
+                    listener = object : Listener {
+                        override fun invoke() {
+                            listener.invoke(model)
+                        }
+                    },
                 ) {
 
                     val icon = addItemView(
@@ -164,11 +169,11 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
         updateTextDisplay(messageView)
     }
 
-    override fun setMyOffersListener(listener: () -> Unit) = myOffersButton.addListener(listener)
+    override fun setMyOffersListener(listener: Listener) = myOffersButton.addListener(listener)
 }
 
 interface MyOffersPresenter: Presenter {
-    fun setMyOffersListener(listener: () -> Unit)
+    fun setMyOffersListener(listener: Listener)
     fun setFeed(orders: List<Pair<Material, Order>>, listener: (Pair<Material, Order>) -> Unit)
     fun setMessage(message: String)
 }
@@ -193,12 +198,14 @@ class MyOffersInteractor(
             routeTo(offerEditorBlock)
         }
 
-        presenter.setMyOffersListener {
-            if (marketConfigRepository.model.maxOrders < 1 || myOrders.size < marketConfigRepository.model.maxOrders) {
-                routeTo(offerCreatorBlock)
-            } else {
-                presenter.setMessage("${ChatColor.RED}You already have the maximum number of orders created, please delete an order before adding a new one")
+        presenter.setMyOffersListener(object : Listener {
+            override fun invoke() {
+                if (marketConfigRepository.model.maxOrders < 1 || myOrders.size < marketConfigRepository.model.maxOrders) {
+                    routeTo(offerCreatorBlock)
+                } else {
+                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of orders created, please delete an order before adding a new one")
+                }
             }
-        }
+        })
     }
 }

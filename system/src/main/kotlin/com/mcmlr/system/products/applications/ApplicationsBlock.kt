@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -78,9 +79,12 @@ class ApplicationsViewController(
                 .margins(bottom = 200),
             text = "${ChatColor.GOLD}Home",
             highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
-        ) {
-            routeBack()
-        }
+            callback = object : Listener {
+                override fun invoke() {
+                    routeBack()
+                }
+            }
+        )
 
         appsButton = addButtonView(
             modifier = Modifier()
@@ -105,9 +109,12 @@ class ApplicationsViewController(
                     size = 7,
                     text = "${ChatColor.GOLD}${applicationModel.name()}",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${applicationModel.name()}",
-                ) {
-                    callback.invoke(applicationModel)
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            callback.invoke(applicationModel)
+                        }
+                    }
+                )
 
                 addItemButtonView(
                     modifier = Modifier()
@@ -116,10 +123,13 @@ class ApplicationsViewController(
                         .alignEndToEndOf(appTitle)
                         .alignBottomToTopOf(appTitle)
                         .margins(bottom = 50),
-                    item = applicationModel.getAppIcon()
-                ) {
-                    callback.invoke(applicationModel)
-                }
+                    item = applicationModel.getAppIcon(),
+                    callback = object : Listener {
+                        override fun invoke() {
+                            callback.invoke(applicationModel)
+                        }
+                    }
+                )
             }
         }
 

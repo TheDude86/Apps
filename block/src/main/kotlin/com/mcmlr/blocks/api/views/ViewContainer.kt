@@ -3,6 +3,8 @@ package com.mcmlr.blocks.api.views
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.block.EmptyListener
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
@@ -27,7 +29,7 @@ open class ViewContainer(
     val clickable: Boolean = false,
     val background: Color = Color.fromARGB(0x40000000),
     val backgroundHighlight: Color = Color.fromARGB(64, 64, 255, 255),
-    override var listeners: MutableList<() -> Unit> = mutableListOf(),
+    override var listeners: MutableList<Listener> = mutableListOf(),
     override var highlighted: Boolean = false,
     teleportDuration: Int = 3,
     height: Int = 0,
@@ -238,7 +240,7 @@ open class ViewContainer(
         backgroundHighlight: Color = Color.fromARGB(64, 255, 255, 255),
         teleportDuration: Int = 3,
         height: Int = 0,
-        listener: () -> Unit = {},
+        listener: Listener = EmptyListener(),
         content: ViewContainer.() -> Unit = {},
     ): ViewContainer {
         val view = ViewContainer(modifier, clickable, background, backgroundHighlight, mutableListOf(listener), teleportDuration = teleportDuration, height = height)
@@ -394,7 +396,7 @@ open class ViewContainer(
         background: Color = Color.fromARGB(0x00000000),
         teleportDuration: Int = 3,
         height: Int = 0,
-        callback: () -> Unit = {},
+        callback: Listener = EmptyListener(),
     ): ButtonView {
         val view = ButtonView(
             modifier = modifier,
@@ -422,7 +424,7 @@ open class ViewContainer(
         visible: Boolean = true,
         teleportDuration: Int = 3,
         height: Int = 0,
-        callback: () -> Unit = {},
+        callback: Listener = EmptyListener(),
     ): ItemButtonView {
         val view = ItemButtonView(
             modifier = modifier,
@@ -445,7 +447,7 @@ open class ViewContainer(
         visible: Boolean = true,
         teleportDuration: Int = 3,
         height: Int = 0,
-        callback: () -> Unit = {},
+        callback: Listener = EmptyListener(),
     ): ItemButtonView {
         val view = ItemButtonView(
             modifier = modifier,
@@ -563,7 +565,7 @@ open class ViewContainer(
 
     override fun bottom(): Int = getPosition().y - getDimensions().height
 
-    fun addListener(listener: () -> Unit) {
+    fun addListener(listener: Listener) {
         listeners.add(listener)
     }
 }

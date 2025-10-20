@@ -4,8 +4,10 @@ import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
@@ -52,17 +54,17 @@ class TextEditorBlockViewController(
 
     private var lineSelectedCallback: (Int) -> Unit = {}
 
-    override fun addFinishListener(listener: () -> Unit) = finishButton.addListener(listener)
+    override fun addFinishListener(listener: Listener) = finishButton.addListener(listener)
 
     override fun addScrollListener(listener: (ScrollModel) -> Unit) = messageContainer.addScrollListener(listener)
 
     override fun removeScrollListener(listener: (ScrollModel) -> Unit) = messageContainer.removeScrollListener(listener)
 
-    override fun setSendListener(listener: () -> Unit) = sendButtonView.addListener(listener)
+    override fun setSendListener(listener: Listener) = sendButtonView.addListener(listener)
 
-    override fun setEditLinesListener(listener: () -> Unit) = editLinesButton.addListener(listener)
+    override fun setEditLinesListener(listener: Listener) = editLinesButton.addListener(listener)
 
-    override fun setTextInputListener(listener: (String) -> Unit) = textInputView.addTextChangedListener(listener)
+    override fun setTextInputListener(listener: TextListener) = textInputView.addTextChangedListener(listener)
 
     override fun setEditingLineListener(listener: (Int) -> Unit) {
         lineSelectedCallback = listener
@@ -119,9 +121,12 @@ class TextEditorBlockViewController(
                     highlightedText = "${ChatColor.BOLD}${index + 1}.${if (index == selectedLine) " (Editing)" else ""}",
                     alignment = Alignment.LEFT,
                     size = 8,
-                ) {
-                    lineSelectedCallback.invoke(index)
-                }
+                    callback = object : Listener {
+                        override fun invoke() {
+                            lineSelectedCallback.invoke(index)
+                        }
+                    }
+                )
             }
         }
     }
@@ -235,10 +240,10 @@ class TextEditorBlockViewController(
 }
 
 interface TextEditorPresenter: Presenter {
-    fun setSendListener(listener: () -> Unit)
-    fun setEditLinesListener(listener: () -> Unit)
-    fun addFinishListener(listener: () -> Unit)
-    fun setTextInputListener(listener: (String) -> Unit)
+    fun setSendListener(listener: Listener)
+    fun setEditLinesListener(listener: Listener)
+    fun addFinishListener(listener: Listener)
+    fun setTextInputListener(listener: TextListener)
     fun addScrollListener(listener: (ScrollModel) -> Unit)
     fun removeScrollListener(listener: (ScrollModel) -> Unit)
     fun setEditingLineListener(listener: (Int) -> Unit)
@@ -269,49 +274,57 @@ class TextEditorInteractor(
         editLines = false
         presenter.setMessage(model)
 
-        presenter.setTextInputListener {
-            input = it.replace("\\n", "\n").colorize()
-            presenter.setFormattedInput(input)
-        }
+        presenter.setTextInputListener(object : TextListener {
+            override fun invoke(text: String) {
+                input = text.replace("\\n", "\n").colorize()
+                presenter.setFormattedInput(input)
+            }
+        })
 
         presenter.setEditingLineListener {
             editingLine = it
             presenter.setMessage(model, editingLine)
         }
 
-        presenter.setSendListener {
-            if (input.isEmpty()) {
-                return@setSendListener
+        presenter.setSendListener(object : Listener {
+            override fun invoke() {
+                if (input.isEmpty()) {
+                    return
+                }
+
+                if (editLines) {
+                    model.lines[editingLine] = input
+                } else {
+                    model.lines.add(input)
+                }
+
+                presenter.setMessage(model, editingLine)
+                presenter.resetInput()
+                input = ""
             }
+        })
 
-            if (editLines) {
-                model.lines[editingLine] = input
-            } else {
-                model.lines.add(input)
+        presenter.setEditLinesListener(object : Listener {
+            override fun invoke() {
+                editLines = !editLines
+                if (editLines) {
+                    editingLine = 0
+                    presenter.addScrollListener(messageScrollListener)
+                } else {
+                    editingLine = -1
+                    presenter.removeScrollListener(messageScrollListener)
+                }
+
+                presenter.setMessage(model, editingLine)
             }
+        })
 
-            presenter.setMessage(model, editingLine)
-            presenter.resetInput()
-            input = ""
-        }
-
-        presenter.setEditLinesListener {
-            editLines = !editLines
-            if (editLines) {
-                editingLine = 0
-                presenter.addScrollListener(messageScrollListener)
-            } else {
-                editingLine = -1
-                presenter.removeScrollListener(messageScrollListener)
+        presenter.addFinishListener(object : Listener {
+            override fun invoke() {
+                addBundleData(TextEditorBlock.TEXT_BUNDLE_KEY, model)
+                routeBack()
             }
-
-            presenter.setMessage(model, editingLine)
-        }
-
-        presenter.addFinishListener {
-            addBundleData(TextEditorBlock.TEXT_BUNDLE_KEY, model)
-            routeBack()
-        }
+        })
     }
 }
 

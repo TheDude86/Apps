@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.views
 
 import com.mcmlr.blocks.api.ScrollEvent
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.views.Area.*
 import com.mcmlr.blocks.api.views.Axis.X
 import com.mcmlr.blocks.api.views.Axis.Y
@@ -26,7 +27,7 @@ abstract class View(
 
     protected var corners: List<BlockDisplay> = mutableListOf()
     protected var dependants: MutableList<Viewable> = mutableListOf()
-    protected var destroyListeners: MutableList<() -> Unit> = mutableListOf()
+    protected var destroyListeners: MutableList<Listener> = mutableListOf()
 
     fun attach(parent: Viewable) {
         modifier.start?.view?.addDependant(this)
@@ -34,12 +35,14 @@ abstract class View(
         modifier.end?.view?.addDependant(this)
         modifier.bottom?.view?.addDependant(this)
         this.parent = parent
-        parent.addDestroyListener {
-            clear()
-        }
+        parent.addDestroyListener(object : Listener {
+            override fun invoke() {
+                clear()
+            }
+        })
     }
 
-    override fun addDestroyListener(listener: () -> Unit) {
+    override fun addDestroyListener(listener: Listener) {
         destroyListeners.add(listener)
     }
 

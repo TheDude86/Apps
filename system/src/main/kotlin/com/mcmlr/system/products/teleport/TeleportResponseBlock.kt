@@ -2,6 +2,7 @@ package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -129,11 +130,11 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
         updateTextDisplay(name)
     }
 
-    override fun setAcceptCallback(callback: () -> Unit) {
+    override fun setAcceptCallback(callback: Listener) {
         accept.addListener(callback)
     }
 
-    override fun setRejectCallback(callback: () -> Unit) {
+    override fun setRejectCallback(callback: Listener) {
         reject.addListener(callback)
     }
 }
@@ -141,9 +142,9 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
 interface TeleportResponsePresenter: Presenter {
     fun setPlayer(playerHead: ItemStack, playerName: String)
 
-    fun setAcceptCallback(callback: () -> Unit)
+    fun setAcceptCallback(callback: Listener)
 
-    fun setRejectCallback(callback: () -> Unit)
+    fun setRejectCallback(callback: Listener)
 
     fun setMessage(message: String)
 }
@@ -167,48 +168,52 @@ class TeleportResponseInteractor(
 
         presenter.setPlayer(head, request.sender.displayName)
 
-        presenter.setAcceptCallback {
-            val wait = playerTeleportRepository.canTeleport(player) / 1000
-            if (wait > 0) {
-                presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
-                return@setAcceptCallback
-            }
+        presenter.setAcceptCallback(object : Listener {
+            override fun invoke() {
+                val wait = playerTeleportRepository.canTeleport(player) / 1000
+                if (wait > 0) {
+                    presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+                    return
+                }
 
-            teleportRepository.deleteRequest(this.player.uniqueId, request)
+                teleportRepository.deleteRequest(player.uniqueId, request)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                var delay = teleportConfigRepository.model.delay
-                while (delay > 0) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    var delay = teleportConfigRepository.model.delay
+                    while (delay > 0) {
+                        CoroutineScope(DudeDispatcher()).launch {
+                            val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
+                            val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
+                            val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
+                            val destinationMessage = "${ChatColor.DARK_AQUA}${passenger.displayName} will be teleported to you in $delay second${if (delay != 1) "s" else ""}"
+
+                            //TODO: Check spigot vs paper
+                            passenger.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(passengerMessage))
+                            destination.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(destinationMessage))
+                        }
+
+                        delay(1.seconds)
+                        delay--
+                    }
+
                     CoroutineScope(DudeDispatcher()).launch {
-                        val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
-                        val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
-                        val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
-                        val destinationMessage = "${ChatColor.DARK_AQUA}${passenger.displayName} will be teleported to you in $delay second${if (delay != 1) "s" else ""}"
-
-                        //TODO: Check spigot vs paper
-                        passenger.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(passengerMessage))
-                        destination.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(destinationMessage))
-                    }
-
-                    delay(1.seconds)
-                    delay--
-                }
-
-                CoroutineScope(DudeDispatcher()).launch {
-                    if (request.type == TeleportRequestType.GOTO) {
-                        request.sender.teleport(player)
-                    } else {
-                        player.teleport(request.sender)
+                        if (request.type == TeleportRequestType.GOTO) {
+                            request.sender.teleport(player)
+                        } else {
+                            player.teleport(request.sender)
+                        }
                     }
                 }
+
+                close()
             }
+        })
 
-            close()
-        }
-
-        presenter.setRejectCallback {
-            teleportRepository.deleteRequest(this.player.uniqueId, request)
-            routeBack()
-        }
+        presenter.setRejectCallback(object : Listener {
+            override fun invoke() {
+                teleportRepository.deleteRequest(player.uniqueId, request)
+                routeBack()
+            }
+        })
     }
 }

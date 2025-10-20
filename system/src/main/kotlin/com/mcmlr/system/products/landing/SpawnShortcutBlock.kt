@@ -2,6 +2,7 @@ package com.mcmlr.system.products.landing
 
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ButtonView
@@ -40,11 +41,11 @@ class SpawnShortcutViewController(
     private var spawn: ButtonView? = null
     private var back: ButtonView? = null
 
-    override fun setSpawnListener(listener: () -> Unit) {
+    override fun setSpawnListener(listener: Listener) {
         spawn?.addListener(listener)
     }
 
-    override fun setBackListener(listener: () -> Unit) {
+    override fun setBackListener(listener: Listener) {
         back?.addListener(listener)
     }
 
@@ -107,8 +108,8 @@ class SpawnShortcutViewController(
 }
 
 interface SpawnShortcutPresenter: Presenter {
-    fun setSpawnListener(listener: () -> Unit)
-    fun setBackListener(listener: () -> Unit)
+    fun setSpawnListener(listener: Listener)
+    fun setBackListener(listener: Listener)
 }
 
 class SpawnShortcutInteractor(
@@ -120,16 +121,20 @@ class SpawnShortcutInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setSpawnListener {
-            val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return@setSpawnListener
-            player.teleport(spawn)
-            close()
-        }
+        presenter.setSpawnListener(object : Listener {
+            override fun invoke() {
+                val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return
+                player.teleport(spawn)
+                close()
+            }
+        })
 
-        presenter.setBackListener {
-            val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return@setBackListener
-            player.teleport(back)
-            close()
-        }
+        presenter.setBackListener(object : Listener {
+            override fun invoke() {
+                val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return
+                player.teleport(back)
+                close()
+            }
+        })
     }
 }
