@@ -22,6 +22,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.data.*
 import com.mcmlr.system.products.spawn.SpawnRepository
 import org.bukkit.ChatColor
@@ -98,7 +99,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 250),
-            text = systemConfigRepository.model.title,
+            text = systemConfigRepository.model.title.placeholders(player),
             size = 14,
         )
 
@@ -118,6 +119,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignEndToEndOf(this)
                 .alignTopToBottomOf(title)
                 .margins(top = 50, end = 400),
+            background = Color.fromARGB(0, 0, 0, 0)
         )
 
         feedContainer = addViewContainer(
@@ -137,6 +139,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignEndToEndOf(this)
                 .alignTopToBottomOf(appsContainer)
                 .margins(end = 400),
+            background = Color.fromARGB(0, 0, 0, 0)
         )
 
         homeButton = addButtonView(

@@ -1,11 +1,13 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -177,8 +179,10 @@ class TeleportResponseInteractor(
                 }
 
                 teleportRepository.deleteRequest(player.uniqueId, request)
+                log(Log.ASSERT, "Delete request")
 
                 CoroutineScope(Dispatchers.IO).launch {
+                    log(Log.ASSERT, "Background wait...")
                     var delay = teleportConfigRepository.model.delay
                     while (delay > 0) {
                         CoroutineScope(DudeDispatcher()).launch {
@@ -197,6 +201,7 @@ class TeleportResponseInteractor(
                     }
 
                     CoroutineScope(DudeDispatcher()).launch {
+                        log(Log.ASSERT, "Foreground teleport Type=${request.type}")
                         if (request.type == TeleportRequestType.GOTO) {
                             request.sender.teleport(player)
                         } else {

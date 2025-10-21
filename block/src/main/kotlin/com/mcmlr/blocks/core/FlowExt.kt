@@ -1,12 +1,13 @@
 package com.mcmlr.blocks.core
 
+import com.mcmlr.blocks.api.block.Listener
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.bukkit.Bukkit
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 
-fun delay(dispatcher: CoroutineDispatcher = Dispatchers.IO, duration: Duration, callback: () -> Unit) = CoroutineScope(dispatcher).launch {
+fun delay(dispatcher: CoroutineDispatcher = Dispatchers.IO, duration: Duration, callback: Listener) = CoroutineScope(dispatcher).launch {
     delay(duration)
 }.invokeOnCompletion {
     CoroutineScope(DudeDispatcher()).launch {
