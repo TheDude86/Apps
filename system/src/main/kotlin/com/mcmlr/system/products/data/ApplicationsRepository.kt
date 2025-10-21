@@ -52,6 +52,18 @@ class ApplicationsRepository @Inject constructor(
                 !systemApps.contains(it.name().lowercase())
     }
 
+    fun getDeeplinkApp(deeplink: String): Environment<App>? {
+        if (!deeplink.contains("://")) return null
+        val appName = deeplink.split("://").first()
+        val environment = environments.find { it.name().lowercase() == appName.lowercase() } ?: return null
+
+        if ((systemApps.contains(environment.name().lowercase()) && systemConfigRepository.model.enabledApps.contains(environment.name().lowercase())) || !systemApps.contains(environment.name().lowercase())) {
+            return environment
+        }
+
+        return null
+    }
+
     fun getPlayerApps(player: Player): List<Environment<App>> = enabledApps().filter {
         val node = it.permission() ?: return@filter true
         permissionsRepository.checkPermission(player, node)

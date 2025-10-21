@@ -59,11 +59,10 @@ class KitRepository @Inject constructor(
                 val item = Bukkit.getItemFactory().createItemStack("$key${it.meta}")
                 item.amount = it.amount
                 player.inventory.add(player.location, item)
-
-                val cost = kit.kitPrice / 100.0
-
-                if (!ignorePrice) vaultRepository.economy?.withdrawPlayer(player, cost)
             }
+            
+            val cost = kit.kitPrice / 100.0
+            if (!ignorePrice) vaultRepository.economy?.withdrawPlayer(player, cost)
 
             kit.commands.forEach {
                 Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, it.placeholders(player))

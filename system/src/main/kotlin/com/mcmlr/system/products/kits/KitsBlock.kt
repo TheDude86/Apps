@@ -353,17 +353,20 @@ class KitsInteractor(
 
         presenter.setGetKitListener(object : Listener {
             override fun invoke() {
-                kitRepository.getCooldown(player, selectedKit)
+                val kit = this@KitsInteractor.selectedKit ?: return
+                kitRepository.getCooldown(player, kit)
                     .collectFirst(DudeDispatcher()) {
-                        val cooldown = it ?: 0
+                        val cooldown = it
                         val balance = vaultRepository.economy?.getBalance(player) ?: 0.0
 
-                        if (cooldown > 0) {
+                        if (cooldown == null) {
+                            presenter.setErrorMessage("${ChatColor.RED}You've already claimed this kit!")
+                        } else if (cooldown > 0) {
                             presenter.setErrorMessage("${ChatColor.RED}You need to wait for the cooldown to finish before collecting this kit again!")
-                        } else if (balance < selectedKit.kitPrice / 100.0) {
+                        } else if (balance < kit.kitPrice / 100.0) {
                             presenter.setErrorMessage("${ChatColor.RED}You don't have enough money to buy this kit!")
                         } else {
-                            kitRepository.givePlayerKit(player, selectedKit)
+                            kitRepository.givePlayerKit(player, kit)
                             updateSelectedKit()
                         }
                     }
