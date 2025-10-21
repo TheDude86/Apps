@@ -212,23 +212,15 @@ class LandingInteractor(
     }
 
     override fun onCreate() {
-//        if (!routed) {
-//            context.deeplink()?.let {
-//                val environment = applicationsRepository.getDeeplinkApp(it) ?: return@let
-//                launchApp(environment)
-//
-//
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    delay(1000)
-//                    CoroutineScope(DudeDispatcher()).launch {
-//                        launchApp(environment)
-//                    }
-//                }
-//
-////                routed = true
-//                return
-//            }
-//        }
+        if (!routed) {
+            context.deeplink()?.let {
+                if (it == "setup://") {
+                    routeTo(setupBlock)
+                    routed = true
+                    return
+                }
+            }
+        }
 
         super.onCreate()
 
