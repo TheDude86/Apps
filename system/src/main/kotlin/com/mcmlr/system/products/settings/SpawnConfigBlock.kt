@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -100,7 +101,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
         kitsPager?.attachAdapter(adapter)
     }
 
-    override fun setPagerListener(listener: (Int) -> Unit) {
+    override fun setPagerListener(listener: PageListener) {
         kitsPager?.addPagerListener(listener)
     }
 
@@ -137,632 +138,546 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: Listener) {
-        contentView.updateView {
-            val title = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                text = "${ChatColor.BOLD}Set spawn kit",
-                size = 14,
-            )
-
-            val directions = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(title)
-                    .centerHorizontally(),
-                text = "${ChatColor.GRAY}Select the order of locations to send players after they die and respawn.  Disabling a location will ignore that location when finding a respawn location and if a player does not have a location set, like a home for example, then that location will be skipped as well.",
-                lineWidth = 400,
-                size = 6,
-            )
-
-            val disabledRespawns = RespawnType.entries.filter { !respawn.contains(it) }
-
-            val list = addListFeedView(
-                modifier = Modifier()
-                    .size(400, 300)
-                    .alignTopToBottomOf(directions)
-                    .centerHorizontally()
-                    .margins(top = 50)
-            ) {
-                respawn.forEach {
-                    addViewContainer(
-                        modifier = Modifier()
-                            .size(MATCH_PARENT, 30),
-                        background = Color.fromARGB(0, 0, 0, 0)
-                    ) {
-                        val location = addTextView(
-                            modifier = Modifier()
-                                .size(WRAP_CONTENT, WRAP_CONTENT)
-                                .center(),
-                            text = it.title,
-                            size = 6
-                        )
-
-                        val arrowUp = addItemButtonView(
-                            modifier = Modifier()
-                                .size(40, 40)
-                                .alignStartToStartOf(this)
-                                .alignTopToTopOf(location)
-                                .alignBottomToBottomOf(location)
-                                .margins(start = 50),
-                            item = getPlayerHead("http://textures.minecraft.net/texture/365fc0426230a2e88df29d2d8ec4512e6dbdbc0777b4b83cdda2ede81864d6"),
-                            callback = object : Listener {
-                                override fun invoke() {
-                                    priorityCallback.invoke(it, PriorityDirection.UP)
-                                }
-                            }
-                        )
-
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .size(40, 40)
-                                .alignStartToEndOf(arrowUp)
-                                .alignTopToTopOf(arrowUp)
-                                .alignBottomToBottomOf(arrowUp),
-                            item = getPlayerHead("http://textures.minecraft.net/texture/4e8ba7863b15a5e40fa7da9629bb866aa22699553e931df1f693cbb1c9f3b6"),
-                            callback = object : Listener {
-                                override fun invoke() {
-                                    priorityCallback.invoke(it, PriorityDirection.DOWN)
-                                }
-                            }
-                        )
-
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .size(20, 20)
-                                .alignStartToEndOf(location)
-                                .alignTopToTopOf(location)
-                                .alignBottomToBottomOf(location)
-                                .margins(start = 30),
-                            item = ItemStack(Material.BARRIER),
-                            callback = object : Listener {
-                                override fun invoke() {
-                                    enableCallback.invoke(it, false)
-                                }
-                            }
-                        )
-                    }
-                }
-
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 30),
-                    background = Color.fromARGB(0, 0, 0, 0)
-                )
-
-                disabledRespawns.forEach {
-                    addViewContainer(
-                        modifier = Modifier()
-                            .size(MATCH_PARENT, 30),
-                        background = Color.fromARGB(0, 0, 0, 0)
-                    ) {
-                        val location = addTextView(
-                            modifier = Modifier()
-                                .size(WRAP_CONTENT, WRAP_CONTENT)
-                                .center(),
-                            text = "${ChatColor.GRAY}${ChatColor.STRIKETHROUGH}${it.title}",
-                            size = 6
-                        )
-
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .size(20, 20)
-                                .alignStartToEndOf(location)
-                                .alignTopToTopOf(location)
-                                .alignBottomToBottomOf(location)
-                                .margins(start = 30),
-                            item = ItemStack(Material.KELP),
-                            callback = object : Listener {
-                                override fun invoke() {
-                                    enableCallback.invoke(it, true)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(list)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                text = "${ChatColor.GOLD}Finish",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish",
-                callback = finishedCallback,
-            )
-        }
-    }
-
-    override fun setKitState() {
-        contentView.updateView {
-            val title = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                text = "${ChatColor.BOLD}Set spawn kit",
-                size = 14,
-            )
-
-            val directions = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(title)
-                    .centerHorizontally(),
-                text = "${ChatColor.GRAY}Select a kit from your saved kits.  You can go into the Kits app to create a new kit if none of the existing kits work for you.",
-                lineWidth = 400,
-                size = 6,
-            )
-
-            kitsPager = addPagerView(
-                modifier = Modifier()
-                    .size(800, 200)
-                    .alignTopToBottomOf(directions)
-                    .centerHorizontally()
-                    .margins(top = 50),
-                background = Color.fromARGB(0, 0, 0, 0)
-            )
-
-            val pager = kitsPager ?: return@updateView
-
-            kitTitleView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(pager)
-                    .centerHorizontally()
-                    .margins(top = 30),
-                text = "Kit Title",
-                size = 12,
-            )
-
-            val kitTitle = kitTitleView ?: return@updateView
-
-            kitSelectButton = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitTitle)
-                    .centerHorizontally()
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}Select Kit",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Select Kit",
-            )
-        }
-    }
-
-    override fun setLocationDirectionsState(newSpawn: Location?) {
-        contentView.updateView {
-            val title = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                text = "${ChatColor.BOLD}Set spawn location",
-                size = 14,
-            )
-
-            if (newSpawn == null) {
-                val directions = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(title)
-                        .centerHorizontally(),
-                    text = "${ChatColor.GRAY}Once you're ready, click the \"Capture\" button and a countdown from 3 will begin.  At the end of the countdown, your location and rotation will be captured as the new spawn point and you will have the options to use that as your new server spawn, try again, or cancel.",
-                    lineWidth = 400,
-                    size = 6,
-                )
-
-                captureButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(directions)
-                        .centerHorizontally()
-                        .margins(top = 100),
-                    text = "${ChatColor.GOLD}Capture",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Capture",
-                )
-            } else {
-
-                val directions = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(title)
-                        .centerHorizontally(),
-                    text = "${ChatColor.GRAY}Your location has been captured.  Please click \"Confirm\" to set it as the server's new spawn point or \"Try Again\" to capture a new point.",
-                    lineWidth = 400,
-                    size = 6,
-                )
-
-                val location = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(directions)
-                        .centerHorizontally()
-                        .margins(top = 50),
-                    size = 8,
-                    text = "${ChatColor.BOLD}New Spawn Location\n${ChatColor.RESET}X:${"%.2f".format(newSpawn.x)} Y:${"%.2f".format(newSpawn.y)} Z:${"%.2f".format(newSpawn.z)} Yaw:${"%.2f".format(newSpawn.yaw)} Pitch:${"%.2f".format(newSpawn.pitch)}",
-                )
-
-                confirmLocationButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(location)
-                        .centerHorizontally()
-                        .margins(top = 100),
-                    text = "${ChatColor.GOLD}Confirm",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Confirm",
-                )
-
-                tryAgainButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .x(-500)
-                        .alignTopToBottomOf(location)
-                        .margins(top = 100),
-                    text = "${ChatColor.GOLD}Try Again",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Try Again",
-                )
-
-                cancelButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .x(500)
-                        .alignTopToBottomOf(location)
-                        .margins(top = 100),
-                    text = "${ChatColor.RED}Cancel",
-                    highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Cancel",
-                )
-            }
-        }
-    }
-
-    override fun setSettingsState() {
-        contentView.updateView {
-            addListFeedView(
-                modifier = Modifier()
-                    .size(MATCH_PARENT, MATCH_PARENT)
-                    .center(),
-                background = Color.fromARGB(0, 0, 0, 0),
-            ) {
-                val enableSpawnTitle = addTextView(
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val title = addTextView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignTopToTopOf(this)
-                        .alignStartToStartOf(this),
-                    size = 6,
-                    text = "Enable Spawn",
-                )
-
-                val enableSpawnMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(enableSpawnTitle)
-                        .alignStartToStartOf(enableSpawnTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}Enable this app to use it's custom spawn logic. Spawn controls where new players spawn for the first time, what kits their given, and a custom welcome message.  Spawn also controls custom existing player join and quit messages, respawn logic and teleporting to spawn and previous locations.",
-                )
-
-                enableSpawnButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(enableSpawnTitle)
-                        .alignBottomToTopOf(enableSpawnMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}Off",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Off",
-                )
-
-                val setSpawnTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(enableSpawnMessage)
-                        .alignStartToStartOf(enableSpawnMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Set spawn location",
-                )
-
-                val setSpawnMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setSpawnTitle)
-                        .alignStartToStartOf(setSpawnTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}New players will join the server for the first time, players who teleport to spawn, and players who die and have no other respawn locations set all will be teleported to this location.",
-                )
-
-                setSpawnLocationView = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(setSpawnTitle)
-                        .alignBottomToTopOf(setSpawnMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}No location set",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}No location set",
-                )
-
-                val setWelcomeMessageTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setSpawnMessage)
-                        .alignStartToStartOf(setSpawnMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Set welcome message",
-                )
-
-                val setWelcomeMessageMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setWelcomeMessageTitle)
-                        .alignStartToStartOf(setWelcomeMessageTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}This message will be displayed when a new player joins the server for the first time.  This message supports Placeholder API so you can use placeholders to display the new player's name or any other info.",
-                )
-
-                setWelcomeMessageView = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(setWelcomeMessageTitle)
-                        .alignBottomToTopOf(setWelcomeMessageMessage),
-                    size = 6,
-                    alignment = Alignment.LEFT,
-                    text = "${ChatColor.GOLD}Welcome %player_name% to the server!",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Welcome %player_name% to the server!",
-                )
-
-                val setFirstTimeKitTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setWelcomeMessageMessage)
-                        .alignStartToStartOf(setWelcomeMessageMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Set new player kit",
-                )
-
-                val setFirstTimeKitMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setFirstTimeKitTitle)
-                        .alignStartToStartOf(setFirstTimeKitTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}Players who join the server for the first time will be automatically given the selected kit.",
-                )
-
-                setFirstTimeKitView = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(setFirstTimeKitTitle)
-                        .alignBottomToTopOf(setFirstTimeKitMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}None",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}None",
-                )
-
-                val respawnLocationTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(setFirstTimeKitMessage)
-                        .alignStartToStartOf(setFirstTimeKitMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Respawn location order",
-                )
-
-                val respawnLocationMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(respawnLocationTitle)
-                        .alignStartToStartOf(respawnLocationTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}Set the order for which respawn locations should a player respawn at when they die.  If a player does not have a location set at the top of the respawn order, the rest of the list will be traversed until a location is found.",
-                )
-
-                setRespawnLocationOrderView = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(respawnLocationTitle)
-                        .alignBottomToTopOf(respawnLocationMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}Bed\nSpawn",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Bed\nSpawn",
-                )
-
-                val spawnOnJoinTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(respawnLocationMessage)
-                        .alignStartToStartOf(respawnLocationMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Teleport to spawn on join",
-                )
-
-                val spawnOnJoinMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(spawnOnJoinTitle)
-                        .alignStartToStartOf(spawnOnJoinTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}If set to true, all players will be teleported to spawn every time they join the server.",
-                )
-
-                setSpawnOnJoinView = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(spawnOnJoinTitle)
-                        .alignBottomToTopOf(spawnOnJoinMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}False",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}False",
-                )
-
-                val joinServerMessageTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(spawnOnJoinMessage)
-                        .alignStartToStartOf(spawnOnJoinMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Player joined message",
-                )
-
-                val joinServerMessageMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(joinServerMessageTitle)
-                        .alignStartToStartOf(joinServerMessageTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}This message will be sent to all online players when a player joins the server.  This message also supports Placeholder API.",
-                )
-
-                joinServerView = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(joinServerMessageTitle)
-                        .alignBottomToTopOf(joinServerMessageMessage),
-                    size = 6,
-                    text = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
-                    highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
-                )
-
-                val quitServerMessageTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(joinServerMessageMessage)
-                        .alignStartToStartOf(joinServerMessageMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Player left message",
-                )
-
-                val quitServerMessageMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(quitServerMessageTitle)
-                        .alignStartToStartOf(quitServerMessageTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}This message will be sent to all online players when a player leaves the server.  This message also supports Placeholder API.",
-                )
-
-                quitServerView = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(quitServerMessageTitle)
-                        .alignBottomToTopOf(quitServerMessageMessage),
-                    size = 6,
-                    text = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
-                    highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
-                )
-
-                val cooldownTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(quitServerMessageMessage)
-                        .alignStartToStartOf(quitServerMessageMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Teleport cooldown",
-                )
-
-                val cooldownMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(cooldownTitle)
-                        .alignStartToStartOf(cooldownTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a home before they can teleport again.",
-                )
-
-                cooldownView = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(cooldownTitle)
-                        .alignBottomToTopOf(cooldownMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}0 Seconds",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
-                )
-
-                val delayTitle = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(cooldownMessage)
-                        .alignStartToStartOf(cooldownMessage)
-                        .margins(top = 100),
-                    size = 6,
-                    text = "Teleport delay",
-                )
-
-                val delayMessage = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(delayTitle)
-                        .alignStartToStartOf(delayTitle),
-                    alignment = Alignment.LEFT,
-                    lineWidth = 300,
-                    size = 4,
-                    text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported.",
-                )
-
-                delayView = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .position(600, 0)
-                        .alignTopToBottomOf(delayTitle)
-                        .alignBottomToTopOf(delayMessage),
-                    size = 6,
-                    text = "${ChatColor.GOLD}0 Seconds",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
-                )
-
-
-                messageView = addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(spawnOnJoinMessage)
                         .centerHorizontally()
                         .margins(top = 200),
-                    size = 4,
-                    text = ""
+                    text = "${ChatColor.BOLD}Set spawn kit",
+                    size = 14,
+                )
+
+                val directions = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(title)
+                        .centerHorizontally(),
+                    text = "${ChatColor.GRAY}Select the order of locations to send players after they die and respawn.  Disabling a location will ignore that location when finding a respawn location and if a player does not have a location set, like a home for example, then that location will be skipped as well.",
+                    lineWidth = 400,
+                    size = 6,
+                )
+
+                val disabledRespawns = RespawnType.entries.filter { !respawn.contains(it) }
+
+                val list = addListFeedView(
+                    modifier = Modifier()
+                        .size(400, 300)
+                        .alignTopToBottomOf(directions)
+                        .centerHorizontally()
+                        .margins(top = 50),
+
+                    )
+
+                addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(list)
+                        .centerHorizontally()
+                        .margins(top = 100),
+                    text = "${ChatColor.GOLD}Finish",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish",
+                    callback = finishedCallback,
                 )
             }
+        })
+    }
 
-        }
+    override fun setKitState() {
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val title = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally()
+                        .margins(top = 200),
+                    text = "${ChatColor.BOLD}Set spawn kit",
+                    size = 14,
+                )
+
+                val directions = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(title)
+                        .centerHorizontally(),
+                    text = "${ChatColor.GRAY}Select a kit from your saved kits.  You can go into the Kits app to create a new kit if none of the existing kits work for you.",
+                    lineWidth = 400,
+                    size = 6,
+                )
+
+                kitsPager = addPagerView(
+                    modifier = Modifier()
+                        .size(800, 200)
+                        .alignTopToBottomOf(directions)
+                        .centerHorizontally()
+                        .margins(top = 50),
+                    background = Color.fromARGB(0, 0, 0, 0)
+                )
+
+                val pager = kitsPager ?: return
+
+                kitTitleView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(pager)
+                        .centerHorizontally()
+                        .margins(top = 30),
+                    text = "Kit Title",
+                    size = 12,
+                )
+
+                val kitTitle = kitTitleView ?: return
+
+                kitSelectButton = addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(kitTitle)
+                        .centerHorizontally()
+                        .margins(top = 50),
+                    text = "${ChatColor.GOLD}Select Kit",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Select Kit",
+                )
+            }
+        })
+    }
+
+    override fun setLocationDirectionsState(newSpawn: Location?) {
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val title = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally()
+                        .margins(top = 200),
+                    text = "${ChatColor.BOLD}Set spawn location",
+                    size = 14,
+                )
+
+                if (newSpawn == null) {
+                    val directions = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(title)
+                            .centerHorizontally(),
+                        text = "${ChatColor.GRAY}Once you're ready, click the \"Capture\" button and a countdown from 3 will begin.  At the end of the countdown, your location and rotation will be captured as the new spawn point and you will have the options to use that as your new server spawn, try again, or cancel.",
+                        lineWidth = 400,
+                        size = 6,
+                    )
+
+                    captureButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(directions)
+                            .centerHorizontally()
+                            .margins(top = 100),
+                        text = "${ChatColor.GOLD}Capture",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Capture",
+                    )
+                } else {
+
+                    val directions = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(title)
+                            .centerHorizontally(),
+                        text = "${ChatColor.GRAY}Your location has been captured.  Please click \"Confirm\" to set it as the server's new spawn point or \"Try Again\" to capture a new point.",
+                        lineWidth = 400,
+                        size = 6,
+                    )
+
+                    val location = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(directions)
+                            .centerHorizontally()
+                            .margins(top = 50),
+                        size = 8,
+                        text = "${ChatColor.BOLD}New Spawn Location\n${ChatColor.RESET}X:${"%.2f".format(newSpawn.x)} Y:${"%.2f".format(newSpawn.y)} Z:${"%.2f".format(newSpawn.z)} Yaw:${"%.2f".format(newSpawn.yaw)} Pitch:${"%.2f".format(newSpawn.pitch)}",
+                    )
+
+                    confirmLocationButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(location)
+                            .centerHorizontally()
+                            .margins(top = 100),
+                        text = "${ChatColor.GOLD}Confirm",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Confirm",
+                    )
+
+                    tryAgainButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .x(-500)
+                            .alignTopToBottomOf(location)
+                            .margins(top = 100),
+                        text = "${ChatColor.GOLD}Try Again",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Try Again",
+                    )
+
+                    cancelButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .x(500)
+                            .alignTopToBottomOf(location)
+                            .margins(top = 100),
+                        text = "${ChatColor.RED}Cancel",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Cancel",
+                    )
+                }
+            }
+        })
+    }
+
+    override fun setSettingsState() {
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                addListFeedView(
+                    modifier = Modifier()
+                        .size(MATCH_PARENT, MATCH_PARENT)
+                        .center(),
+                    background = Color.fromARGB(0, 0, 0, 0),
+                    content = object : ContextListener<ViewContainer>() {
+                        override fun ViewContainer.invoke() {
+                            val enableSpawnTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToTopOf(this)
+                                    .alignStartToStartOf(this),
+                                size = 6,
+                                text = "Enable Spawn",
+                            )
+
+                            val enableSpawnMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(enableSpawnTitle)
+                                    .alignStartToStartOf(enableSpawnTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}Enable this app to use it's custom spawn logic. Spawn controls where new players spawn for the first time, what kits their given, and a custom welcome message.  Spawn also controls custom existing player join and quit messages, respawn logic and teleporting to spawn and previous locations.",
+                            )
+
+                            enableSpawnButton = addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(enableSpawnTitle)
+                                    .alignBottomToTopOf(enableSpawnMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}Off",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Off",
+                            )
+
+                            val setSpawnTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(enableSpawnMessage)
+                                    .alignStartToStartOf(enableSpawnMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Set spawn location",
+                            )
+
+                            val setSpawnMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setSpawnTitle)
+                                    .alignStartToStartOf(setSpawnTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}New players will join the server for the first time, players who teleport to spawn, and players who die and have no other respawn locations set all will be teleported to this location.",
+                            )
+
+                            setSpawnLocationView = addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(setSpawnTitle)
+                                    .alignBottomToTopOf(setSpawnMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}No location set",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}No location set",
+                            )
+
+                            val setWelcomeMessageTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setSpawnMessage)
+                                    .alignStartToStartOf(setSpawnMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Set welcome message",
+                            )
+
+                            val setWelcomeMessageMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setWelcomeMessageTitle)
+                                    .alignStartToStartOf(setWelcomeMessageTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}This message will be displayed when a new player joins the server for the first time.  This message supports Placeholder API so you can use placeholders to display the new player's name or any other info.",
+                            )
+
+                            setWelcomeMessageView = addTextInputView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(setWelcomeMessageTitle)
+                                    .alignBottomToTopOf(setWelcomeMessageMessage),
+                                size = 6,
+                                alignment = Alignment.LEFT,
+                                text = "${ChatColor.GOLD}Welcome %player_name% to the server!",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Welcome %player_name% to the server!",
+                            )
+
+                            val setFirstTimeKitTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setWelcomeMessageMessage)
+                                    .alignStartToStartOf(setWelcomeMessageMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Set new player kit",
+                            )
+
+                            val setFirstTimeKitMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setFirstTimeKitTitle)
+                                    .alignStartToStartOf(setFirstTimeKitTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}Players who join the server for the first time will be automatically given the selected kit.",
+                            )
+
+                            setFirstTimeKitView = addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(setFirstTimeKitTitle)
+                                    .alignBottomToTopOf(setFirstTimeKitMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}None",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}None",
+                            )
+
+                            val respawnLocationTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(setFirstTimeKitMessage)
+                                    .alignStartToStartOf(setFirstTimeKitMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Respawn location order",
+                            )
+
+                            val respawnLocationMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(respawnLocationTitle)
+                                    .alignStartToStartOf(respawnLocationTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}Set the order for which respawn locations should a player respawn at when they die.  If a player does not have a location set at the top of the respawn order, the rest of the list will be traversed until a location is found.",
+                            )
+
+                            setRespawnLocationOrderView = addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(respawnLocationTitle)
+                                    .alignBottomToTopOf(respawnLocationMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}Bed\nSpawn",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Bed\nSpawn",
+                            )
+
+                            val spawnOnJoinTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(respawnLocationMessage)
+                                    .alignStartToStartOf(respawnLocationMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Teleport to spawn on join",
+                            )
+
+                            val spawnOnJoinMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(spawnOnJoinTitle)
+                                    .alignStartToStartOf(spawnOnJoinTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}If set to true, all players will be teleported to spawn every time they join the server.",
+                            )
+
+                            setSpawnOnJoinView = addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(spawnOnJoinTitle)
+                                    .alignBottomToTopOf(spawnOnJoinMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}False",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}False",
+                            )
+
+                            val joinServerMessageTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(spawnOnJoinMessage)
+                                    .alignStartToStartOf(spawnOnJoinMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Player joined message",
+                            )
+
+                            val joinServerMessageMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(joinServerMessageTitle)
+                                    .alignStartToStartOf(joinServerMessageTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}This message will be sent to all online players when a player joins the server.  This message also supports Placeholder API.",
+                            )
+
+                            joinServerView = addTextInputView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(joinServerMessageTitle)
+                                    .alignBottomToTopOf(joinServerMessageMessage),
+                                size = 6,
+                                text = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
+                                highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
+                            )
+
+                            val quitServerMessageTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(joinServerMessageMessage)
+                                    .alignStartToStartOf(joinServerMessageMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Player left message",
+                            )
+
+                            val quitServerMessageMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(quitServerMessageTitle)
+                                    .alignStartToStartOf(quitServerMessageTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}This message will be sent to all online players when a player leaves the server.  This message also supports Placeholder API.",
+                            )
+
+                            quitServerView = addTextInputView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(quitServerMessageTitle)
+                                    .alignBottomToTopOf(quitServerMessageMessage),
+                                size = 6,
+                                text = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
+                                highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
+                            )
+
+                            val cooldownTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(quitServerMessageMessage)
+                                    .alignStartToStartOf(quitServerMessageMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Teleport cooldown",
+                            )
+
+                            val cooldownMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(cooldownTitle)
+                                    .alignStartToStartOf(cooldownTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a home before they can teleport again.",
+                            )
+
+                            cooldownView = addTextInputView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(cooldownTitle)
+                                    .alignBottomToTopOf(cooldownMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}0 Seconds",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                            )
+
+                            val delayTitle = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(cooldownMessage)
+                                    .alignStartToStartOf(cooldownMessage)
+                                    .margins(top = 100),
+                                size = 6,
+                                text = "Teleport delay",
+                            )
+
+                            val delayMessage = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(delayTitle)
+                                    .alignStartToStartOf(delayTitle),
+                                alignment = Alignment.LEFT,
+                                lineWidth = 300,
+                                size = 4,
+                                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported.",
+                            )
+
+                            delayView = addTextInputView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .position(600, 0)
+                                    .alignTopToBottomOf(delayTitle)
+                                    .alignBottomToTopOf(delayMessage),
+                                size = 6,
+                                text = "${ChatColor.GOLD}0 Seconds",
+                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                            )
+
+
+                            messageView = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignTopToBottomOf(spawnOnJoinMessage)
+                                    .centerHorizontally()
+                                    .margins(top = 200),
+                                size = 4,
+                                text = ""
+                            )
+                        }
+                    }
+                )
+            }
+        })
     }
 
     override fun setEnabledText(text: String) {
@@ -853,7 +768,7 @@ interface SpawnConfigPresenter: Presenter {
     fun setRespawnListState(respawn: List<RespawnType>, finishedCallback: Listener)
     fun setRespawnCallbacks(priorityCallback: (RespawnType, PriorityDirection) -> Unit, enableCallback: (RespawnType, Boolean) -> Unit)
     fun setKitAdapter(adapter: PagerViewAdapter)
-    fun setPagerListener(listener: (Int) -> Unit)
+    fun setPagerListener(listener: PageListener)
     fun setKitTitle(title: String)
     fun setSelectKitListener(listener: Listener)
 }
@@ -1024,10 +939,12 @@ class SpawnConfigInteractor(
 
                 presenter.setKitTitle(selectedKit.name)
 
-                presenter.setPagerListener {
-                    selectedKit = kitRepository.getKits()[it]
-                    presenter.setKitTitle(selectedKit.name)
-                }
+                presenter.setPagerListener(object : PageListener {
+                    override fun invoke(page: Int) {
+                        selectedKit = kitRepository.getKits()[page]
+                        presenter.setKitTitle(selectedKit.name)
+                    }
+                })
 
                 presenter.setSelectKitListener(object : Listener {
                     override fun invoke() {
@@ -1116,14 +1033,16 @@ class SpawnKitPagerAdapter(private val kitRepository: KitRepository): PagerViewA
         val kits = kitRepository.getKits()
         if (kits.isEmpty()) return
 
-        parent.updateView {
-            addItemView(
-                modifier = Modifier()
-                    .size(150, 150)
-                    .center(),
-                item = Material.valueOf(kits[index].icon)
-            )
-        }
+        parent.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                addItemView(
+                    modifier = Modifier()
+                        .size(150, 150)
+                        .center(),
+                    item = Material.valueOf(kits[index].icon)
+                )
+            }
+        })
     }
 
 }

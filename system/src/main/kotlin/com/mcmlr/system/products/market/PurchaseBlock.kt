@@ -2,6 +2,7 @@ package com.mcmlr.system.products.market
 
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -69,141 +70,144 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                 .alignTopToBottomOf(pageTitle)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            head = addItemView(
-                modifier = Modifier()
-                    .size(80, 80)
-                    .alignTopToTopOf(this)
-                    .alignStartToStartOf(this)
-                    .margins(start = 250, top = 350),
-                item = Material.AIR
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    head = addItemView(
+                        modifier = Modifier()
+                            .size(80, 80)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this)
+                            .margins(start = 250, top = 350),
+                        item = Material.AIR
+                    )
 
-            name = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(head)
-                    .alignStartToEndOf(head)
-                    .margins(start = 100, top = -50),
-                text = "",
-                size = 6,
-            )
+                    name = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(head)
+                            .alignStartToEndOf(head)
+                            .margins(start = 100, top = -50),
+                        text = "",
+                        size = 6,
+                    )
 
-            sellerHead = addItemView(
-                modifier = Modifier()
-                    .size(40, 40)
-                    .alignStartToEndOf(name)
-                    .alignTopToBottomOf(name),
-                item = Material.AIR,
-            )
+                    sellerHead = addItemView(
+                        modifier = Modifier()
+                            .size(40, 40)
+                            .alignStartToEndOf(name)
+                            .alignTopToBottomOf(name),
+                        item = Material.AIR,
+                    )
 
-            sellerName = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(sellerHead)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 10),
-                text = "",
-                size = 5,
-            )
+                    sellerName = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToEndOf(sellerHead)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 10),
+                        text = "",
+                        size = 5,
+                    )
 
-            quantity = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(head)
-                    .alignBottomToBottomOf(name)
-                    .margins(start = 800, top = 150),
-                text = "",
-                size = 7,
-            )
+                    quantity = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToEndOf(head)
+                            .alignBottomToBottomOf(name)
+                            .margins(start = 800, top = 150),
+                        text = "",
+                        size = 7,
+                    )
 
-            price = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(quantity)
-                    .alignStartToStartOf(quantity)
-                    .margins(top = 0),
-                text = "",
-                size = 7,
-            )
+                    price = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(quantity)
+                            .alignStartToStartOf(quantity)
+                            .margins(top = 0),
+                        text = "",
+                        size = 7,
+                    )
 
 
-            quantityInput = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(price)
-                    .centerHorizontally()
-                    .margins(top = 400),
-                text = "${ChatColor.GRAY}Quantity",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
-            )
+                    quantityInput = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(price)
+                            .centerHorizontally()
+                            .margins(top = 400),
+                        text = "${ChatColor.GRAY}Quantity",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
+                    )
 
-            add = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(quantityInput)
-                    .alignBottomToBottomOf(quantityInput)
-                    .alignStartToEndOf(quantityInput)
-                    .margins(start = 300),
-                text = "${ChatColor.GOLD}+",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
-            )
+                    add = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(quantityInput)
+                            .alignBottomToBottomOf(quantityInput)
+                            .alignStartToEndOf(quantityInput)
+                            .margins(start = 300),
+                        text = "${ChatColor.GOLD}+",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
+                    )
 
-            max = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(add)
-                    .alignBottomToBottomOf(add)
-                    .alignStartToEndOf(add)
-                    .margins(start = 40),
-                text = "${ChatColor.GOLD}Max",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
-            )
+                    max = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(add)
+                            .alignBottomToBottomOf(add)
+                            .alignStartToEndOf(add)
+                            .margins(start = 40),
+                        text = "${ChatColor.GOLD}Max",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
+                    )
 
-            subtract = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(quantityInput)
-                    .alignBottomToBottomOf(quantityInput)
-                    .alignEndToStartOf(quantityInput)
-                    .margins(end = 300),
-                text = "${ChatColor.GOLD}-",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
-            )
+                    subtract = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(quantityInput)
+                            .alignBottomToBottomOf(quantityInput)
+                            .alignEndToStartOf(quantityInput)
+                            .margins(end = 300),
+                        text = "${ChatColor.GOLD}-",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
+                    )
 
-            zero = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(subtract)
-                    .alignBottomToBottomOf(subtract)
-                    .alignEndToStartOf(subtract)
-                    .margins(end = 40),
-                text = "${ChatColor.GOLD}Zero",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
-            )
+                    zero = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(subtract)
+                            .alignBottomToBottomOf(subtract)
+                            .alignEndToStartOf(subtract)
+                            .margins(end = 40),
+                        text = "${ChatColor.GOLD}Zero",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
+                    )
 
-            purchase = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(quantityInput)
-                    .centerHorizontally()
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}Purchase",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Purchase",
-            )
+                    purchase = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(quantityInput)
+                            .centerHorizontally()
+                            .margins(top = 50),
+                        text = "${ChatColor.GOLD}Purchase",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Purchase",
+                    )
 
-            message = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(purchase)
-                    .centerHorizontally()
-                    .margins(top = 25),
-                size = 4,
-                alignment = Alignment.LEFT,
-                text = "",
-            )
-        }
+                    message = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(purchase)
+                            .centerHorizontally()
+                            .margins(top = 25),
+                        size = 4,
+                        alignment = Alignment.LEFT,
+                        text = "",
+                    )
+                }
+            }
+        )
     }
 
     override fun setPurchaseResult(success: Boolean, material: Material, order: Order, onFinish: Listener) {
@@ -219,38 +223,39 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         var titleView: TextView
         var errorMessageView: TextView
 
-        content.updateView {
-            titleView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(pageTitle),
-                text = "${ChatColor.DARK_RED}${ChatColor.BOLD}Purchase failed...",
-                size = 24,
-            )
+        content.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                titleView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .centerHorizontally()
+                        .alignTopToBottomOf(pageTitle),
+                    text = "${ChatColor.DARK_RED}${ChatColor.BOLD}Purchase failed...",
+                    size = 24,
+                )
 
-            errorMessageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(titleView)
-                    .margins(top = 100),
-                text = "Something happened to the listing and is no longer available for purchase.",
-                alignment = Alignment.LEFT,
-            )
+                errorMessageView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .centerHorizontally()
+                        .alignTopToBottomOf(titleView)
+                        .margins(top = 100),
+                    text = "Something happened to the listing and is no longer available for purchase.",
+                    alignment = Alignment.LEFT,
+                )
 
-            addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(errorMessageView)
-                    .centerHorizontally()
-                    .margins(top = 350),
-                text = "${ChatColor.GOLD}Continue",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
-                callback = onFinish,
-            )
-
-        }
+                addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(errorMessageView)
+                        .centerHorizontally()
+                        .margins(top = 350),
+                    text = "${ChatColor.GOLD}Continue",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    callback = onFinish,
+                )
+            }
+        })
     }
 
     private fun showPurchaseSuccess(material: Material, order: Order, onFinish: Listener) {
@@ -260,67 +265,68 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         var quantityView: TextView
         var priceView: TextView
 
-        content.updateView {
-            titleView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(pageTitle),
-                text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Purchase Complete!",
-                size = 24,
-            )
+        content.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                titleView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .centerHorizontally()
+                        .alignTopToBottomOf(pageTitle),
+                    text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Purchase Complete!",
+                    size = 24,
+                )
 
-            materialView = addItemView(
-                modifier = Modifier()
-                    .size(120, 120)
-                    .alignStartToStartOf(titleView)
-                    .alignTopToBottomOf(titleView)
-                    .margins(top = 300, start = 600),
-                item = ItemStack(material)
-            )
+                materialView = addItemView(
+                    modifier = Modifier()
+                        .size(120, 120)
+                        .alignStartToStartOf(titleView)
+                        .alignTopToBottomOf(titleView)
+                        .margins(top = 300, start = 600),
+                    item = ItemStack(material)
+                )
 
-            materialNameView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(materialView)
-                    .alignTopToTopOf(materialView)
-                    .margins(start = 150),
-                text = material.name.fromMCItem(),
-            )
+                materialNameView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(materialView)
+                        .alignTopToTopOf(materialView)
+                        .margins(start = 150),
+                    text = material.name.fromMCItem(),
+                )
 
-            quantityView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(materialView)
-                    .alignTopToBottomOf(materialNameView)
-                    .margins(start = 150),
-                text = "${ChatColor.GRAY}Amount: ${order.quantity}",
-                size = 8,
-            )
+                quantityView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(materialView)
+                        .alignTopToBottomOf(materialNameView)
+                        .margins(start = 150),
+                    text = "${ChatColor.GRAY}Amount: ${order.quantity}",
+                    size = 8,
+                )
 
-            priceView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(quantityView)
-                    .alignTopToBottomOf(materialNameView)
-                    .alignBottomToTopOf(quantityView)
-                    .margins(start = 500),
-                text = "$${"%.2f".format((order.quantity * order.price) / 100f)}",
-                size = 14,
-            )
+                priceView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(quantityView)
+                        .alignTopToBottomOf(materialNameView)
+                        .alignBottomToTopOf(quantityView)
+                        .margins(start = 500),
+                    text = "$${"%.2f".format((order.quantity * order.price) / 100f)}",
+                    size = 14,
+                )
 
-            addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(priceView)
-                    .centerHorizontally()
-                    .margins(top = 150),
-                text = "${ChatColor.GOLD}Continue",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
-                callback = onFinish,
-            )
-
-        }
+                addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(priceView)
+                        .centerHorizontally()
+                        .margins(top = 150),
+                    text = "${ChatColor.GOLD}Continue",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    callback = onFinish,
+                )
+            }
+        })
     }
 
     override fun setOrder(material: Material, order: Order) {

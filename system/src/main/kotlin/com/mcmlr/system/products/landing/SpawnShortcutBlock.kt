@@ -1,12 +1,14 @@
 package com.mcmlr.system.products.landing
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.data.PermissionNode
 import com.mcmlr.system.products.data.PermissionsRepository
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
@@ -80,29 +82,32 @@ class SpawnShortcutViewController(
                 .alignBottomToBottomOf(this)
                 .margins(top = 20),
             background = Color.fromARGB(0, 0, 0, 0),
-        ) {
-            if (spawnRepository.model.enabled) {
-                spawn = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignStartToStartOf(this),
-                    text = "${ChatColor.GOLD}Spawn",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
-                    size = 8,
-                )
-            }
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    if (spawnRepository.model.enabled) {
+                        spawn = addButtonView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignStartToStartOf(this),
+                            text = "${ChatColor.GOLD}Spawn",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
+                            size = 8,
+                        )
+                    }
 
-            if (permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
-                back = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignStartToStartOf(this),
-                    text = "${ChatColor.GOLD}Back",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                    size = 8,
-                )
+                    if (permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
+                        back = addButtonView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignStartToStartOf(this),
+                            text = "${ChatColor.GOLD}Back",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                            size = 8,
+                        )
+                    }
+                }
             }
-        }
+        )
 
     }
 }

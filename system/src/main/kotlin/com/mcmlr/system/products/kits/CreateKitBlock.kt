@@ -3,6 +3,7 @@ package com.mcmlr.system.products.kits
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.EmptyTextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -74,36 +75,38 @@ class CreateKitViewController(
     private var commandListener: TextListener = EmptyTextListener()
 
     override fun setIsEditing(isEditing: Boolean) {
-        ctaContainer.updateView {
-            if (isEditing) {
-                editKitButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .alignStartToStartOf(this),
-                    text = "${ChatColor.GOLD}Update Kit",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update Kit",
-                )
+        ctaContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (isEditing) {
+                    editKitButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this),
+                        text = "${ChatColor.GOLD}Update Kit",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update Kit",
+                    )
 
-                deleteKitButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .alignEndToEndOf(this),
-                    text = "${ChatColor.RED}Delete Kit",
-                    highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete Kit",
-                )
-            } else {
-                createKitButton = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally(),
-                    text = "${ChatColor.GOLD}Create Kit",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Kit",
-                )
+                    deleteKitButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .alignEndToEndOf(this),
+                        text = "${ChatColor.RED}Delete Kit",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete Kit",
+                    )
+                } else {
+                    createKitButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally(),
+                        text = "${ChatColor.GOLD}Create Kit",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Kit",
+                    )
+                }
             }
-        }
+        })
     }
 
     override fun setCreateKitListener(listener: Listener) {
@@ -129,9 +132,8 @@ class CreateKitViewController(
 
     override fun setKitContents(items: List<KitItem>, commands: List<String>) {
 
-        kitContents.updateView {
-
-            items.forEach {
+        kitContents.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {            items.forEach {
 //                @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
 //                    Material.valueOf(it.material).keyOrNull
 //                } else {
@@ -144,78 +146,85 @@ class CreateKitViewController(
                     modifier = Modifier()
                         .size(MATCH_PARENT, 35),
                     background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val icon = addItemView(
-                        modifier = Modifier()
-                            .size(30, 30)
-                            .alignStartToStartOf(this)
-                            .centerVertically(),
-                        item = Bukkit.getItemFactory().createItemStack("$key${it.meta}"),
-                    )
+                    content = object : ContextListener<ViewContainer>() {
+                        override fun ViewContainer.invoke() {
+                            val icon = addItemView(
+                                modifier = Modifier()
+                                    .size(30, 30)
+                                    .alignStartToStartOf(this)
+                                    .centerVertically(),
+                                item = Bukkit.getItemFactory().createItemStack("$key${it.meta}"),
+                            )
 
-                    val name = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .centerVertically()
-                            .margins(start = 10),
-                        text = "${it.amount} x ${it.material.fromMCItem()}",
-                        size = 4,
-                    )
+                            val name = addTextView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignStartToEndOf(icon)
+                                    .centerVertically()
+                                    .margins(start = 10),
+                                text = "${it.amount} x ${it.material.fromMCItem()}",
+                                size = 4,
+                            )
 
-                    addButtonView(
+                            addButtonView(
+                                modifier = Modifier()
+                                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                                    .alignStartToEndOf(name)
+                                    .centerVertically()
+                                    .margins(start = 10),
+                                text = "✖",
+                                highlightedText = "${ChatColor.RED}✖",
+                                size = 4,
+                                callback = object : Listener {
+                                    override fun invoke() {
+                                        itemListener.invoke(it)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
+            }
+
+                commands.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(name)
-                            .centerVertically()
-                            .margins(start = 10),
-                        text = "✖",
-                        highlightedText = "${ChatColor.RED}✖",
-                        size = 4,
-                        callback = object : Listener {
-                            override fun invoke() {
-                                itemListener.invoke(it)
+                            .size(MATCH_PARENT, 35),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val command = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically(),
+                                    text = "/$it",
+                                    size = 4,
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 150,
+                                )
+
+                                addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(command)
+                                        .centerVertically()
+                                        .margins(start = 10),
+                                    text = "✖",
+                                    highlightedText = "${ChatColor.RED}✖",
+                                    size = 4,
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            commandListener.invoke(it)
+                                        }
+                                    }
+                                )
                             }
                         }
                     )
                 }
             }
-
-            commands.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 35),
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val command = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically(),
-                        text = "/$it",
-                        size = 4,
-                        alignment = Alignment.LEFT,
-                        lineWidth = 150,
-                    )
-
-                    addButtonView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(command)
-                            .centerVertically()
-                            .margins(start = 10),
-                        text = "✖",
-                        highlightedText = "${ChatColor.RED}✖",
-                        size = 4,
-                        callback = object : Listener {
-                            override fun invoke() {
-                                commandListener.invoke(it)
-                            }
-                        }
-                    )
-                }
-            }
-        }
+        })
 
     }
 
@@ -246,24 +255,26 @@ class CreateKitViewController(
     }
 
     override fun setIcon(icon: Material?) {
-        iconContainer.updateView {
-            if (icon == null) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .center(),
-                    text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
-                    size = 7,
-                )
-            } else {
-                addItemView(
-                    modifier = Modifier()
-                        .size(100, 100)
-                        .center(),
-                    item = icon
-                )
+        iconContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (icon == null) {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
+                        size = 7,
+                    )
+                } else {
+                    addItemView(
+                        modifier = Modifier()
+                            .size(100, 100)
+                            .center(),
+                        item = icon
+                    )
+                }
             }
-        }
+        })
     }
 
     override fun setNameListener(listener: TextListener) = kitName.addTextChangedListener(listener)
@@ -295,16 +306,19 @@ class CreateKitViewController(
                 override fun invoke() {
                     iconListener.invoke()
                 }
+            },
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
+                        size = 7,
+                    )
+                }
             }
-        ) {
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
-                size = 7,
-            )
-        }
+        )
 
         val addKitContainer = addViewContainer(
             modifier = Modifier()
@@ -312,99 +326,102 @@ class CreateKitViewController(
                 .alignTopToBottomOf(iconContainer)
                 .alignBottomToBottomOf(this)
                 .margins(top = 75, bottom = 400),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            kitName = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally(),
-                text = "Set Kit Name",
-                teleportDuration = 0,
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    kitName = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally(),
+                        text = "Set Kit Name",
+                        teleportDuration = 0,
+                    )
 
-            kitPrice = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .alignTopToBottomOf(kitName)
-                    .margins(top = 50, start = 50),
-                text = "Set Kit Price",
-                teleportDuration = 0,
-            )
+                    kitPrice = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .alignTopToBottomOf(kitName)
+                            .margins(top = 50, start = 50),
+                        text = "Set Kit Price",
+                        teleportDuration = 0,
+                    )
 
-            kitCooldown = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitPrice)
-                    .alignStartToStartOf(kitPrice)
-                    .margins(top = 40),
-                text = "Set Kit Cooldown",
-                size = 6,
-                teleportDuration = 0,
-            )
+                    kitCooldown = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitPrice)
+                            .alignStartToStartOf(kitPrice)
+                            .margins(top = 40),
+                        text = "Set Kit Cooldown",
+                        size = 6,
+                        teleportDuration = 0,
+                    )
 
-            val cooldownSubtitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitCooldown)
-                    .alignStartToStartOf(kitCooldown),
-                text = "${ChatColor.GRAY}Setting the cooldown to a negative number makes the kit single use.",
-                teleportDuration = 0,
-                lineWidth = 400,
-                size = 3,
-            )
+                    val cooldownSubtitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitCooldown)
+                            .alignStartToStartOf(kitCooldown),
+                        text = "${ChatColor.GRAY}Setting the cooldown to a negative number makes the kit single use.",
+                        teleportDuration = 0,
+                        lineWidth = 400,
+                        size = 3,
+                    )
 
-            kitDescription = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(cooldownSubtitle)
-                    .alignStartToStartOf(cooldownSubtitle)
-                    .margins(top = 40),
-                text = "Set Kit Description",
-                teleportDuration = 0,
-                size = 6,
-            )
+                    kitDescription = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(cooldownSubtitle)
+                            .alignStartToStartOf(cooldownSubtitle)
+                            .margins(top = 40),
+                        text = "Set Kit Description",
+                        teleportDuration = 0,
+                        size = 6,
+                    )
 
-            val kitListTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitName)
-                    .alignEndToEndOf(this)
-                    .margins(top = 50, end = 200),
-                text = "${ChatColor.BOLD}Kit Contents",
-                size = 6,
-            )
+                    val kitListTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitName)
+                            .alignEndToEndOf(this)
+                            .margins(top = 50, end = 200),
+                        text = "${ChatColor.BOLD}Kit Contents",
+                        size = 6,
+                    )
 
-            kitContents = addListFeedView(
-                modifier = Modifier()
-                    .size(300, 250)
-                    .alignTopToBottomOf(kitListTitle)
-                    .alignStartToStartOf(kitListTitle)
-                    .margins(top = 20),
-            )
+                    kitContents = addListFeedView(
+                        modifier = Modifier()
+                            .size(300, 250)
+                            .alignTopToBottomOf(kitListTitle)
+                            .alignStartToStartOf(kitListTitle)
+                            .margins(top = 20),
+                    )
 
-            addItemButton = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitContents)
-                    .alignStartToStartOf(kitContents),
-                text = "${ChatColor.GOLD}+ Add Item",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Item",
-                size = 5
-            )
+                    addItemButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitContents)
+                            .alignStartToStartOf(kitContents),
+                        text = "${ChatColor.GOLD}+ Add Item",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Item",
+                        size = 5
+                    )
 
-            addCommandButton = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitContents)
-                    .alignStartToEndOf(addItemButton)
-                    .margins(start = 50),
-                text = "${ChatColor.GOLD}+ Add Command",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Command",
-                size = 5,
-            )
-        }
+                    addCommandButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitContents)
+                            .alignStartToEndOf(addItemButton)
+                            .margins(start = 50),
+                        text = "${ChatColor.GOLD}+ Add Command",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Command",
+                        size = 5,
+                    )
+                }
+            }
+        )
 
         ctaContainer = addViewContainer(
             modifier = Modifier()

@@ -3,6 +3,7 @@ package com.mcmlr.system.products.homes
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -74,24 +75,27 @@ class AddHomeViewController(
                 .alignBottomToBottomOf(homeNameButton)
                 .margins(start = 50),
             background = Color.fromARGB(0x00000000),
-        ) {
-            homeIconButton = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                size = 6,
-                text = "${ChatColor.GRAY}Select\nIcon...",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
-            )
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    homeIconButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        size = 6,
+                        text = "${ChatColor.GRAY}Select\nIcon...",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
+                    )
 
-            homeIconItemButton = addItemButtonView(
-                modifier = Modifier()
-                    .size(55, 55)
-                    .center(),
-                item = null,
-                visible = false,
-            )
-        }
+                    homeIconItemButton = addItemButtonView(
+                        modifier = Modifier()
+                            .size(55, 55)
+                            .center(),
+                        item = null,
+                        visible = false,
+                    )
+                }
+            }
+        )
 
         actionButton = addButtonView(
             modifier = Modifier()

@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -57,59 +58,62 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
                 .alignTopToBottomOf(title)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            head = addItemView(
-                modifier = Modifier()
-                    .size(280, 280)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                item = ItemStack(Material.PLAYER_HEAD)
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    head = addItemView(
+                        modifier = Modifier()
+                            .size(280, 280)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        item = ItemStack(Material.PLAYER_HEAD)
+                    )
 
-            name = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(head)
-                    .margins(top = 300),
-                text = "Player name"
-            )
+                    name = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .centerHorizontally()
+                            .alignTopToBottomOf(head)
+                            .margins(top = 300),
+                        text = "Player name"
+                    )
 
-            tpa = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(-400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}Teleport\nto them",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto them",
-            )
+                    tpa = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(-400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.GOLD}Teleport\nto them",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto them",
+                    )
 
-            tpahere = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}Teleport\nto you",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto you",
-            )
+                    tpahere = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.GOLD}Teleport\nto you",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto you",
+                    )
 
-            statusMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(tpa)
-                    .centerHorizontally()
-                    .margins(top = 50),
-                text = "",
-                size = 4,
-                visible = false,
-            )
+                    statusMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(tpa)
+                            .centerHorizontally()
+                            .margins(top = 50),
+                        text = "",
+                        size = 4,
+                        visible = false,
+                    )
 
-            spin(head)
-        }
+                    spin(head)
+                }
+            }
+        )
     }
 
     override fun setPlayer(playerHead: ItemStack, playerName: String) {

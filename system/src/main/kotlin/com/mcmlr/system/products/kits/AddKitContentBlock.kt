@@ -3,6 +3,7 @@ package com.mcmlr.system.products.kits
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
@@ -84,24 +85,26 @@ class AddKitContentViewController(
     }
 
     override fun setIcon(icon: ItemStack?) {
-        itemContainer.updateView {
-            if (icon == null) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .center(),
-                    text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
-                    size = 7,
-                )
-            } else {
-                addItemView(
-                    modifier = Modifier()
-                        .size(100, 100)
-                        .center(),
-                    item = icon
-                )
+        itemContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (icon == null) {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
+                        size = 7,
+                    )
+                } else {
+                    addItemView(
+                        modifier = Modifier()
+                            .size(100, 100)
+                            .center(),
+                        item = icon
+                    )
+                }
             }
-        }
+        })
     }
 
     override fun createView() {
@@ -128,36 +131,42 @@ class AddKitContentViewController(
                     .centerHorizontally()
                     .margins(top = 200),
                 background = Color.fromARGB(0, 0, 0, 0),
-            ) {
-                itemContainer = addViewContainer(
-                    modifier = Modifier()
-                        .size(200, 200)
-                        .alignTopToTopOf(this),
-                    clickable = true,
-                    listener = object : Listener {
-                        override fun invoke() {
-                            iconListener.invoke()
-                        }
-                    }
-                ) {
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .center(),
-                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
-                        size = 7,
-                    )
-                }
+                content = object : ContextListener<ViewContainer>() {
+                    override fun ViewContainer.invoke() {
+                        itemContainer = addViewContainer(
+                            modifier = Modifier()
+                                .size(200, 200)
+                                .alignTopToTopOf(this),
+                            clickable = true,
+                            listener = object : Listener {
+                                override fun invoke() {
+                                    iconListener.invoke()
+                                }
+                            },
+                            content = object : ContextListener<ViewContainer>() {
+                                override fun ViewContainer.invoke() {
+                                    addTextView(
+                                        modifier = Modifier()
+                                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                                            .center(),
+                                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
+                                        size = 7,
+                                    )
+                                }
+                            }
+                        )
 
-                quantityTextInput = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(itemContainer)
-                        .centerHorizontally()
-                        .margins(top = 50),
-                    text = "Set quantity",
-                )
-            }
+                        quantityTextInput = addTextInputView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignTopToBottomOf(itemContainer)
+                                .centerHorizontally()
+                                .margins(top = 50),
+                            text = "Set quantity",
+                        )
+                    }
+                }
+            )
         } else {
             content = addViewContainer(
                 modifier = Modifier()
@@ -166,15 +175,18 @@ class AddKitContentViewController(
                     .centerHorizontally()
                     .margins(top = 300),
                 background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                commandTextInput = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .center()
-                        .margins(top = 50),
-                    text = "Set command",
-                )
-            }
+                content = object : ContextListener<ViewContainer>() {
+                    override fun ViewContainer.invoke() {
+                        commandTextInput = addTextInputView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .center()
+                                .margins(top = 50),
+                            text = "Set command",
+                        )
+                    }
+                }
+            )
         }
 
         val addButtonText = if (showItem) "Add Item" else "Add Command"

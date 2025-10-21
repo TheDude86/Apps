@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -11,6 +12,7 @@ import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -61,62 +63,67 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
     }
 
     private fun updateAppsFeed() {
-        appsFeed.updateView {
-            appList.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    clickable = true,
-                    listener = object : Listener {
-                        override fun invoke() {
-                            enabledAppCallback.invoke(it)
+        appsFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                appList.forEach {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 100),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                enabledAppCallback.invoke(it)
+                            }
+                        },
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val selected = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 50),
+                                    text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
+                                )
+
+                                appFeedContainers[it.app.name()] = selected
+
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 150),
+                                    item = it.app.getAppIcon()
+                                )
+
+                                val appName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(this)
+                                        .margins(start = 50, top = 20),
+                                    text = it.app.name(),
+                                    size = 6,
+                                )
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignTopToBottomOf(appName)
+                                        .alignStartToStartOf(appName)
+                                        .margins(top = 10),
+                                    text = it.app.summary(),
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 250,
+                                    size = 4,
+                                )
+                            }
                         }
-                    }
-                ) {
-                    val selected = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 50),
-                        text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
-                    )
-
-                    appFeedContainers[it.app.name()] = selected
-
-                    val icon = addItemView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 150),
-                        item = it.app.getAppIcon()
-                    )
-
-                    val appName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(this)
-                            .margins(start = 50, top = 20),
-                        text = it.app.name(),
-                        size = 6,
-                    )
-
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(appName)
-                            .alignStartToStartOf(appName)
-                            .margins(top = 10),
-                        text = it.app.summary(),
-                        alignment = Alignment.LEFT,
-                        lineWidth = 250,
-                        size = 4,
                     )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {

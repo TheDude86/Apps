@@ -1,12 +1,12 @@
 package com.mcmlr.blocks.api.views
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.ViewController
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -148,14 +148,14 @@ open class ViewContainer(
     }
 
     open fun updateView(
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ) {
         dudeDisplay?.remove()
         corners.forEach { it.remove() }
         children.forEach { it.clear() }
         corners = listOf()
         children.clear()
-        content.invoke(this)
+        content.invokeContext(this)
         render()
     }
 
@@ -172,14 +172,14 @@ open class ViewContainer(
         modifier: Modifier,
         background: Color = Color.fromARGB(0x40000000),
         height: Int = 0,
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): PagerView {
         val view = PagerView(modifier, background, height = height)
 
         view.attach(this)
         children.add(view)
 
-        content.invoke(view)
+        content.invokeContext(view)
 
         return view
     }
@@ -188,14 +188,14 @@ open class ViewContainer(
         modifier: Modifier,
         background: Color = Color.fromARGB(0x40000000),
         height: Int = 0,
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): ListView {
         val view = ListView(modifier, background, height = height)
 
         view.attach(this)
         children.add(view)
 
-        content.invoke(view)
+        content.invokeContext(view)
 
         return view
     }
@@ -205,14 +205,14 @@ open class ViewContainer(
         background: Color = Color.fromARGB(0x40000000),
         height: Int = 0,
         backgroundHighlight: Color = Color.fromARGB(64, 255, 255, 255),
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): ListFeedView {
         val view = ListFeedView(modifier, background, height = height, backgroundHighlight = backgroundHighlight)
 
         view.attach(this)
         children.add(view)
 
-        content.invoke(view)
+        content.invokeContext(view)
 
         return view
     }
@@ -221,14 +221,14 @@ open class ViewContainer(
         modifier: Modifier,
         background: Color = Color.fromARGB(0x40000000),
         height: Int = 0,
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): FeedView {
         val view = FeedView(modifier, background, height = height)
 
         view.attach(this)
         children.add(view)
 
-        content.invoke(view)
+        content.invokeContext(view)
 
         return view
     }
@@ -241,13 +241,13 @@ open class ViewContainer(
         teleportDuration: Int = 3,
         height: Int = 0,
         listener: Listener = EmptyListener(),
-        content: ViewContainer.() -> Unit = {},
+        content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): ViewContainer {
         val view = ViewContainer(modifier, clickable, background, backgroundHighlight, mutableListOf(listener), teleportDuration = teleportDuration, height = height)
         view.attach(this)
         children.add(view)
 
-        content.invoke(view)
+        content.invokeContext(view)
 
         return view
     }

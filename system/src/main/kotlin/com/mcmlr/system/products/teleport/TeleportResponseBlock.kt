@@ -2,6 +2,7 @@ package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -66,58 +67,61 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                 .alignTopToBottomOf(title)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            head = addItemView(
-                modifier = Modifier()
-                    .size(280, 280)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                item = ItemStack(Material.PLAYER_HEAD)
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    head = addItemView(
+                        modifier = Modifier()
+                            .size(280, 280)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        item = ItemStack(Material.PLAYER_HEAD)
+                    )
 
-            name = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(head)
-                    .margins(top = 300),
-                text = "Player name"
-            )
+                    name = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .centerHorizontally()
+                            .alignTopToBottomOf(head)
+                            .margins(top = 300),
+                        text = "Player name"
+                    )
 
-            accept = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(-400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.GREEN}Accept",
-                highlightedText = "${ChatColor.GREEN}${ChatColor.BOLD}Accept",
-            )
+                    accept = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(-400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.GREEN}Accept",
+                        highlightedText = "${ChatColor.GREEN}${ChatColor.BOLD}Accept",
+                    )
 
-            reject = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.RED}Reject",
-                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Reject",
-            )
+                    reject = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.RED}Reject",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Reject",
+                    )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(accept)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                size = 4,
-                text = ""
-            )
+                    messageView = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(accept)
+                            .centerHorizontally()
+                            .margins(top = 100),
+                        size = 4,
+                        text = ""
+                    )
 
-            spin(head)
-        }
+                    spin(head)
+                }
+            }
+        )
     }
 
     override fun setMessage(message: String) {

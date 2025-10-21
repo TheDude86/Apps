@@ -3,6 +3,7 @@ package com.mcmlr.system.products.preferences
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
@@ -45,26 +46,28 @@ class FavoritesViewController(
         favoriteApps.forEachIndexed { index, applicationModel ->
             if (favoriteSlots.size <= index) return@forEachIndexed
             val slot = favoriteSlots[index]
-            slot.updateView {
-                val appIcon = addItemView(
-                    modifier = Modifier()
-                        .size(75, 75)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 30),
-                    item = applicationModel.getAppIcon()
-                )
+            slot.updateView(object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    val appIcon = addItemView(
+                        modifier = Modifier()
+                            .size(75, 75)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 30),
+                        item = applicationModel.getAppIcon()
+                    )
 
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(appIcon)
-                        .centerHorizontally()
-                        .margins(top = 10),
-                    text = "${ChatColor.GOLD}${applicationModel.name()}",
-                    size = 6,
-                )
-            }
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(appIcon)
+                            .centerHorizontally()
+                            .margins(top = 10),
+                        text = "${ChatColor.GOLD}${applicationModel.name()}",
+                        size = 6,
+                    )
+                }
+            })
         }
     }
 

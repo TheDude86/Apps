@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
@@ -53,16 +54,18 @@ class PreferencesViewController(
                 .alignTopToBottomOf(title)
                 .alignBottomToBottomOf(this)
                 .margins(start = 350, top = 150, end = 350, bottom = 200),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-
-            favoritesBlock = addViewContainer(
-                modifier = Modifier()
-                    .size(MATCH_PARENT, 320)
-                    .centerHorizontally(),
-                background = Color.fromARGB(0, 255, 255, 0)
-            )
-        }
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    favoritesBlock = addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 320)
+                            .centerHorizontally(),
+                        background = Color.fromARGB(0, 255, 255, 0)
+                    )
+                }
+            }
+        )
 
 
     }

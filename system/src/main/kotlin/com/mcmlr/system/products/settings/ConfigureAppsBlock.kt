@@ -2,6 +2,7 @@ package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -36,51 +38,56 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
     private lateinit var configureAppCallback: (ConfigurableEnvironment<*>) -> Unit
 
     override fun updateConfigurableApps(configurableApps: List<ConfigurableEnvironment<*>>) {
-        appsConfigFeed.updateView {
-            configurableApps.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    clickable = true,
-                    listener = object : Listener {
-                        override fun invoke() {
-                            configureAppCallback.invoke(it)
+        appsConfigFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                configurableApps.forEach {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 100),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                configureAppCallback.invoke(it)
+                            }
+                        },
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 150),
+                                    item = it.getAppIcon()
+                                )
+
+                                val appName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(this)
+                                        .margins(start = 50, top = 20),
+                                    text = it.name(),
+                                    size = 6,
+                                )
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignTopToBottomOf(appName)
+                                        .alignStartToStartOf(appName)
+                                        .margins(top = 10),
+                                    text = it.summary(),
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 250,
+                                    size = 4,
+                                )
+                            }
                         }
-                    }
-                ) {
-                    val icon = addItemView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 150),
-                        item = it.getAppIcon()
-                    )
-
-                    val appName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(this)
-                            .margins(start = 50, top = 20),
-                        text = it.name(),
-                        size = 6,
-                    )
-
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(appName)
-                            .alignStartToStartOf(appName)
-                            .margins(top = 10),
-                        text = it.summary(),
-                        alignment = Alignment.LEFT,
-                        lineWidth = 250,
-                        size = 4,
                     )
                 }
             }
-        }
+        })
 
     }
 

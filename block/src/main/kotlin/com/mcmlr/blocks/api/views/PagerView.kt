@@ -1,5 +1,6 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,7 @@ class PagerView(
 
     private var adapter: PagerViewAdapter? = null
 
-    private val pageListeners: MutableList<(Int) -> Unit> = mutableListOf()
+    private val pageListeners: MutableList<PageListener> = mutableListOf()
 
     init {
         val dimensions = getDimensions()
@@ -45,7 +46,7 @@ class PagerView(
             clickable = true,
             listener = object : Listener {
                 override fun invoke() {
-                    rightView.updateView {  }
+                    rightView.updateView(EmptyContextListener<ViewContainer>())
                     centerView.height = 0
                     leftView.height = 4
                     centerView.setPositionView(dimensions.width * 2 / 3)
@@ -75,7 +76,7 @@ class PagerView(
             clickable = true,
             listener = object : Listener {
                 override fun invoke() {
-                    leftView.updateView {  }
+                    leftView.updateView(EmptyContextListener<ViewContainer>())
                     centerView.height = 0
                     rightView.height = 4
                     centerView.setPositionView(- (dimensions.width * 2 / 3))
@@ -97,7 +98,7 @@ class PagerView(
         )
     }
 
-    fun addPagerListener(listener: (Int) -> Unit) {
+    fun addPagerListener(listener: PageListener) {
         pageListeners.add(listener)
     }
 
@@ -141,4 +142,8 @@ abstract class PagerViewAdapter {
     abstract fun getCount(): Int
 
     abstract fun renderElement(selected: Boolean, index: Int, parent: ViewContainer)
+}
+
+interface PageListener {
+    fun invoke(page: Int)
 }

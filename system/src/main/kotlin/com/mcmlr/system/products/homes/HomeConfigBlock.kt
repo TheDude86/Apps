@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.homes
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -63,113 +65,116 @@ class HomeConfigViewController(player: Player, origin: Location): NavigationView
                 .alignBottomToBottomOf(this)
                 .centerHorizontally()
                 .margins(top = 600),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            val maxHomesTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .alignStartToStartOf(this),
-                size = 6,
-                text = "Max Homes",
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    val maxHomesTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this),
+                        size = 6,
+                        text = "Max Homes",
+                    )
 
-            val maxHomesMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(maxHomesTitle)
-                    .alignStartToStartOf(maxHomesTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The maximum homes a player can set.",
-            )
+                    val maxHomesMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(maxHomesTitle)
+                            .alignStartToStartOf(maxHomesTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The maximum homes a player can set.",
+                    )
 
-            maxHomesView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(maxHomesTitle)
-                    .alignBottomToTopOf(maxHomesMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}0 Home",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Home",
-            )
+                    maxHomesView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(maxHomesTitle)
+                            .alignBottomToTopOf(maxHomesMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}0 Home",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Home",
+                    )
 
-            val teleportDelayTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(maxHomesMessage)
-                    .alignStartToStartOf(this)
-                    .margins(top = 100),
-                size = 6,
-                text = "Teleport Delay",
-            )
+                    val teleportDelayTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(maxHomesMessage)
+                            .alignStartToStartOf(this)
+                            .margins(top = 100),
+                        size = 6,
+                        text = "Teleport Delay",
+                    )
 
-            val teleportDelayMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportDelayTitle)
-                    .alignStartToStartOf(teleportDelayTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported to a selected home.",
-            )
+                    val teleportDelayMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportDelayTitle)
+                            .alignStartToStartOf(teleportDelayTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported to a selected home.",
+                    )
 
-            delayView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(teleportDelayTitle)
-                    .alignBottomToTopOf(teleportDelayMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}1 Seconds",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}1 Seconds",
-            )
+                    delayView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(teleportDelayTitle)
+                            .alignBottomToTopOf(teleportDelayMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}1 Seconds",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}1 Seconds",
+                    )
 
-            val teleportCooldownTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportDelayMessage)
-                    .alignStartToStartOf(this)
-                    .margins(top = 100),
-                size = 6,
-                text = "Teleport Cooldown",
-            )
+                    val teleportCooldownTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportDelayMessage)
+                            .alignStartToStartOf(this)
+                            .margins(top = 100),
+                        size = 6,
+                        text = "Teleport Cooldown",
+                    )
 
-            val teleportCooldownMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportCooldownTitle)
-                    .alignStartToStartOf(teleportCooldownTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a home before they can teleport again.",
-            )
+                    val teleportCooldownMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportCooldownTitle)
+                            .alignStartToStartOf(teleportCooldownTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a home before they can teleport again.",
+                    )
 
-            cooldownView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(teleportCooldownTitle)
-                    .alignBottomToTopOf(teleportCooldownMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}1 Seconds",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}1 Seconds",
-            )
+                    cooldownView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(teleportCooldownTitle)
+                            .alignBottomToTopOf(teleportCooldownMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}1 Seconds",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}1 Seconds",
+                    )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportCooldownMessage)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                size = 4,
-                text = ""
-            )
-        }
+                    messageView = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportCooldownMessage)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        size = 4,
+                        text = ""
+                    )
+                }
+            }
+        )
     }
 
     override fun updateMaxHomesText(text: String) {

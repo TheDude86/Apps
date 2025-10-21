@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.pong
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -10,6 +11,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ItemView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -124,64 +126,65 @@ class PongViewController(
                 .size(700, 700)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 300),
-        ) {
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    score = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally(),
+                        text = "${ChatColor.BOLD}0 - 0",
+                    )
 
-            score = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally(),
-                text = "${ChatColor.BOLD}0 - 0",
-            )
+                    play = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "Play",
+                        size = 24,
+                        callback = object : Listener {
+                            override fun invoke() {
+                                startGame()
+                            }
+                        }
+                    )
 
-            play = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                text = "Play",
-                size = 24,
-                callback = object : Listener {
-                    override fun invoke() {
-                        startGame()
-                    }
+                    point = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "",
+                        size = 24,
+                    )
+
+                    playerPaddle = addItemView(
+                        modifier = Modifier()
+                            .size(10, 100)
+                            .alignStartToStartOf(this)
+                            .centerVertically()
+                            .margins(start = 100),
+                        item = Material.SMOOTH_QUARTZ,
+                        teleportDuration = 2,
+                    )
+
+                    opponentPaddle = addItemView(
+                        modifier = Modifier()
+                            .size(10, 100)
+                            .alignEndToEndOf(this)
+                            .centerVertically()
+                            .margins(end = 100),
+                        item = Material.SMOOTH_QUARTZ
+                    )
+
+                    ball = addItemView(
+                        modifier = Modifier()
+                            .size(40, 40)
+                            .position(0, 450),
+                        item = Material.LIME_CONCRETE,
+                    )
                 }
-            )
-
-            point = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                text = "",
-                size = 24,
-            )
-
-            playerPaddle = addItemView(
-                modifier = Modifier()
-                    .size(10, 100)
-                    .alignStartToStartOf(this)
-                    .centerVertically()
-                    .margins(start = 100),
-                item = Material.SMOOTH_QUARTZ,
-                teleportDuration = 2,
-            )
-
-            opponentPaddle = addItemView(
-                modifier = Modifier()
-                    .size(10, 100)
-                    .alignEndToEndOf(this)
-                    .centerVertically()
-                    .margins(end = 100),
-                item = Material.SMOOTH_QUARTZ
-            )
-
-            ball = addItemView(
-                modifier = Modifier()
-                    .size(40, 40)
-                    .position(0, 450),
-                item = Material.LIME_CONCRETE,
-            )
-
-        }
+            }
+        )
     }
 
     private fun startGame() {

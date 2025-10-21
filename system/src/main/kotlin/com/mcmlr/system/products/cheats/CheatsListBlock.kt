@@ -1,12 +1,14 @@
 package com.mcmlr.system.products.cheats
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -32,31 +34,33 @@ class CheatsListViewController(
     private lateinit var cheatsView: ListFeedView
 
     override fun setFeed(cheats: List<CheatType>, callback: (CheatType) -> Unit) {
-        cheatsView.updateView {
-            addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .margins(bottom = 50),
-                text = "${ChatColor.GRAY}${ChatColor.BOLD}${ChatColor.ITALIC}Cheats",
-            )
-
-            cheats.forEach {
-                addButtonView(
+        cheatsView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                addTextView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
-                        .margins(top = 50, bottom = 50),
-                    text = it.title,
-                    highlightedText = "${ChatColor.BOLD}${it.title}",
-                    callback = object : Listener {
-                        override fun invoke() {
-                            callback.invoke(it)
-                        }
-                    }
+                        .margins(bottom = 50),
+                    text = "${ChatColor.GRAY}${ChatColor.BOLD}${ChatColor.ITALIC}Cheats",
                 )
+
+                cheats.forEach {
+                    addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .margins(top = 50, bottom = 50),
+                        text = it.title,
+                        highlightedText = "${ChatColor.BOLD}${it.title}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(it)
+                            }
+                        }
+                    )
+                }
             }
-        }
+        })
     }
 
     override fun createView() {

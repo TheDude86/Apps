@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.kits
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
@@ -54,7 +55,7 @@ class KitsViewController(
 
     override fun clearErrorMessage() = errorMessage.setTextView("")
 
-    override fun setPagerListener(listener: (Int) -> Unit) = kitsPager.addPagerListener(listener)
+    override fun setPagerListener(listener: PageListener) = kitsPager.addPagerListener(listener)
 
     override fun setName(name: String) = kitName.setTextView("${ChatColor.BOLD}$name")
 
@@ -65,60 +66,68 @@ class KitsViewController(
     override fun setDescription(description: String) = kitDescription.setTextView(description)
 
     override fun setKitContents(items: List<KitItem>, commands: List<String>) {
-        kitItemList.updateView {
-            items.forEach {
+        kitItemList.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                items.forEach {
 //                @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
 //                    Material.valueOf(it.material).keyOrNull
 //                } else {
 //                    Material.valueOf(it.material).key
 //                }
 
-                @Suppress("DEPRECATION") val key = Material.valueOf(it.material).key
+                    @Suppress("DEPRECATION") val key = Material.valueOf(it.material).key
 
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 35),
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val icon = addItemView(
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(30, 30)
-                            .alignStartToStartOf(this)
-                            .centerVertically(),
-                        item = Bukkit.getItemFactory().createItemStack("$key${it.meta}"),
+                            .size(MATCH_PARENT, 35),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(30, 30)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically(),
+                                    item = Bukkit.getItemFactory().createItemStack("$key${it.meta}"),
+                                )
+
+                                val name = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .centerVertically()
+                                        .margins(start = 10),
+                                    text = "${it.amount} x ${it.material.fromMCItem()}",
+                                    size = 4,
+                                )
+                            }
+                        }
                     )
+                }
 
-                    val name = addTextView(
+                commands.forEach {
+                    addViewContainer(
                         modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .centerVertically()
-                            .margins(start = 10),
-                        text = "${it.amount} x ${it.material.fromMCItem()}",
-                        size = 4,
+                            .size(MATCH_PARENT, 35),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically(),
+                                    text = "/$it",
+                                    size = 4,
+                                    alignment = Alignment.LEFT,
+                                    lineWidth = 150,
+                                )
+                            }
+                        }
                     )
                 }
             }
-
-            commands.forEach {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 35),
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val command = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToStartOf(this)
-                            .centerVertically(),
-                        text = "/$it",
-                        size = 4,
-                        alignment = Alignment.LEFT,
-                        lineWidth = 150,
-                    )
-                }
-            }
-        }
+        })
     }
 
     override fun setKitAdapter(adapter: PagerViewAdapter) {
@@ -158,70 +167,73 @@ class KitsViewController(
                 .alignTopToBottomOf(kitsPager)
                 .alignBottomToBottomOf(this)
                 .margins(top = -250, bottom = 550),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            kitName = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitsPager)
-                    .centerHorizontally(),
-                text = "${ChatColor.BOLD}Kit Name",
-                teleportDuration = 0,
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    kitName = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitsPager)
+                            .centerHorizontally(),
+                        text = "${ChatColor.BOLD}Kit Name",
+                        teleportDuration = 0,
+                    )
 
-            kitPrice = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(this)
-                    .alignTopToBottomOf(kitName)
-                    .margins(start = 50, top = 50),
-                text = "Kit Price",
-                teleportDuration = 0,
-            )
+                    kitPrice = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this)
+                            .alignTopToBottomOf(kitName)
+                            .margins(start = 50, top = 50),
+                        text = "Kit Price",
+                        teleportDuration = 0,
+                    )
 
-            kitCooldown = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitPrice)
-                    .alignStartToStartOf(kitPrice)
-                    .margins(top = 20),
-                text = "Kit Cooldown",
-                size = 6,
-                lineWidth = 150,
-                alignment = Alignment.LEFT,
-                teleportDuration = 0,
-            )
+                    kitCooldown = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitPrice)
+                            .alignStartToStartOf(kitPrice)
+                            .margins(top = 20),
+                        text = "Kit Cooldown",
+                        size = 6,
+                        lineWidth = 150,
+                        alignment = Alignment.LEFT,
+                        teleportDuration = 0,
+                    )
 
-            kitDescription = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitCooldown)
-                    .alignStartToStartOf(kitCooldown)
-                    .margins(top = 20),
-                text = "${ChatColor.GRAY}Kit Description",
-                teleportDuration = 0,
-                alignment = Alignment.LEFT,
-                size = 6,
-            )
+                    kitDescription = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitCooldown)
+                            .alignStartToStartOf(kitCooldown)
+                            .margins(top = 20),
+                        text = "${ChatColor.GRAY}Kit Description",
+                        teleportDuration = 0,
+                        alignment = Alignment.LEFT,
+                        size = 6,
+                    )
 
-            val kitListTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(kitName)
-                    .alignEndToEndOf(this)
-                    .margins(top = 50, end = 200),
-                text = "${ChatColor.BOLD}Kit Contents",
-                size = 6,
-            )
+                    val kitListTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(kitName)
+                            .alignEndToEndOf(this)
+                            .margins(top = 50, end = 200),
+                        text = "${ChatColor.BOLD}Kit Contents",
+                        size = 6,
+                    )
 
-            kitItemList = addListFeedView(
-                modifier = Modifier()
-                    .size(300, 250)
-                    .alignTopToBottomOf(kitListTitle)
-                    .alignStartToStartOf(kitListTitle)
-                    .margins(top = 20),
-            )
-        }
+                    kitItemList = addListFeedView(
+                        modifier = Modifier()
+                            .size(300, 250)
+                            .alignTopToBottomOf(kitListTitle)
+                            .alignStartToStartOf(kitListTitle)
+                            .margins(top = 20),
+                    )
+                }
+            }
+        )
 
 
         kitPurchase = addButtonView(
@@ -287,7 +299,7 @@ interface KitsPresenter: Presenter {
 
     fun setKitContents(items: List<KitItem>, commands: List<String>)
 
-    fun setPagerListener(listener: (Int) -> Unit)
+    fun setPagerListener(listener: PageListener)
 
     fun setErrorMessage(message: String)
 
@@ -298,14 +310,16 @@ class KitsPagerAdapter(private val kitRepository: KitRepository): PagerViewAdapt
     override fun getCount(): Int = kitRepository.getKits().size
 
     override fun renderElement(selected: Boolean, index: Int, parent: ViewContainer) {
-        parent.updateView {
-            addItemView(
-                modifier = Modifier()
-                    .size(150, 150)
-                    .center(),
-                item = Material.valueOf(kitRepository.getKits()[index].icon)
-            )
-        }
+        parent.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                addItemView(
+                    modifier = Modifier()
+                        .size(150, 150)
+                        .center(),
+                    item = Material.valueOf(kitRepository.getKits()[index].icon)
+                )
+            }
+        })
     }
 
 }
@@ -356,10 +370,12 @@ class KitsInteractor(
             }
         })
 
-        presenter.setPagerListener {
-            this.selectedKit = kitRepository.getKits()[it]
-            updateSelectedKit()
-        }
+        presenter.setPagerListener(object : PageListener {
+            override fun invoke(page: Int) {
+                this@KitsInteractor.selectedKit = kitRepository.getKits()[page]
+                updateSelectedKit()
+            }
+        })
 
         presenter.setEditKitListener(object : Listener {
             override fun invoke() {

@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
 import com.mcmlr.system.products.warps.WarpsConfigRepository
@@ -63,81 +65,84 @@ class WarpConfigViewController(player: Player, origin: Location): NavigationView
                 .alignBottomToBottomOf(this)
                 .centerHorizontally()
                 .margins(top = 600),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            val teleportDelayTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .alignStartToStartOf(this),
-                size = 6,
-                text = "Teleport Delay",
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    val teleportDelayTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this),
+                        size = 6,
+                        text = "Teleport Delay",
+                    )
 
-            val teleportDelayMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportDelayTitle)
-                    .alignStartToStartOf(teleportDelayTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported to a selected warp.",
-            )
+                    val teleportDelayMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportDelayTitle)
+                            .alignStartToStartOf(teleportDelayTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported to a selected warp.",
+                    )
 
-            delayView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(teleportDelayTitle)
-                    .alignBottomToTopOf(teleportDelayMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}0 Seconds",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
-            )
+                    delayView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(teleportDelayTitle)
+                            .alignBottomToTopOf(teleportDelayMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}0 Seconds",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                    )
 
-            val teleportCooldownTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportDelayMessage)
-                    .alignStartToStartOf(this)
-                    .margins(top = 100),
-                size = 6,
-                text = "Teleport Cooldown",
-            )
+                    val teleportCooldownTitle = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportDelayMessage)
+                            .alignStartToStartOf(this)
+                            .margins(top = 100),
+                        size = 6,
+                        text = "Teleport Cooldown",
+                    )
 
-            val teleportCooldownMessage = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportCooldownTitle)
-                    .alignStartToStartOf(teleportCooldownTitle),
-                alignment = Alignment.LEFT,
-                lineWidth = 300,
-                size = 4,
-                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a warp before they can teleport again.",
-            )
+                    val teleportCooldownMessage = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportCooldownTitle)
+                            .alignStartToStartOf(teleportCooldownTitle),
+                        alignment = Alignment.LEFT,
+                        lineWidth = 300,
+                        size = 4,
+                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a warp before they can teleport again.",
+                    )
 
-            cooldownView = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(600, 0)
-                    .alignTopToBottomOf(teleportCooldownTitle)
-                    .alignBottomToTopOf(teleportCooldownMessage),
-                size = 6,
-                text = "${ChatColor.GOLD}0 Seconds",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
-            )
+                    cooldownView = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(600, 0)
+                            .alignTopToBottomOf(teleportCooldownTitle)
+                            .alignBottomToTopOf(teleportCooldownMessage),
+                        size = 6,
+                        text = "${ChatColor.GOLD}0 Seconds",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                    )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(teleportCooldownMessage)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                size = 4,
-                text = ""
-            )
-        }
+                    messageView = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(teleportCooldownMessage)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        size = 4,
+                        text = ""
+                    )
+                }
+            }
+        )
     }
 
     override fun updateDelayText(text: String) {
