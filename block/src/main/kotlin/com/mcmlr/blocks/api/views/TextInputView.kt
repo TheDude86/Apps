@@ -1,5 +1,7 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -35,16 +37,18 @@ class TextInputView(
     teleportDuration = teleportDuration,
     height = height,
 ) {
-    private val textChangedListeners: MutableList<(String) -> Unit> = mutableListOf()
+    private val textChangedListeners: MutableList<TextListener> = mutableListOf()
 
     private var waitingInput = false
     private var previousText: String? = null
     private var previousHighlightedText: String? = null
 
     init {
-        listeners.add {
-            parent.setFocus(this)
-        }
+        listeners.add(object : Listener {
+            override fun invoke() {
+                parent.setFocus(this@TextInputView)
+            }
+        })
     }
 
     override fun setTextView(text: String) {
@@ -83,7 +87,7 @@ class TextInputView(
         textChangedListeners.forEach { it.invoke(event.message) }
     }
 
-    fun addTextChangedListener(listener: (String) -> Unit) {
+    fun addTextChangedListener(listener: TextListener) {
         textChangedListeners.add(listener)
     }
 

@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import kotlinx.coroutines.flow.Flow
@@ -68,7 +69,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     override fun deeplink(): String? = context.deeplink()
 
-    fun setResultCallback(callback: ((Bundle) -> Unit)?) {
+    fun setResultCallback(callback: RouteToCallback?) {
         router().setCallback(callback)
     }
 
@@ -88,7 +89,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     override fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>) = context.launchAppConfig(app)
 
-    override fun routeTo(block: Block, callback: ((Bundle) -> Unit)?) = context.routeTo(block, callback)
+    override fun routeTo(block: Block, callback: RouteToCallback?) = context.routeTo(block, callback)
 
     override fun routeBack() {
         context.routeBack()
@@ -170,7 +171,7 @@ interface Context {
 
     fun launchAppConfig(app: ConfigurableEnvironment<ConfigurableApp>)
 
-    fun routeTo(block: Block, callback: ((Bundle) -> Unit)? = null)
+    fun routeTo(block: Block, callback: RouteToCallback? = null)
 
     fun routeBack()
 

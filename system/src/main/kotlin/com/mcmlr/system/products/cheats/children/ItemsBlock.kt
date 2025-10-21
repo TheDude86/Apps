@@ -1,8 +1,11 @@
 package com.mcmlr.system.products.cheats.children
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -41,81 +44,93 @@ class ItemsViewController(
     private lateinit var searchButton: TextInputView
     private lateinit var feedView: ListFeedView
 
-    override fun addSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
     override fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit) {
-        feedView.updateView {
-            for (i in materials.indices step 6) {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    background = Color.fromARGB(0, 0, 0, 0)
-                ) {
-                    for (j in 0..5) {
-                        if (i + j >= materials.size) break
-                        val material = materials[i + j]
-                        if (material.type == Material.WATER ||
-                            material.type == Material.FIRE) break
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                for (i in materials.indices step 6) {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 100),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                for (j in 0..5) {
+                                    if (i + j >= materials.size) break
+                                    val material = materials[i + j]
+                                    if (material.type == Material.WATER ||
+                                        material.type == Material.FIRE) break
 
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .position(-500 + (200 * j), 0)
-                                .size(73, 73),
-                            item = material,
-                            visible = true,
-                        ) {
-                            itemCallback.invoke(material)
+                                    addItemButtonView(
+                                        modifier = Modifier()
+                                            .position(-500 + (200 * j), 0)
+                                            .size(73, 73),
+                                        item = material,
+                                        visible = true,
+                                        callback = object : Listener {
+                                            override fun invoke() {
+                                                itemCallback.invoke(material)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                         }
-                    }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun selectItemState() {
-        contentView.updateView {
-            searchButton = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally(),
-                size = 8,
-                text = "${ChatColor.GRAY}${ChatColor.ITALIC}\uD83D\uDD0D Search for items or blocks...",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}\uD83D\uDD0D Search for items or blocks...",
-            )
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                searchButton = addTextInputView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally(),
+                    size = 8,
+                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}\uD83D\uDD0D Search for items or blocks...",
+                    highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}\uD83D\uDD0D Search for items or blocks...",
+                )
 
-            feedView = addListFeedView(
-                modifier = Modifier()
-                    .size(800, 500)
-                    .alignTopToBottomOf(searchButton)
-                    .centerHorizontally()
-                    .margins(top = 100, bottom = 0),
-                background = Color.fromARGB(0, 0, 0, 0),
-            )
-        }
+                feedView = addListFeedView(
+                    modifier = Modifier()
+                        .size(800, 500)
+                        .alignTopToBottomOf(searchButton)
+                        .centerHorizontally()
+                        .margins(top = 100, bottom = 0),
+                    background = Color.fromARGB(0, 0, 0, 0),
+                )
+            }
+        })
     }
 
     override fun setItemMetadataState(item: ItemStack) {
-        contentView.updateView {
-            val selectedItem = addItemView(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally(),
-                item = item,
-            )
+        contentView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val selectedItem = addItemView(
+                    modifier = Modifier()
+                        .size(50, 50)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally(),
+                    item = item,
+                )
 
-            addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(selectedItem)
-                    .x(-500)
-                    .margins(top = 50),
-                size = 8,
-                text = "${ChatColor.GRAY}${ChatColor.ITALIC}Set custom name...",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}Set custom name...",
-            )
-        }
+                addTextInputView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(selectedItem)
+                        .x(-500)
+                        .margins(top = 50),
+                    size = 8,
+                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}Set custom name...",
+                    highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}Set custom name...",
+                )
+            }
+        })
     }
 
     override fun createView() {
@@ -131,7 +146,7 @@ class ItemsViewController(
 }
 
 interface ItemsPresenter: Presenter {
-    fun addSearchListener(listener: (String) -> Unit)
+    fun addSearchListener(listener: TextListener)
 
     fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit)
 
@@ -159,14 +174,16 @@ class ItemsInteractor(
             }
         }
 
-        presenter.addSearchListener { searchTerm ->
-            materialsRepository.searchMaterialsStream(searchTerm).collectFirst {
-                collectOn(DudeDispatcher()) { materials ->
-                    presenter.setFeed(materials) {
+        presenter.addSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                materialsRepository.searchMaterialsStream(text).collectFirst {
+                    collectOn(DudeDispatcher()) { materials ->
+                        presenter.setFeed(materials) {
 
+                        }
                     }
                 }
             }
-        }
+        })
     }
 }

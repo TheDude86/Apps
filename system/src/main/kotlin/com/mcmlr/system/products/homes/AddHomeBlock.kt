@@ -1,9 +1,14 @@
 package com.mcmlr.system.products.homes
 
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.system.IconSelectionBlock
@@ -70,24 +75,27 @@ class AddHomeViewController(
                 .alignBottomToBottomOf(homeNameButton)
                 .margins(start = 50),
             background = Color.fromARGB(0x00000000),
-        ) {
-            homeIconButton = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .center(),
-                size = 6,
-                text = "${ChatColor.GRAY}Select\nIcon...",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
-            )
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    homeIconButton = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        size = 6,
+                        text = "${ChatColor.GRAY}Select\nIcon...",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
+                    )
 
-            homeIconItemButton = addItemButtonView(
-                modifier = Modifier()
-                    .size(55, 55)
-                    .center(),
-                item = null,
-                visible = false,
-            )
-        }
+                    homeIconItemButton = addItemButtonView(
+                        modifier = Modifier()
+                            .size(55, 55)
+                            .center(),
+                        item = null,
+                        visible = false,
+                    )
+                }
+            }
+        )
 
         actionButton = addButtonView(
             modifier = Modifier()
@@ -117,7 +125,7 @@ class AddHomeViewController(
         setIcon(icon)
     }
 
-    override fun addHomeIconListener(listener: () -> Unit) {
+    override fun addHomeIconListener(listener: Listener) {
         homeIconButton.addListener(listener)
         homeIconItemButton.addListener(listener)
     }
@@ -137,11 +145,11 @@ class AddHomeViewController(
         }
     }
 
-    override fun addTextListener(listener: (String) -> Unit) {
+    override fun addTextListener(listener: TextListener) {
         homeNameButton.addTextChangedListener(listener)
     }
 
-    override fun addActionListener(listener: () -> Unit) {
+    override fun addActionListener(listener: Listener) {
         actionButton.addListener(listener)
     }
 
@@ -153,13 +161,13 @@ class AddHomeViewController(
 
 interface AddHomePresenter: Presenter {
 
-    fun addHomeIconListener(listener: () -> Unit)
+    fun addHomeIconListener(listener: Listener)
 
     fun setIcon(icon: Material?)
 
-    fun addTextListener(listener: (String) -> Unit)
+    fun addTextListener(listener: TextListener)
 
-    fun addActionListener(listener: () -> Unit)
+    fun addActionListener(listener: Listener)
 
     fun showError()
 
@@ -184,33 +192,41 @@ class AddHomeInteractor(
             presenter.setUpdate(editor.name, editor.icon)
         }
 
-        presenter.addTextListener {
-            homeBuilder.name(it)
-        }
-
-        presenter.addHomeIconListener {
-            routeTo(iconSelectionBlock) { bundle ->
-                val icon = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY)
-                presenter.setIcon(icon?.type)
-                homeBuilder.icon(icon?.type)
+        presenter.addTextListener(object : TextListener {
+            override fun invoke(text: String) {
+                homeBuilder.name(text)
             }
-        }
+        })
 
-        presenter.addActionListener {
-            val homeLocation = player.location.clone()
-            homeLocation.yaw = 0f
-            homeLocation.pitch = 0f
-
-            val home = homeBuilder.location(homeLocation)
-                .build()
-
-            if (home != null) {
-                homesRepository.saveHome(player, home)
-                routeBack()
-            } else {
-                presenter.showError()
+        presenter.addHomeIconListener(object : Listener {
+            override fun invoke() {
+                routeTo(iconSelectionBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val icon = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY)
+                        presenter.setIcon(icon?.type)
+                        homeBuilder.icon(icon?.type)
+                    }
+                })
             }
-        }
+        })
+
+        presenter.addActionListener(object : Listener {
+            override fun invoke() {
+                val homeLocation = player.location.clone()
+                homeLocation.yaw = 0f
+                homeLocation.pitch = 0f
+
+                val home = homeBuilder.location(homeLocation)
+                    .build()
+
+                if (home != null) {
+                    homesRepository.saveHome(player, home)
+                    routeBack()
+                } else {
+                    presenter.showError()
+                }
+            }
+        })
     }
 
     override fun onClose() {

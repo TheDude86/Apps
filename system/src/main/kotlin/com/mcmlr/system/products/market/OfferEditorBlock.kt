@@ -1,9 +1,12 @@
 package com.mcmlr.system.products.market
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
@@ -61,128 +64,131 @@ class OfferEditorViewController(player: Player, origin: Location): NavigationVie
                 .alignTopToBottomOf(pageTitle)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            head = addItemView(
-                modifier = Modifier()
-                    .size(120, 120)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 350),
-                item = ItemStack(Material.AIR)
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    head = addItemView(
+                        modifier = Modifier()
+                            .size(120, 120)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 350),
+                        item = ItemStack(Material.AIR)
+                    )
 
-            name = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(head)
-                    .margins(top = 150),
-                text = "Select Item",
-                highlightedText = "${ChatColor.BOLD}Select item",
-            )
+                    name = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .centerHorizontally()
+                            .alignTopToBottomOf(head)
+                            .margins(top = 150),
+                        text = "Select Item",
+                        highlightedText = "${ChatColor.BOLD}Select item",
+                    )
 
-            price = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(name)
-                    .centerHorizontally()
-                    .margins(top = 20),
-                text = "${ChatColor.GRAY}Price",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Price",
-            )
+                    price = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(name)
+                            .centerHorizontally()
+                            .margins(top = 20),
+                        text = "${ChatColor.GRAY}Price",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Price",
+                    )
 
-            quantity = addTextInputView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(price)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                text = "${ChatColor.GRAY}Quantity",
-                highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
-            )
+                    quantity = addTextInputView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(price)
+                            .centerHorizontally()
+                            .margins(top = 100),
+                        text = "${ChatColor.GRAY}Quantity",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
+                    )
 
-            add = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(quantity)
-                    .alignBottomToBottomOf(quantity)
-                    .alignStartToEndOf(quantity)
-                    .margins(start = 300),
-                text = "${ChatColor.GOLD}+",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
-            )
+                    add = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(quantity)
+                            .alignBottomToBottomOf(quantity)
+                            .alignStartToEndOf(quantity)
+                            .margins(start = 300),
+                        text = "${ChatColor.GOLD}+",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
+                    )
 
-            max = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(add)
-                    .alignBottomToBottomOf(add)
-                    .alignStartToEndOf(add)
-                    .margins(start = 40),
-                text = "${ChatColor.GOLD}Max",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
-            )
+                    max = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(add)
+                            .alignBottomToBottomOf(add)
+                            .alignStartToEndOf(add)
+                            .margins(start = 40),
+                        text = "${ChatColor.GOLD}Max",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
+                    )
 
-            subtract = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(quantity)
-                    .alignBottomToBottomOf(quantity)
-                    .alignEndToStartOf(quantity)
-                    .margins(end = 300),
-                text = "${ChatColor.GOLD}-",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
-            )
+                    subtract = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(quantity)
+                            .alignBottomToBottomOf(quantity)
+                            .alignEndToStartOf(quantity)
+                            .margins(end = 300),
+                        text = "${ChatColor.GOLD}-",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
+                    )
 
-            zero = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToTopOf(subtract)
-                    .alignBottomToBottomOf(subtract)
-                    .alignEndToStartOf(subtract)
-                    .margins(end = 40),
-                text = "${ChatColor.GOLD}Zero",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
-            )
+                    zero = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(subtract)
+                            .alignBottomToBottomOf(subtract)
+                            .alignEndToStartOf(subtract)
+                            .margins(end = 40),
+                        text = "${ChatColor.GOLD}Zero",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
+                    )
 
-            update = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(-200, 0)
-                    .alignTopToBottomOf(quantity)
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}Update",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update",
-            )
+                    update = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(-200, 0)
+                            .alignTopToBottomOf(quantity)
+                            .margins(top = 50),
+                        text = "${ChatColor.GOLD}Update",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update",
+                    )
 
-            delete = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(200, 0)
-                    .alignTopToBottomOf(quantity)
-                    .margins(top = 50),
-                text = "${ChatColor.RED}Delete",
-                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete",
-            )
+                    delete = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(200, 0)
+                            .alignTopToBottomOf(quantity)
+                            .margins(top = 50),
+                        text = "${ChatColor.RED}Delete",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete",
+                    )
 
-            message = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(update)
-                    .centerHorizontally()
-                    .margins(top = 25),
-                size = 4,
-                alignment = Alignment.LEFT,
-                visible = false,
-                text = "",
-            )
+                    message = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(update)
+                            .centerHorizontally()
+                            .margins(top = 25),
+                        size = 4,
+                        alignment = Alignment.LEFT,
+                        visible = false,
+                        text = "",
+                    )
 
-            spin(head)
-        }
+                    spin(head)
+                }
+            }
+        )
     }
 
-    override fun setItemListener(listener: () -> Unit) = name.addListener(listener)
+    override fun setItemListener(listener: Listener) = name.addListener(listener)
 
     override fun setItem(item: Material) {
         val prettyName = item.name.fromMCItem()
@@ -195,21 +201,21 @@ class OfferEditorViewController(player: Player, origin: Location): NavigationVie
         updateTextDisplay(name)
     }
 
-    override fun setPriceListener(listener: (String) -> Unit) = price.addTextChangedListener(listener)
+    override fun setPriceListener(listener: TextListener) = price.addTextChangedListener(listener)
 
-    override fun setQuantityListener(listener: (String) -> Unit) = quantity.addTextChangedListener(listener)
+    override fun setQuantityListener(listener: TextListener) = quantity.addTextChangedListener(listener)
 
-    override fun setZeroListener(listener: () -> Unit) = zero.addListener(listener)
+    override fun setZeroListener(listener: Listener) = zero.addListener(listener)
 
-    override fun setSubtractListener(listener: () -> Unit) = subtract.addListener(listener)
+    override fun setSubtractListener(listener: Listener) = subtract.addListener(listener)
 
-    override fun setMaxListener(listener: () -> Unit) = max.addListener(listener)
+    override fun setMaxListener(listener: Listener) = max.addListener(listener)
 
-    override fun setAddListener(listener: () -> Unit) = add.addListener(listener)
+    override fun setAddListener(listener: Listener) = add.addListener(listener)
 
-    override fun setUpdateListener(listener: () -> Unit) = update.addListener(listener)
+    override fun setUpdateListener(listener: Listener) = update.addListener(listener)
 
-    override fun setDeleteListener(listener: () -> Unit) = delete.addListener(listener)
+    override fun setDeleteListener(listener: Listener) = delete.addListener(listener)
 
     override fun updatePriceText(text: String) {
         price.text = text
@@ -234,144 +240,146 @@ class OfferEditorViewController(player: Player, origin: Location): NavigationVie
         updateTextDisplay(this.message)
     }
 
-    override fun animateOrderDeleteSuccess(material: Material, order: Order, onFinish: () -> Unit) {
+    override fun animateOrderDeleteSuccess(material: Material, order: Order, onFinish: Listener) {
         var materialView: ItemView
         var titleView: TextView
         var messageView: TextView
 
-        content.updateView {
-            titleView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(pageTitle),
-                text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Order Deleted!",
-                size = 24,
-            )
+        content.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                titleView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .centerHorizontally()
+                        .alignTopToBottomOf(pageTitle),
+                    text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Order Deleted!",
+                    size = 24,
+                )
 
-            materialView = addItemView(
-                modifier = Modifier()
-                    .size(120, 120)
-                    .alignTopToBottomOf(titleView)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                item = ItemStack(material)
-            )
+                materialView = addItemView(
+                    modifier = Modifier()
+                        .size(120, 120)
+                        .alignTopToBottomOf(titleView)
+                        .centerHorizontally()
+                        .margins(top = 100),
+                    item = ItemStack(material)
+                )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(materialView)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                text ="${order.quantity} ${material.name.fromMCItem()}${if (order.quantity > 1) "s" else ""} has been returned to your inventory",
-            )
+                messageView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(materialView)
+                        .centerHorizontally()
+                        .margins(top = 100),
+                    text ="${order.quantity} ${material.name.fromMCItem()}${if (order.quantity > 1) "s" else ""} has been returned to your inventory",
+                )
 
-            addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(messageView)
-                    .centerHorizontally()
-                    .margins(top = 150),
-                text = "${ChatColor.GOLD}Continue",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
-                callback = onFinish,
-            )
-
-        }
+                addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(messageView)
+                        .centerHorizontally()
+                        .margins(top = 150),
+                    text = "${ChatColor.GOLD}Continue",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    callback = onFinish,
+                )
+            }
+        })
     }
 
-    override fun animateOrderSuccess(material: Material, order: Order, onFinish: () -> Unit) {
+    override fun animateOrderSuccess(material: Material, order: Order, onFinish: Listener) {
         var materialView: ItemView
         var titleView: TextView
         var materialNameView: TextView
         var quantityView: TextView
         var priceView: TextView
 
-        content.updateView {
-            titleView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(pageTitle),
-                text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Order Updated!",
-                size = 24,
-            )
+        content.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                titleView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .centerHorizontally()
+                        .alignTopToBottomOf(pageTitle),
+                    text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Order Updated!",
+                    size = 24,
+                )
 
-            materialView = addItemView(
-                modifier = Modifier()
-                    .size(120, 120)
-                    .alignStartToStartOf(titleView)
-                    .alignTopToBottomOf(titleView)
-                    .margins(top = 300),
-                item = ItemStack(material)
-            )
+                materialView = addItemView(
+                    modifier = Modifier()
+                        .size(120, 120)
+                        .alignStartToStartOf(titleView)
+                        .alignTopToBottomOf(titleView)
+                        .margins(top = 300),
+                    item = ItemStack(material)
+                )
 
-            materialNameView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(materialView)
-                    .alignTopToTopOf(materialView)
-                    .margins(start = 150),
-                text = material.name.fromMCItem(),
-            )
+                materialNameView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(materialView)
+                        .alignTopToTopOf(materialView)
+                        .margins(start = 150),
+                    text = material.name.fromMCItem(),
+                )
 
-            quantityView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(materialView)
-                    .alignTopToBottomOf(materialNameView)
-                    .margins(start = 150),
-                text = "${ChatColor.GRAY}Amount: ${order.quantity}",
-                size = 8,
-            )
+                quantityView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(materialView)
+                        .alignTopToBottomOf(materialNameView)
+                        .margins(start = 150),
+                    text = "${ChatColor.GRAY}Amount: ${order.quantity}",
+                    size = 8,
+                )
 
-            priceView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToEndOf(materialNameView)
-                    .alignTopToBottomOf(materialNameView)
-                    .alignBottomToTopOf(quantityView)
-                    .margins(start = 200),
-                text = "$${"%.2f".format(order.price / 100f)}\nper Item",
-                size = 14,
-            )
+                priceView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(materialNameView)
+                        .alignTopToBottomOf(materialNameView)
+                        .alignBottomToTopOf(quantityView)
+                        .margins(start = 200),
+                    text = "$${"%.2f".format(order.price / 100f)}\nper Item",
+                    size = 14,
+                )
 
-            addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(priceView)
-                    .centerHorizontally()
-                    .margins(top = 150),
-                text = "${ChatColor.GOLD}Continue",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
-                callback = onFinish,
-            )
-
-        }
+                addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(priceView)
+                        .centerHorizontally()
+                        .margins(top = 150),
+                    text = "${ChatColor.GOLD}Continue",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    callback = onFinish,
+                )
+            }
+        })
     }
 }
 
 interface OfferEditorPresenter: Presenter {
-    fun setItemListener(listener: () -> Unit)
+    fun setItemListener(listener: Listener)
 
-    fun setZeroListener(listener: () -> Unit)
+    fun setZeroListener(listener: Listener)
 
-    fun setSubtractListener(listener: () -> Unit)
+    fun setSubtractListener(listener: Listener)
 
-    fun setMaxListener(listener: () -> Unit)
+    fun setMaxListener(listener: Listener)
 
-    fun setAddListener(listener: () -> Unit)
+    fun setAddListener(listener: Listener)
 
-    fun setUpdateListener(listener: () -> Unit)
+    fun setUpdateListener(listener: Listener)
 
-    fun setDeleteListener(listener: () -> Unit)
+    fun setDeleteListener(listener: Listener)
 
     fun setItem(item: Material)
 
-    fun setPriceListener(listener: (String) -> Unit)
+    fun setPriceListener(listener: TextListener)
 
-    fun setQuantityListener(listener: (String) -> Unit)
+    fun setQuantityListener(listener: TextListener)
 
     fun updatePriceText(text: String)
 
@@ -381,9 +389,9 @@ interface OfferEditorPresenter: Presenter {
 
     fun hideMessage()
 
-    fun animateOrderSuccess(material: Material, order: Order, onFinish: () -> Unit)
+    fun animateOrderSuccess(material: Material, order: Order, onFinish: Listener)
 
-    fun animateOrderDeleteSuccess(material: Material, order: Order, onFinish: () -> Unit)
+    fun animateOrderDeleteSuccess(material: Material, order: Order, onFinish: Listener)
 }
 
 class OfferEditorInteractor(
@@ -421,148 +429,171 @@ class OfferEditorInteractor(
 //            }
 //        }
 
-        presenter.setPriceListener {
-            if (it.toDoubleOrNull() == null) {
-                presenter.updatePriceText("$0")
-                presenter.setMessage("${ChatColor.RED}Prices must be a valid number!")
-                builder.price(0)
-            } else {
-                presenter.updatePriceText("$${it.priceFormat()}")
-                val price = ((it.toDouble() * 100) + 0.5).toInt()
-                builder.price(price)
+        presenter.setPriceListener(object : TextListener {
+            override fun invoke(text: String) {
+                if (text.toDoubleOrNull() == null) {
+                    presenter.updatePriceText("$0")
+                    presenter.setMessage("${ChatColor.RED}Prices must be a valid number!")
+                    builder.price(0)
+                } else {
+                    presenter.updatePriceText("$${text.priceFormat()}")
+                    val price = ((text.toDouble() * 100) + 0.5).toInt()
+                    builder.price(price)
+                }
             }
-        }
+        })
 
-        presenter.setQuantityListener {
-            if (it.toIntOrNull() == null) {
-                presenter.updateQuantityText("0")
-                presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
-                builder.quantity(0)
-            } else {
-                builder.quantity(it.toInt())
-                checkValidQuantity(updatingOrder)
-            }
-        }
-
-        presenter.setZeroListener {
-            presenter.updateQuantityText("0")
-            builder.quantity(0)
-            checkValidQuantity(updatingOrder)
-        }
-
-        presenter.setSubtractListener {
-            builder.quantity?.let { quantity ->
-                if (quantity > 0) {
-                    builder.quantity(quantity - 1)
-                    presenter.updateQuantityText(builder.quantity.toString())
+        presenter.setQuantityListener(object : TextListener {
+            override fun invoke(text: String) {
+                if (text.toIntOrNull() == null) {
+                    presenter.updateQuantityText("0")
+                    presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
+                    builder.quantity(0)
+                } else {
+                    builder.quantity(text.toInt())
                     checkValidQuantity(updatingOrder)
                 }
             }
+        })
 
-        }
+        presenter.setZeroListener(object : Listener {
+            override fun invoke() {
+                presenter.updateQuantityText("0")
+                builder.quantity(0)
+                checkValidQuantity(updatingOrder)
+            }
+        })
 
-        presenter.setMaxListener {
-            var count = updatingOrder.quantity
-            player.inventory.filterNotNull().forEach {
-                if (it.type == selectedMaterial && it.itemMeta?.asComponentString == builder.meta) {
-                    count += it.amount
+        presenter.setSubtractListener(object : Listener {
+            override fun invoke() {
+                builder.quantity?.let { quantity ->
+                    if (quantity > 0) {
+                        builder.quantity(quantity - 1)
+                        presenter.updateQuantityText(builder.quantity.toString())
+                        checkValidQuantity(updatingOrder)
+                    }
                 }
             }
+        })
 
-            builder.quantity(count)
-            presenter.updateQuantityText(builder.quantity.toString())
-            checkValidQuantity(updatingOrder)
-        }
+        presenter.setMaxListener(object : Listener {
+            override fun invoke() {
+                var count = updatingOrder.quantity
+                player.inventory.filterNotNull().forEach {
+                    if (it.type == selectedMaterial && it.itemMeta?.asComponentString == builder.meta) {
+                        count += it.amount
+                    }
+                }
 
-        presenter.setAddListener {
-            builder.quantity((builder.quantity ?: 0) + 1)
-            presenter.updateQuantityText(builder.quantity.toString())
-            checkValidQuantity(updatingOrder)
-        }
+                builder.quantity(count)
+                presenter.updateQuantityText(builder.quantity.toString())
+                checkValidQuantity(updatingOrder)
+            }
+        })
 
-        presenter.setDeleteListener {
-            orderRepository.selectedMaterial?.let {
-                orderRepository.deleteOrder(it, updatingOrder).collectFirst(DudeDispatcher()) { orderResponse ->
-                    if (orderResponse == OrderStatus.ERROR) {
-                        presenter.setMessage("${ChatColor.RED}Something went wrong, please try again later...")
-                    } else {
+        presenter.setAddListener(object : Listener {
+            override fun invoke() {
+                builder.quantity((builder.quantity ?: 0) + 1)
+                presenter.updateQuantityText(builder.quantity.toString())
+                checkValidQuantity(updatingOrder)
+            }
+        })
+
+        presenter.setDeleteListener(object : Listener {
+            override fun invoke() {
+                orderRepository.selectedMaterial?.let {
+                    orderRepository.deleteOrder(it, updatingOrder).collectFirst(DudeDispatcher()) { orderResponse ->
+                        if (orderResponse == OrderStatus.ERROR) {
+                            presenter.setMessage("${ChatColor.RED}Something went wrong, please try again later...")
+                        } else {
 //                        @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
 //                            it.keyOrNull
 //                        } else {
 //                            it.key
 //                        }
 
-                        @Suppress("DEPRECATION") val key = it.key
+                            @Suppress("DEPRECATION") val key = it.key
 
-                        val item = Bukkit.getItemFactory().createItemStack("$key${updatingOrder.meta}")
-                        item.amount = updatingOrder.quantity
+                            val item = Bukkit.getItemFactory().createItemStack("$key${updatingOrder.meta}")
+                            item.amount = updatingOrder.quantity
 
-                        player.inventory.add(player.location, item)
-                        presenter.animateOrderDeleteSuccess(it, updatingOrder) {
-                            routeBack()
+                            player.inventory.add(player.location, item)
+                            presenter.animateOrderDeleteSuccess(it, updatingOrder, object : Listener {
+                                override fun invoke() {
+                                    routeBack()
+                                }
+                            })
                         }
                     }
                 }
             }
-        }
+        })
 
-        presenter.setUpdateListener {
-            if (selectedMaterial == null) {
-                presenter.setMessage("${ChatColor.RED}You need to select an item to sell first!")
-                return@setUpdateListener
-            }
+        presenter.setUpdateListener(object : Listener {
+            override fun invoke() {
+                if (selectedMaterial == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to select an item to sell first!")
+                    return
+                }
 
-            if (builder.price == null) {
-                presenter.setMessage("${ChatColor.RED}You need to specify the price of the ${selectedMaterial?.name?.fromMCItem()} you want to sell!")
-                return@setUpdateListener
-            }
+                if (builder.price == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to specify the price of the ${selectedMaterial?.name?.fromMCItem()} you want to sell!")
+                    return
+                }
 
-            if (builder.quantity == null) {
-                presenter.setMessage("${ChatColor.RED}You need to specify the amount of the ${selectedMaterial?.name?.fromMCItem()} you want to sell!")
-                return@setUpdateListener
-            }
+                if (builder.quantity == null) {
+                    presenter.setMessage("${ChatColor.RED}You need to specify the amount of the ${selectedMaterial?.name?.fromMCItem()} you want to sell!")
+                    return
+                }
 
-            selectedMaterial?.let { material ->
-                val order = builder.playerId(player.uniqueId).build() ?: return@setUpdateListener
-                order.quantity -= updatingOrder.quantity
-                if (checkValidQuantity(updatingOrder)) {
-                    if (order.quantity > 0) {
-                        orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
-                            player.inventory.remove(material, order.meta, order.quantity)
-                            presenter.animateOrderSuccess(material, order) {
-                                routeBack()
+                selectedMaterial?.let { material ->
+                    val order = builder.playerId(player.uniqueId).build() ?: return
+                    order.quantity -= updatingOrder.quantity
+                    if (checkValidQuantity(updatingOrder)) {
+                        if (order.quantity > 0) {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                                player.inventory.remove(material, order.meta, order.quantity)
+                                presenter.animateOrderSuccess(material, order, object : Listener {
+                                    override fun invoke() {
+                                        routeBack()
+                                    }
+                                })
                             }
-                        }
-                    } else if (order.quantity < 0) {
-                        orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                        } else if (order.quantity < 0) {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
 //                            @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
 //                                material.keyOrNull
 //                            } else {
 //                                material.key
 //                            }
 
-                            @Suppress("DEPRECATION") val key = material.key
+                                @Suppress("DEPRECATION") val key = material.key
 
-                            val item = Bukkit.getItemFactory().createItemStack("$key${updatingOrder.meta}")
-                            item.amount = -order.quantity
+                                val item = Bukkit.getItemFactory().createItemStack("$key${updatingOrder.meta}")
+                                item.amount = -order.quantity
 
-                            player.inventory.add(player.location, item)
-                            presenter.animateOrderSuccess(material, order) {
-                                routeBack()
+                                player.inventory.add(player.location, item)
+                                presenter.animateOrderSuccess(material, order, object : Listener {
+                                    override fun invoke() {
+                                        routeBack()
+                                    }
+                                })
+                            }
+                        } else {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                                presenter.animateOrderSuccess(material, order, object : Listener {
+                                    override fun invoke() {
+                                        routeBack()
+                                    }
+                                })
                             }
                         }
                     } else {
-                        orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
-                            presenter.animateOrderSuccess(material, order) {
-                                routeBack()
-                            }
-                        }
+                        presenter.setMessage("${ChatColor.RED}You don't have enough ${selectedMaterial?.name?.fromMCItem()} in your inventory!")
                     }
-                } else {
-                    presenter.setMessage("${ChatColor.RED}You don't have enough ${selectedMaterial?.name?.fromMCItem()} in your inventory!")
                 }
             }
-        }
+        })
     }
 
     private fun checkValidQuantity(existingOrder: Order): Boolean {

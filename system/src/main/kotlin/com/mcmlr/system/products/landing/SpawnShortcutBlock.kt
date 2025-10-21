@@ -1,11 +1,14 @@
 package com.mcmlr.system.products.landing
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.data.PermissionNode
 import com.mcmlr.system.products.data.PermissionsRepository
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
@@ -40,11 +43,11 @@ class SpawnShortcutViewController(
     private var spawn: ButtonView? = null
     private var back: ButtonView? = null
 
-    override fun setSpawnListener(listener: () -> Unit) {
+    override fun setSpawnListener(listener: Listener) {
         spawn?.addListener(listener)
     }
 
-    override fun setBackListener(listener: () -> Unit) {
+    override fun setBackListener(listener: Listener) {
         back?.addListener(listener)
     }
 
@@ -79,36 +82,39 @@ class SpawnShortcutViewController(
                 .alignBottomToBottomOf(this)
                 .margins(top = 20),
             background = Color.fromARGB(0, 0, 0, 0),
-        ) {
-            if (spawnRepository.model.enabled) {
-                spawn = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignStartToStartOf(this),
-                    text = "${ChatColor.GOLD}Spawn",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
-                    size = 8,
-                )
-            }
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    if (spawnRepository.model.enabled) {
+                        spawn = addButtonView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignStartToStartOf(this),
+                            text = "${ChatColor.GOLD}Spawn",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
+                            size = 8,
+                        )
+                    }
 
-            if (permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
-                back = addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignStartToStartOf(this),
-                    text = "${ChatColor.GOLD}Back",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
-                    size = 8,
-                )
+                    if (permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
+                        back = addButtonView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignStartToStartOf(this),
+                            text = "${ChatColor.GOLD}Back",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                            size = 8,
+                        )
+                    }
+                }
             }
-        }
+        )
 
     }
 }
 
 interface SpawnShortcutPresenter: Presenter {
-    fun setSpawnListener(listener: () -> Unit)
-    fun setBackListener(listener: () -> Unit)
+    fun setSpawnListener(listener: Listener)
+    fun setBackListener(listener: Listener)
 }
 
 class SpawnShortcutInteractor(
@@ -120,16 +126,20 @@ class SpawnShortcutInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setSpawnListener {
-            val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return@setSpawnListener
-            player.teleport(spawn)
-            close()
-        }
+        presenter.setSpawnListener(object : Listener {
+            override fun invoke() {
+                val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return
+                player.teleport(spawn)
+                close()
+            }
+        })
 
-        presenter.setBackListener {
-            val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return@setBackListener
-            player.teleport(back)
-            close()
-        }
+        presenter.setBackListener(object : Listener {
+            override fun invoke() {
+                val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return
+                player.teleport(back)
+                close()
+            }
+        })
     }
 }

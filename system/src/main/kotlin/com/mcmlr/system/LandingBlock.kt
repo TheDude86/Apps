@@ -15,14 +15,21 @@ import com.mcmlr.system.products.warps.WarpsBlock
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Context
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.data.*
 import com.mcmlr.system.products.spawn.SpawnRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -46,6 +53,7 @@ class LandingBlock @Inject constructor(
     permissionsRepository: PermissionsRepository,
     spawnRepository: SpawnRepository,
     systemConfigRepository: SystemConfigRepository,
+    applicationsRepository: ApplicationsRepository,
 ) : Block(player, origin) {
     private val view: LandingViewController = LandingViewController(player, origin, systemConfigRepository)
     private val interactor: LandingInteractor = LandingInteractor(
@@ -64,6 +72,7 @@ class LandingBlock @Inject constructor(
         setupBlock,
         permissionsRepository,
         spawnRepository,
+        applicationsRepository,
     )
 
     override fun interactor(): Interactor = interactor
@@ -83,7 +92,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
 
     override fun getFeedBlockContainer(): ViewContainer = feedContainer
 
-    override fun addAppsListener(listener: () -> Unit) = appsButton.addListener(listener)
+    override fun addAppsListener(listener: Listener) = appsButton.addListener(listener)
 
     override fun getAppsBlockContainer(): ViewContainer = appsContainer
 
@@ -97,7 +106,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 250),
-            text = systemConfigRepository.model.title,
+            text = systemConfigRepository.model.title.placeholders(player),
             size = 14,
         )
 
@@ -117,6 +126,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignEndToEndOf(this)
                 .alignTopToBottomOf(title)
                 .margins(top = 50, end = 400),
+            background = Color.fromARGB(0, 0, 0, 0)
         )
 
         feedContainer = addViewContainer(
@@ -136,6 +146,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .alignEndToEndOf(this)
                 .alignTopToBottomOf(appsContainer)
                 .margins(end = 400),
+            background = Color.fromARGB(0, 0, 0, 0)
         )
 
         homeButton = addButtonView(
@@ -163,7 +174,7 @@ class LandingViewController(private val player: Player, origin: Location, privat
 interface LandingPresenter: Presenter {
     fun getAppsBlockContainer(): ViewContainer
     fun getSpawnBlockContainer(): ViewContainer
-    fun addAppsListener(listener: () -> Unit)
+    fun addAppsListener(listener: Listener)
     fun getFeedBlockContainer(): ViewContainer
 }
 
@@ -183,6 +194,7 @@ class LandingInteractor(
     private val setupBlock: SetupBlock,
     private val permissionsRepository: PermissionsRepository,
     private val spawnRepository: SpawnRepository,
+    private val applicationsRepository: ApplicationsRepository,
 ): Interactor(presenter) {
 
     private var routed = false
@@ -200,20 +212,23 @@ class LandingInteractor(
     }
 
     override fun onCreate() {
-        if (!routed) {
-            context.deeplink()?.let {
-                when (it) {
-                    "teleport://" -> routeTo(teleportBlock)
-                    "warp://" -> routeTo(warpsBlock)
-                    "home://" -> routeTo(homesBlock)
-                    "market://" -> routeTo(marketBlock)
-                    "tutorial://" -> routeTo(tutorialBlock)
-                    "setup://" -> routeTo(setupBlock)
-                }
-                routed = true
-                return
-            }
-        }
+//        if (!routed) {
+//            context.deeplink()?.let {
+//                val environment = applicationsRepository.getDeeplinkApp(it) ?: return@let
+//                launchApp(environment)
+//
+//
+//                CoroutineScope(Dispatchers.IO).launch {
+//                    delay(1000)
+//                    CoroutineScope(DudeDispatcher()).launch {
+//                        launchApp(environment)
+//                    }
+//                }
+//
+////                routed = true
+//                return
+//            }
+//        }
 
         super.onCreate()
 
@@ -228,8 +243,15 @@ class LandingInteractor(
             attachChild(spawnShortcutBlock, presenter.getSpawnBlockContainer())
         }
 
-        presenter.addAppsListener {
-            routeTo(applicationsBlock)
+        presenter.addAppsListener(object : Listener {
+            override fun invoke() {
+                routeTo(applicationsBlock)
+            }
+        })
+
+        context.deeplink()?.let {
+            val environment = applicationsRepository.getDeeplinkApp(it) ?: return@let
+            launchApp(environment)
         }
     }
 }

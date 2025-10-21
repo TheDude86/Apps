@@ -1,10 +1,14 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -63,58 +67,61 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                 .alignTopToBottomOf(title)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            background = Color.fromARGB(0, 0, 0, 0)
-        ) {
-            head = addItemView(
-                modifier = Modifier()
-                    .size(280, 280)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 200),
-                item = ItemStack(Material.PLAYER_HEAD)
-            )
+            background = Color.fromARGB(0, 0, 0, 0),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    head = addItemView(
+                        modifier = Modifier()
+                            .size(280, 280)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 200),
+                        item = ItemStack(Material.PLAYER_HEAD)
+                    )
 
-            name = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .centerHorizontally()
-                    .alignTopToBottomOf(head)
-                    .margins(top = 300),
-                text = "Player name"
-            )
+                    name = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .centerHorizontally()
+                            .alignTopToBottomOf(head)
+                            .margins(top = 300),
+                        text = "Player name"
+                    )
 
-            accept = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(-400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.GREEN}Accept",
-                highlightedText = "${ChatColor.GREEN}${ChatColor.BOLD}Accept",
-            )
+                    accept = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(-400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.GREEN}Accept",
+                        highlightedText = "${ChatColor.GREEN}${ChatColor.BOLD}Accept",
+                    )
 
-            reject = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .position(400, 0)
-                    .alignTopToBottomOf(name)
-                    .margins(top = 50),
-                text = "${ChatColor.RED}Reject",
-                highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Reject",
-            )
+                    reject = addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .position(400, 0)
+                            .alignTopToBottomOf(name)
+                            .margins(top = 50),
+                        text = "${ChatColor.RED}Reject",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Reject",
+                    )
 
-            messageView = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(accept)
-                    .centerHorizontally()
-                    .margins(top = 100),
-                size = 4,
-                text = ""
-            )
+                    messageView = addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(accept)
+                            .centerHorizontally()
+                            .margins(top = 100),
+                        size = 4,
+                        text = ""
+                    )
 
-            spin(head)
-        }
+                    spin(head)
+                }
+            }
+        )
     }
 
     override fun setMessage(message: String) {
@@ -129,11 +136,11 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
         updateTextDisplay(name)
     }
 
-    override fun setAcceptCallback(callback: () -> Unit) {
+    override fun setAcceptCallback(callback: Listener) {
         accept.addListener(callback)
     }
 
-    override fun setRejectCallback(callback: () -> Unit) {
+    override fun setRejectCallback(callback: Listener) {
         reject.addListener(callback)
     }
 }
@@ -141,9 +148,9 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
 interface TeleportResponsePresenter: Presenter {
     fun setPlayer(playerHead: ItemStack, playerName: String)
 
-    fun setAcceptCallback(callback: () -> Unit)
+    fun setAcceptCallback(callback: Listener)
 
-    fun setRejectCallback(callback: () -> Unit)
+    fun setRejectCallback(callback: Listener)
 
     fun setMessage(message: String)
 }
@@ -167,48 +174,55 @@ class TeleportResponseInteractor(
 
         presenter.setPlayer(head, request.sender.displayName)
 
-        presenter.setAcceptCallback {
-            val wait = playerTeleportRepository.canTeleport(player) / 1000
-            if (wait > 0) {
-                presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
-                return@setAcceptCallback
-            }
+        presenter.setAcceptCallback(object : Listener {
+            override fun invoke() {
+                val wait = playerTeleportRepository.canTeleport(player) / 1000
+                if (wait > 0) {
+                    presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+                    return
+                }
 
-            teleportRepository.deleteRequest(this.player.uniqueId, request)
+                teleportRepository.deleteRequest(player.uniqueId, request)
+                log(Log.ASSERT, "Delete request")
 
-            CoroutineScope(Dispatchers.IO).launch {
-                var delay = teleportConfigRepository.model.delay
-                while (delay > 0) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    log(Log.ASSERT, "Background wait...")
+                    var delay = teleportConfigRepository.model.delay
+                    while (delay > 0) {
+                        CoroutineScope(DudeDispatcher()).launch {
+                            val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
+                            val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
+                            val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
+                            val destinationMessage = "${ChatColor.DARK_AQUA}${passenger.displayName} will be teleported to you in $delay second${if (delay != 1) "s" else ""}"
+
+                            //TODO: Check spigot vs paper
+                            passenger.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(passengerMessage))
+                            destination.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(destinationMessage))
+                        }
+
+                        delay(1.seconds)
+                        delay--
+                    }
+
                     CoroutineScope(DudeDispatcher()).launch {
-                        val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
-                        val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
-                        val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
-                        val destinationMessage = "${ChatColor.DARK_AQUA}${passenger.displayName} will be teleported to you in $delay second${if (delay != 1) "s" else ""}"
-
-                        //TODO: Check spigot vs paper
-                        passenger.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(passengerMessage))
-                        destination.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(destinationMessage))
-                    }
-
-                    delay(1.seconds)
-                    delay--
-                }
-
-                CoroutineScope(DudeDispatcher()).launch {
-                    if (request.type == TeleportRequestType.GOTO) {
-                        request.sender.teleport(player)
-                    } else {
-                        player.teleport(request.sender)
+                        log(Log.ASSERT, "Foreground teleport Type=${request.type}")
+                        if (request.type == TeleportRequestType.GOTO) {
+                            request.sender.teleport(player)
+                        } else {
+                            player.teleport(request.sender)
+                        }
                     }
                 }
+
+                close()
             }
+        })
 
-            close()
-        }
-
-        presenter.setRejectCallback {
-            teleportRepository.deleteRequest(this.player.uniqueId, request)
-            routeBack()
-        }
+        presenter.setRejectCallback(object : Listener {
+            override fun invoke() {
+                teleportRepository.deleteRequest(player.uniqueId, request)
+                routeBack()
+            }
+        })
     }
 }

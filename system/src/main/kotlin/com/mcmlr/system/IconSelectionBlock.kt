@@ -2,9 +2,12 @@ package com.mcmlr.system
 
 import com.mcmlr.system.products.data.MaterialsRepository
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -88,53 +91,61 @@ class IconSelectionBlockViewController(
         )
     }
 
-    override fun addSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
     override fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit) {
-        feedView.updateView {
-            var row: ViewContainer? = null
-            for (i in materials.indices step 6) {
-                val modifier = if (row == null) {
-                    Modifier()
-                        .size(MATCH_PARENT, 100)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                } else {
-                    Modifier()
-                        .size(MATCH_PARENT, 100)
-                        .alignTopToBottomOf(row)
-                        .centerHorizontally()
-                }
-
-                row = addViewContainer(
-                    modifier = modifier,
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    for (j in 0..5) {
-                        if (i + j >= materials.size) break
-                        val material = materials[i + j]
-                        if (material.type == Material.WATER ||
-                            material.type == Material.FIRE ||
-                            material.type == Material.ACACIA_WALL_SIGN) break
-
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .position(-500 + (200 * j), 0)
-                                .size(73, 73),
-                            item = material,
-                            visible = true,
-                        ) {
-                            itemCallback.invoke(material)
-                        }
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                var row: ViewContainer? = null
+                for (i in materials.indices step 6) {
+                    val modifier = if (row == null) {
+                        Modifier()
+                            .size(MATCH_PARENT, 100)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                    } else {
+                        Modifier()
+                            .size(MATCH_PARENT, 100)
+                            .alignTopToBottomOf(row)
+                            .centerHorizontally()
                     }
+
+                    row = addViewContainer(
+                        modifier = modifier,
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                for (j in 0..5) {
+                                    if (i + j >= materials.size) break
+                                    val material = materials[i + j]
+                                    if (material.type == Material.WATER ||
+                                        material.type == Material.FIRE ||
+                                        material.type == Material.ACACIA_WALL_SIGN) break
+
+                                    addItemButtonView(
+                                        modifier = Modifier()
+                                            .position(-500 + (200 * j), 0)
+                                            .size(73, 73),
+                                        item = material,
+                                        visible = true,
+                                        callback = object : Listener {
+                                            override fun invoke() {
+                                                itemCallback.invoke(material)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    )
                 }
             }
-        }
+        })
     }
 }
 
 interface IconSelectionPresenter: Presenter {
-    fun addSearchListener(listener: (String) -> Unit)
+    fun addSearchListener(listener: TextListener)
 
     fun setFeed(materials: List<ItemStack>, itemCallback: (ItemStack) -> Unit)
 }
@@ -156,15 +167,17 @@ class IconSelectionInteractor(
             }
         }
 
-        presenter.addSearchListener { searchTerm ->
-            materialsRepository.searchMaterialsStream(searchTerm).collectFirst {
-                collectOn(DudeDispatcher()) { materials ->
-                    presenter.setFeed(materials) {
-                        addBundleData(IconSelectionBlock.MATERIAL_BUNDLE_KEY, it)
-                        routeBack()
+        presenter.addSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                materialsRepository.searchMaterialsStream(text).collectFirst {
+                    collectOn(DudeDispatcher()) { materials ->
+                        presenter.setFeed(materials) {
+                            addBundleData(IconSelectionBlock.MATERIAL_BUNDLE_KEY, it)
+                            routeBack()
+                        }
                     }
                 }
             }
-        }
+        })
     }
 }

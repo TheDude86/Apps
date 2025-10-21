@@ -3,6 +3,7 @@ package com.mcmlr.system.products.spawn
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -36,11 +37,11 @@ class SpawnViewController(
 
     private var spawnButton: ButtonView? = null
 
-    override fun setSpawnListener(listener: () -> Unit) {
+    override fun setSpawnListener(listener: Listener) {
         spawnButton?.addListener(listener)
     }
 
-    override fun setBackListener(listener: () -> Unit) = teleportBackButton.addListener(listener)
+    override fun setBackListener(listener: Listener) = teleportBackButton.addListener(listener)
 
     override fun createView() {
         super.createView()
@@ -90,8 +91,8 @@ class SpawnViewController(
 }
 
 interface SpawnPresenter: Presenter {
-    fun setSpawnListener(listener: () -> Unit)
-    fun setBackListener(listener: () -> Unit)
+    fun setSpawnListener(listener: Listener)
+    fun setBackListener(listener: Listener)
 }
 
 class SpawnInteractor(
@@ -103,16 +104,20 @@ class SpawnInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setSpawnListener {
-            val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return@setSpawnListener
-            player.teleport(spawn)
-            close()
-        }
+        presenter.setSpawnListener(object : Listener {
+            override fun invoke() {
+                val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return
+                player.teleport(spawn)
+                close()
+            }
+        })
 
-        presenter.setBackListener {
-            val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return@setBackListener
-            player.teleport(back)
-            close()
-        }
+        presenter.setBackListener(object : Listener {
+            override fun invoke() {
+                val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return
+                player.teleport(back)
+                close()
+            }
+        })
     }
 }

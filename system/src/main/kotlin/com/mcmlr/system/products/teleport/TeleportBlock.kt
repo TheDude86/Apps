@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -79,9 +81,9 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
         )
     }
 
-    override fun setPlayersButtonCallback(callback: () -> Unit) = players.addListener(callback)
+    override fun setPlayersButtonCallback(callback: Listener) = players.addListener(callback)
 
-    override fun setRequestsButtonCallback(callback: () -> Unit) = requests.addListener(callback)
+    override fun setRequestsButtonCallback(callback: Listener) = requests.addListener(callback)
 
     override fun setRequestList(requests: List<TeleportRequestModel>, callback: (TeleportRequestModel) -> Unit) {
         this.players.text = "${ChatColor.BLUE}Players"
@@ -93,76 +95,84 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
         updateTextDisplay(this.players)
         updateTextDisplay(this.requests)
 
-        feedView.updateView {
-            if (requests.isEmpty()) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10),
-                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}You have no pending\nteleport requests...",
-                    size = 8,
-                )
-
-                return@updateView
-            }
-
-            var row: ViewContainer? = null
-            requests.forEach { rowModel ->
-                val r = row
-                val modifier = if (r == null) {
-                    Modifier()
-                        .size(MATCH_PARENT, 100)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 32)
-                } else {
-                    Modifier()
-                        .size(MATCH_PARENT, 100)
-                        .alignTopToBottomOf(r)
-                        .centerHorizontally()
-                        .margins(top = 32)
-                }
-
-                row = addViewContainer(
-                    modifier = modifier,
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val head = ItemStack(Material.PLAYER_HEAD)
-                    val headMeta = head.itemMeta as SkullMeta
-                    headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(rowModel.sender.uniqueId))
-                    head.itemMeta = headMeta
-
-                    val playerView = addButtonView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .center(),
-                        text = rowModel.sender.displayName,
-                        highlightedText = "${ChatColor.BOLD}${rowModel.sender.displayName}"
-                    ) {
-                        callback.invoke(rowModel)
-                    }
-
-                    addItemView(
-                        modifier = Modifier()
-                            .size(80, 80)
-                            .alignEndToStartOf(playerView)
-                            .alignTopToTopOf(playerView)
-                            .alignBottomToBottomOf(playerView),
-                        item = head,
-                    )
-
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (requests.isEmpty()) {
                     addTextView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(playerView)
-                            .centerVertically(),
-                        text = if (rowModel.type == TeleportRequestType.GOTO) "✈" else "\uD83D\uDED6",
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 10),
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}You have no pending\nteleport requests...",
+                        size = 8,
+                    )
+
+                    return
+                }
+
+                var row: ViewContainer? = null
+                requests.forEach { rowModel ->
+                    val r = row
+                    val modifier = if (r == null) {
+                        Modifier()
+                            .size(MATCH_PARENT, 100)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 32)
+                    } else {
+                        Modifier()
+                            .size(MATCH_PARENT, 100)
+                            .alignTopToBottomOf(r)
+                            .centerHorizontally()
+                            .margins(top = 32)
+                    }
+
+                    row = addViewContainer(
+                        modifier = modifier,
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val head = ItemStack(Material.PLAYER_HEAD)
+                                val headMeta = head.itemMeta as SkullMeta
+                                headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(rowModel.sender.uniqueId))
+                                head.itemMeta = headMeta
+
+                                val playerView = addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .center(),
+                                    text = rowModel.sender.displayName,
+                                    highlightedText = "${ChatColor.BOLD}${rowModel.sender.displayName}",
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            callback.invoke(rowModel)
+                                        }
+                                    }
+                                )
+
+                                addItemView(
+                                    modifier = Modifier()
+                                        .size(80, 80)
+                                        .alignEndToStartOf(playerView)
+                                        .alignTopToTopOf(playerView)
+                                        .alignBottomToBottomOf(playerView),
+                                    item = head,
+                                )
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(playerView)
+                                        .centerVertically(),
+                                    text = if (rowModel.type == TeleportRequestType.GOTO) "✈" else "\uD83D\uDED6",
+                                )
+                            }
+                        }
                     )
                 }
             }
-        }
+        })
     }
 
     override fun setPlayerList(players: List<Pair<Player, ItemStack>>, callback: (Player) -> Unit) {
@@ -175,63 +185,71 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
         updateTextDisplay(this.players)
         updateTextDisplay(this.requests)
 
-        feedView.updateView {
-            if (players.isEmpty()) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10),
-                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no other\nplayers online...",
-                    size = 8,
-                )
-
-                return@updateView
-            }
-
-            var row: ViewContainer? = null
-            players.forEach { rowModel ->
-                val r = row
-                val modifier = if (r == null) {
-                    Modifier()
-                        .size(MATCH_PARENT, 100)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 32)
-                } else {
-                    Modifier()
-                        .size(MATCH_PARENT, 200)
-                        .alignTopToBottomOf(r)
-                        .centerHorizontally()
-                        .margins(top = 32)
-                }
-
-                row = addViewContainer(
-                    modifier = modifier,
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    val playerView = addButtonView(
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (players.isEmpty()) {
+                    addTextView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .center(),
-                        text = rowModel.first.displayName,
-                        highlightedText = "${ChatColor.BOLD}${rowModel.first.displayName}"
-                    ) {
-                        callback.invoke(rowModel.first)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 10),
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no other\nplayers online...",
+                        size = 8,
+                    )
+
+                    return
+                }
+
+                var row: ViewContainer? = null
+                players.forEach { rowModel ->
+                    val r = row
+                    val modifier = if (r == null) {
+                        Modifier()
+                            .size(MATCH_PARENT, 100)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 32)
+                    } else {
+                        Modifier()
+                            .size(MATCH_PARENT, 200)
+                            .alignTopToBottomOf(r)
+                            .centerHorizontally()
+                            .margins(top = 32)
                     }
 
-                    addItemView(
-                        modifier = Modifier()
-                            .size(80, 80)
-                            .alignEndToStartOf(playerView)
-                            .alignTopToTopOf(playerView)
-                            .alignBottomToBottomOf(playerView),
-                        item = rowModel.second,
+                    row = addViewContainer(
+                        modifier = modifier,
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val playerView = addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .center(),
+                                    text = rowModel.first.displayName,
+                                    highlightedText = "${ChatColor.BOLD}${rowModel.first.displayName}",
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            callback.invoke(rowModel.first)
+                                        }
+                                    }
+                                )
+
+                                addItemView(
+                                    modifier = Modifier()
+                                        .size(80, 80)
+                                        .alignEndToStartOf(playerView)
+                                        .alignTopToTopOf(playerView)
+                                        .alignBottomToBottomOf(playerView),
+                                    item = rowModel.second,
+                                )
+                            }
+                        }
                     )
                 }
             }
-        }
+        })
     }
 }
 
@@ -240,9 +258,9 @@ interface TeleportPresenter: Presenter {
 
     fun setRequestList(requests: List<TeleportRequestModel>, callback: (TeleportRequestModel) -> Unit)
 
-    fun setPlayersButtonCallback(callback: () -> Unit)
+    fun setPlayersButtonCallback(callback: Listener)
 
-    fun setRequestsButtonCallback(callback: () -> Unit)
+    fun setRequestsButtonCallback(callback: Listener)
 }
 
 class TeleportInteractor(
@@ -259,13 +277,17 @@ class TeleportInteractor(
 
         gotoPlayerList()
 
-        presenter.setPlayersButtonCallback {
-            gotoPlayerList()
-        }
+        presenter.setPlayersButtonCallback(object : Listener {
+            override fun invoke() {
+                gotoPlayerList()
+            }
+        })
 
-        presenter.setRequestsButtonCallback {
-            gotoRequestList()
-        }
+        presenter.setRequestsButtonCallback(object : Listener {
+            override fun invoke() {
+                gotoRequestList()
+            }
+        })
     }
 
     private fun gotoRequestList() {

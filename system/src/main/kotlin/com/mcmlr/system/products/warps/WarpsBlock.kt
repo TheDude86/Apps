@@ -1,7 +1,9 @@
 package com.mcmlr.system.products.warps
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -9,6 +11,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.system.products.data.*
 import kotlinx.coroutines.*
@@ -109,81 +112,89 @@ class WarpsViewController(private val player: Player, origin: Location, private 
             removeWarpButton?.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove warp"
         }
 
-        container.updateView {
-            if (warps.isEmpty()) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10),
-                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no warps\nset yet...",
-                    size = 8,
-                )
-
-                return@updateView
-            }
-
-            var homeView: ButtonView? = null
-            warps.forEach { home ->
-                val modifier = if (homeView == null) {
-                    Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToTopOf(this)
-                        .centerHorizontally()
-                        .margins(top = 10)
-                } else {
-                    homeView?.let {
-                        Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignTopToBottomOf(it)
-                            .centerHorizontally()
-                            .margins(top = 25)
-                    }
-                } ?: return@forEach
-
-
-                homeView = addButtonView(
-                    modifier = modifier,
-                    text = home.name,
-                    highlightedText = "${ChatColor.BOLD}${home.name}"
-                ) {
-                    listener.teleport(home)
-                }
-
-                addItemView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignEndToStartOf(homeView!!)
-                        .alignTopToTopOf(homeView!!)
-                        .alignBottomToBottomOf(homeView!!)
-                        .margins(end = 64),
-                    item = home.icon,
-                )
-
-                if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN)) {
-                    addButtonView(
+        container.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (warps.isEmpty()) {
+                    addTextView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(homeView!!)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 10),
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no warps\nset yet...",
+                        size = 8,
+                    )
+
+                    return
+                }
+
+                var homeView: ButtonView? = null
+                warps.forEach { home ->
+                    val modifier = if (homeView == null) {
+                        Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToTopOf(this)
+                            .centerHorizontally()
+                            .margins(top = 10)
+                    } else {
+                        homeView?.let {
+                            Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignTopToBottomOf(it)
+                                .centerHorizontally()
+                                .margins(top = 25)
+                        }
+                    } ?: return@forEach
+
+
+                    homeView = addButtonView(
+                        modifier = modifier,
+                        text = home.name,
+                        highlightedText = "${ChatColor.BOLD}${home.name}",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                listener.teleport(home)
+                            }
+                        }
+                    )
+
+                    addItemView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignEndToStartOf(homeView!!)
                             .alignTopToTopOf(homeView!!)
                             .alignBottomToBottomOf(homeView!!)
-                            .margins(start = 64),
-                        text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
-                        highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎"
-                    ) {
-                        listener.edit(home, deleteMode)
+                            .margins(end = 64),
+                        item = home.icon,
+                    )
+
+                    if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN)) {
+                        addButtonView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignStartToEndOf(homeView!!)
+                                .alignTopToTopOf(homeView!!)
+                                .alignBottomToBottomOf(homeView!!)
+                                .margins(start = 64),
+                            text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
+                            highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
+                            callback = object : Listener {
+                                override fun invoke() {
+                                    listener.edit(home, deleteMode)
+                                }
+                            }
+                        )
                     }
                 }
             }
-        }
+        })
     }
 
-    override fun addNewWarpListener(listener: () -> Unit) {
+    override fun addNewWarpListener(listener: Listener) {
         newWarpButton?.addListener(listener)
     }
 
-    override fun addRemoveWarpListener(listener: () -> Unit) {
+    override fun addRemoveWarpListener(listener: Listener) {
         removeWarpButton?.addListener(listener)
     }
 
@@ -195,8 +206,8 @@ class WarpsViewController(private val player: Player, origin: Location, private 
 
 interface WarpsPresenter: Presenter {
     fun setWarps(warps: List<WarpModel>, deleteMode: Boolean, listener: WarpActionListener)
-    fun addNewWarpListener(listener: () -> Unit)
-    fun addRemoveWarpListener(listener: () -> Unit)
+    fun addNewWarpListener(listener: Listener)
+    fun addRemoveWarpListener(listener: Listener)
     fun setMessage(message: String)
 }
 
@@ -218,15 +229,19 @@ class WarpsInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.addNewWarpListener {
-            routeTo(addWarpsBlock)
-        }
+        presenter.addNewWarpListener(object : Listener {
+            override fun invoke() {
+                routeTo(addWarpsBlock)
+            }
+        })
 
-        presenter.addRemoveWarpListener {
-            val model = warpsRepository.getWarps()
-            deleteMode = !deleteMode
-            presenter.setWarps(model, deleteMode, this)
-        }
+        presenter.addRemoveWarpListener(object : Listener {
+            override fun invoke() {
+                val model = warpsRepository.getWarps()
+                deleteMode = !deleteMode
+                presenter.setWarps(model, deleteMode, this@WarpsInteractor)
+            }
+        })
 
         getWarps()
     }

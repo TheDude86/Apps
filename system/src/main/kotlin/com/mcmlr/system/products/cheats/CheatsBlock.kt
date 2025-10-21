@@ -3,7 +3,10 @@ package com.mcmlr.system.products.cheats
 import com.mcmlr.system.products.cheats.children.ItemsBlock
 import com.mcmlr.system.products.cheats.children.SpawnerBlock
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
@@ -52,7 +55,7 @@ class CheatsViewController(
     private lateinit var selectedPluginListener: (CheatType) -> Unit
 
     override fun getDetailsContainer(): ViewContainer {
-        cheatsDetailContainer.updateView {}
+        cheatsDetailContainer.updateView(EmptyContextListener<ViewContainer>())
         return cheatsDetailContainer
     }
 
@@ -63,48 +66,53 @@ class CheatsViewController(
     override fun listContainer(): ViewContainer = cheatsListContainer
 
     override fun setDetailsContainer(selectedCheat: CheatType) {
-        cheatsDetailContainer.updateView {
-            val animationView = addViewContainer(
-                modifier = Modifier()
-                    .size(200, 200)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
-                    .margins(top = 100),
-            )
+        cheatsDetailContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val animationView = addViewContainer(
+                    modifier = Modifier()
+                        .size(200, 200)
+                        .alignTopToTopOf(this)
+                        .centerHorizontally()
+                        .margins(top = 100),
+                )
 
-            val cheatTitle = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(animationView)
-                    .alignStartToStartOf(this)
-                    .margins(start = 100, top = 100),
-                text = "${ChatColor.BOLD}${selectedCheat.title.titlecase()}",
-                size = 12,
-            )
+                val cheatTitle = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(animationView)
+                        .alignStartToStartOf(this)
+                        .margins(start = 100, top = 100),
+                    text = "${ChatColor.BOLD}${selectedCheat.title.titlecase()}",
+                    size = 12,
+                )
 
-            val cheatDescription = addTextView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignStartToStartOf(cheatTitle)
-                    .alignTopToBottomOf(cheatTitle)
-                    .margins(top = 50),
-                text = selectedCheat.description,
-                alignment = Alignment.LEFT,
-                size = 6,
-            )
+                val cheatDescription = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToStartOf(cheatTitle)
+                        .alignTopToBottomOf(cheatTitle)
+                        .margins(top = 50),
+                    text = selectedCheat.description,
+                    alignment = Alignment.LEFT,
+                    size = 6,
+                )
 
-            val cheatCTA = addButtonView(
-                modifier = Modifier()
-                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                    .alignTopToBottomOf(cheatDescription)
-                    .centerHorizontally()
-                    .margins(top = 50),
-                text = "${ChatColor.GOLD}${selectedCheat.cta}",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${selectedCheat.cta}",
-            ) {
-                selectedPluginListener.invoke(selectedCheat)
+                val cheatCTA = addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(cheatDescription)
+                        .centerHorizontally()
+                        .margins(top = 50),
+                    text = "${ChatColor.GOLD}${selectedCheat.cta}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${selectedCheat.cta}",
+                    callback = object : Listener {
+                        override fun invoke() {
+                            selectedPluginListener.invoke(selectedCheat)
+                        }
+                    }
+                )
             }
-        }
+        })
     }
 
     override fun createView() {

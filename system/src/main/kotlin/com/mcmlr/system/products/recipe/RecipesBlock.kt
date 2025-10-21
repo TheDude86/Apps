@@ -1,9 +1,13 @@
 package com.mcmlr.system.products.recipe
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -42,65 +46,77 @@ class RecipesViewController(
     private lateinit var searchButton: TextInputView
     private lateinit var feedView: ListFeedView
 
-    override fun addSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
     override fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit) {
-        feedView.updateView {
-            for (i in recipes.indices step 6) {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 100),
-                    background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                    for (j in 0..5) {
-                        if (i + j >= recipes.size) break
-                        val recipe = recipes[i + j]
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                for (i in recipes.indices step 6) {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 100),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                for (j in 0..5) {
+                                    if (i + j >= recipes.size) break
+                                    val recipe = recipes[i + j]
 
-                        addItemButtonView(
-                            modifier = Modifier()
-                                .position(-500 + (200 * j), 0)
-                                .size(73, 73),
-                            item = recipe.result,
-                        ) {
-                            itemCallback.invoke(recipe)
+                                    addItemButtonView(
+                                        modifier = Modifier()
+                                            .position(-500 + (200 * j), 0)
+                                            .size(73, 73),
+                                        item = recipe.result,
+                                        callback = object : Listener {
+                                            override fun invoke() {
+                                                itemCallback.invoke(recipe)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                         }
-                    }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun setShapedRecipe(shape: Array<String>, recipe: Map<Char, ItemStack>) {
-        craftingSlots.forEach { it.updateView {  } }
+        craftingSlots.forEach { it.updateView(EmptyContextListener<ViewContainer>()) }
 
         shape.forEachIndexed { rowIndex, row ->
             val rowIndexOffset = rowIndex * 3
             row.forEachIndexed row@ { slotIndex, item ->
                 val recipeItem = recipe[item] ?: return@row
-                craftingSlots[rowIndexOffset + slotIndex].updateView {
-                    addItemView(
-                        modifier = Modifier()
-                            .size(RECIPE_ITEM_SIZE, RECIPE_ITEM_SIZE)
-                            .center(),
-                        item = recipeItem
-                    )
-                }
+                craftingSlots[rowIndexOffset + slotIndex].updateView(object : ContextListener<ViewContainer>() {
+                    override fun ViewContainer.invoke() {
+                        addItemView(
+                            modifier = Modifier()
+                                .size(RECIPE_ITEM_SIZE, RECIPE_ITEM_SIZE)
+                                .center(),
+                            item = recipeItem
+                        )
+                    }
+                })
             }
         }
     }
 
     override fun setShapelessRecipe(recipe: List<ItemStack>) {
-        craftingSlots.forEach { it.updateView {  } }
+        craftingSlots.forEach { it.updateView(EmptyContextListener<ViewContainer>()) }
 
         recipe.forEachIndexed { index, item ->
-            craftingSlots[index].updateView {
-                addItemView(
-                    modifier = Modifier()
-                        .size(RECIPE_ITEM_SIZE, RECIPE_ITEM_SIZE)
-                        .center(),
-                    item = item
-                )
-            }
+            craftingSlots[index].updateView(object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    addItemView(
+                        modifier = Modifier()
+                            .size(RECIPE_ITEM_SIZE, RECIPE_ITEM_SIZE)
+                            .center(),
+                        item = item
+                    )
+                }
+            })
         }
     }
 
@@ -123,84 +139,87 @@ class RecipesViewController(
                 .centerHorizontally()
                 .margins(top = 30),
             background = Color.fromARGB(0, 0, 0, 0),
-        ) {
-            val slotOne = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(this)
-                    .alignStartToStartOf(this),
-            )
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+                    val slotOne = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(this)
+                            .alignStartToStartOf(this),
+                    )
 
-            val slotTwo = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotOne)
-                    .alignStartToEndOf(slotOne)
-                    .margins(start = 10),
-            )
+                    val slotTwo = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotOne)
+                            .alignStartToEndOf(slotOne)
+                            .margins(start = 10),
+                    )
 
-            val slotThree = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotTwo)
-                    .alignStartToEndOf(slotTwo)
-                    .margins(start = 10),
-            )
+                    val slotThree = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotTwo)
+                            .alignStartToEndOf(slotTwo)
+                            .margins(start = 10),
+                    )
 
-            val slotFour = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignStartToStartOf(slotOne)
-                    .alignTopToBottomOf(slotOne)
-                    .margins(top = 10),
-            )
+                    val slotFour = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignStartToStartOf(slotOne)
+                            .alignTopToBottomOf(slotOne)
+                            .margins(top = 10),
+                    )
 
-            val slotFive = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotFour)
-                    .alignStartToEndOf(slotFour)
-                    .margins(start = 10),
-            )
+                    val slotFive = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotFour)
+                            .alignStartToEndOf(slotFour)
+                            .margins(start = 10),
+                    )
 
-            val slotSix = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotFive)
-                    .alignStartToEndOf(slotFive)
-                    .margins(start = 10),
-            )
+                    val slotSix = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotFive)
+                            .alignStartToEndOf(slotFive)
+                            .margins(start = 10),
+                    )
 
-            val slotSeven = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignStartToStartOf(slotFour)
-                    .alignTopToBottomOf(slotFour)
-                    .margins(top = 10),
-            )
+                    val slotSeven = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignStartToStartOf(slotFour)
+                            .alignTopToBottomOf(slotFour)
+                            .margins(top = 10),
+                    )
 
-            val slotEight = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotSeven)
-                    .alignStartToEndOf(slotSeven)
-                    .margins(start = 10),
-            )
+                    val slotEight = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotSeven)
+                            .alignStartToEndOf(slotSeven)
+                            .margins(start = 10),
+                    )
 
-            val slotNine = addViewContainer(
-                modifier = Modifier()
-                    .size(50, 50)
-                    .alignTopToTopOf(slotEight)
-                    .alignStartToEndOf(slotEight)
-                    .margins(start = 10),
-            )
+                    val slotNine = addViewContainer(
+                        modifier = Modifier()
+                            .size(50, 50)
+                            .alignTopToTopOf(slotEight)
+                            .alignStartToEndOf(slotEight)
+                            .margins(start = 10),
+                    )
 
-            craftingSlots = listOf(
-                slotOne, slotTwo, slotThree,
-                slotFour, slotFive, slotSix,
-                slotSeven, slotEight, slotNine
-            )
-        }
+                    craftingSlots = listOf(
+                        slotOne, slotTwo, slotThree,
+                        slotFour, slotFive, slotSix,
+                        slotSeven, slotEight, slotNine
+                    )
+                }
+            }
+        )
 
         searchButton = addTextInputView(
             modifier = Modifier()
@@ -226,7 +245,7 @@ class RecipesViewController(
 }
 
 interface RecipesPresenter: Presenter {
-    fun addSearchListener(listener: (String) -> Unit)
+    fun addSearchListener(listener: TextListener)
 
     fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit)
 
@@ -260,9 +279,11 @@ class RecipesInteractor(
             if (it is ShapedRecipe || it is ShapelessRecipe) recipes.add(it)
         }
 
-        presenter.addSearchListener { searchTerm ->
-            presenter.setFeed(recipes.filter { it.result.type.name.fromMCItem().lowercase().contains(searchTerm.lowercase()) }, feedCallback)
-        }
+        presenter.addSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                presenter.setFeed(recipes.filter { it.result.type.name.fromMCItem().lowercase().contains(text.lowercase()) }, feedCallback)
+            }
+        })
 
         presenter.setFeed(recipes, feedCallback)
     }

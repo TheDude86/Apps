@@ -1,9 +1,15 @@
 package com.mcmlr.system.products.kits
 
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationPresenter
 import com.mcmlr.blocks.api.block.NavigationViewController
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.system.IconSelectionBlock
@@ -50,9 +56,9 @@ class AddKitContentViewController(
 
     private var quantityTextInput: TextInputView? = null
     private var commandTextInput: TextInputView? = null
-    private var iconListener: () -> Unit = {}
+    private var iconListener: Listener = EmptyListener()
 
-    override fun setCommandListener(listener: (String) -> Unit) {
+    override fun setCommandListener(listener: TextListener) {
         commandTextInput?.addTextChangedListener(listener)
     }
 
@@ -64,9 +70,9 @@ class AddKitContentViewController(
 
     override fun hideErrorMessage() = errorMessage.setTextView("")
 
-    override fun setAddContentListener(listener: () -> Unit) = addContentButton.addListener(listener)
+    override fun setAddContentListener(listener: Listener) = addContentButton.addListener(listener)
 
-    override fun setQuantityListener(listener: (String) -> Unit) {
+    override fun setQuantityListener(listener: TextListener) {
         quantityTextInput?.addTextChangedListener(listener)
     }
 
@@ -74,29 +80,31 @@ class AddKitContentViewController(
         quantityTextInput?.updateText(quantity)
     }
 
-    override fun setIconListener(listener: () -> Unit) {
+    override fun setIconListener(listener: Listener) {
         iconListener = listener
     }
 
     override fun setIcon(icon: ItemStack?) {
-        itemContainer.updateView {
-            if (icon == null) {
-                addTextView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .center(),
-                    text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
-                    size = 7,
-                )
-            } else {
-                addItemView(
-                    modifier = Modifier()
-                        .size(100, 100)
-                        .center(),
-                    item = icon
-                )
+        itemContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                if (icon == null) {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .center(),
+                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
+                        size = 7,
+                    )
+                } else {
+                    addItemView(
+                        modifier = Modifier()
+                            .size(100, 100)
+                            .center(),
+                        item = icon
+                    )
+                }
             }
-        }
+        })
     }
 
     override fun createView() {
@@ -123,34 +131,42 @@ class AddKitContentViewController(
                     .centerHorizontally()
                     .margins(top = 200),
                 background = Color.fromARGB(0, 0, 0, 0),
-            ) {
-                itemContainer = addViewContainer(
-                    modifier = Modifier()
-                        .size(200, 200)
-                        .alignTopToTopOf(this),
-                    clickable = true,
-                    listener = {
-                        iconListener.invoke()
-                    }
-                ) {
-                    addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .center(),
-                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
-                        size = 7,
-                    )
-                }
+                content = object : ContextListener<ViewContainer>() {
+                    override fun ViewContainer.invoke() {
+                        itemContainer = addViewContainer(
+                            modifier = Modifier()
+                                .size(200, 200)
+                                .alignTopToTopOf(this),
+                            clickable = true,
+                            listener = object : Listener {
+                                override fun invoke() {
+                                    iconListener.invoke()
+                                }
+                            },
+                            content = object : ContextListener<ViewContainer>() {
+                                override fun ViewContainer.invoke() {
+                                    addTextView(
+                                        modifier = Modifier()
+                                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                                            .center(),
+                                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nItem",
+                                        size = 7,
+                                    )
+                                }
+                            }
+                        )
 
-                quantityTextInput = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(itemContainer)
-                        .centerHorizontally()
-                        .margins(top = 50),
-                    text = "Set quantity",
-                )
-            }
+                        quantityTextInput = addTextInputView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .alignTopToBottomOf(itemContainer)
+                                .centerHorizontally()
+                                .margins(top = 50),
+                            text = "Set quantity",
+                        )
+                    }
+                }
+            )
         } else {
             content = addViewContainer(
                 modifier = Modifier()
@@ -159,15 +175,18 @@ class AddKitContentViewController(
                     .centerHorizontally()
                     .margins(top = 300),
                 background = Color.fromARGB(0, 0, 0, 0),
-                ) {
-                commandTextInput = addTextInputView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .center()
-                        .margins(top = 50),
-                    text = "Set command",
-                )
-            }
+                content = object : ContextListener<ViewContainer>() {
+                    override fun ViewContainer.invoke() {
+                        commandTextInput = addTextInputView(
+                            modifier = Modifier()
+                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                .center()
+                                .margins(top = 50),
+                            text = "Set command",
+                        )
+                    }
+                }
+            )
         }
 
         val addButtonText = if (showItem) "Add Item" else "Add Command"
@@ -196,21 +215,21 @@ class AddKitContentViewController(
 }
 
 interface AddKitContentPresenter: NavigationPresenter {
-    fun setIconListener(listener: () -> Unit)
+    fun setIconListener(listener: Listener)
 
     fun setIcon(icon: ItemStack?)
 
-    fun setQuantityListener(listener: (String) -> Unit)
+    fun setQuantityListener(listener: TextListener)
 
     fun setQuantity(quantity: String)
 
-    fun setAddContentListener(listener: () -> Unit)
+    fun setAddContentListener(listener: Listener)
 
     fun showErrorMessage(message: String)
 
     fun hideErrorMessage()
 
-    fun setCommandListener(listener: (String) -> Unit)
+    fun setCommandListener(listener: TextListener)
 
     fun setCommand(quantity: String)
 }
@@ -231,60 +250,71 @@ class AddKitContentInteractor(
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setIconListener {
-            iconSelectionBlock.setInventory(player.inventory)
-            routeTo(iconSelectionBlock) { bundle ->
-                val item = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY) ?: return@routeTo
-                kitItem = KitItem(item.type.name, item.amount, item.itemMeta?.asComponentString)
-//                kitRepository.builder.items.add(kitItem)
+        presenter.setIconListener(object : Listener {
+            override fun invoke() {
+                iconSelectionBlock.setInventory(player.inventory)
+                routeTo(iconSelectionBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val item = bundle.getData<ItemStack>(MATERIAL_BUNDLE_KEY) ?: return
+                        kitItem = KitItem(item.type.name, item.amount, item.itemMeta?.asComponentString)
 
+                        presenter.hideErrorMessage()
+                        presenter.setIcon(item)
+                    }
+                })
+            }
+        })
+
+        presenter.setQuantityListener(object : TextListener {
+            override fun invoke(text: String) {
+                val quantity = text.toIntOrNull()
+                if (quantity == null) {
+                    presenter.setQuantity("Set quantity")
+                    return
+                }
+
+                this@AddKitContentInteractor.quantity = quantity
+            }
+        })
+
+        presenter.setCommandListener(object : TextListener {
+            override fun invoke(text: String) {
+                presenter.setCommand("/$text")
                 presenter.hideErrorMessage()
-                presenter.setIcon(item)
+                command = text
             }
-        }
+        })
 
-        presenter.setQuantityListener {
-            val quantity = it.toIntOrNull()
-            if (quantity == null) {
-                presenter.setQuantity("Set quantity")
-                return@setQuantityListener
-            }
+        presenter.setAddContentListener(object : Listener {
+            override fun invoke() {
+                if (showItem) {
+                    val item = kitItem
+                    if (item == null) {
+                        presenter.showErrorMessage("${ChatColor.RED}You need to select an item first!")
+                        return
+                    }
 
-            this.quantity = quantity
-        }
+                    kitRepository.builder.items.add(KitItem(item.material, quantity, item.meta))
+                } else {
+                    val command = command
+                    if (command == null) {
+                        presenter.showErrorMessage("${ChatColor.RED}You need to add a command!")
+                        return
+                    }
 
-        presenter.setCommandListener {
-            presenter.setCommand("/$it")
-            presenter.hideErrorMessage()
-            command = it
-        }
-
-        presenter.setAddContentListener {
-            if (showItem) {
-                val item = kitItem
-                if (item == null) {
-                    presenter.showErrorMessage("${ChatColor.RED}You need to select an item first!")
-                    return@setAddContentListener
+                    kitRepository.builder.commands.add(command)
                 }
 
-                kitRepository.builder.items.add(KitItem(item.material, quantity, item.meta))
-            } else {
-                val command = this.command
-                if (command == null) {
-                    presenter.showErrorMessage("${ChatColor.RED}You need to add a command!")
-                    return@setAddContentListener
-                }
-
-                kitRepository.builder.commands.add(command)
+                reset()
+                routeBack()
             }
+        })
 
-            reset()
-            routeBack()
-        }
-
-        presenter.addBackListener {
-            reset()
-        }
+        presenter.addBackListener(object : Listener {
+            override fun invoke() {
+                reset()
+            }
+        })
     }
 
     private fun reset() {

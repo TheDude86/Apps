@@ -1,11 +1,14 @@
 package com.mcmlr.system.products.cheats.children
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.titlecase
 import com.mcmlr.system.products.cheats.ActiveCheatsRepository
 import org.bukkit.ChatColor
@@ -35,32 +38,40 @@ class SpawnerViewController(
     private lateinit var mobsFeed: ListFeedView
 
     override fun setMobFeed(mobs: List<EntityType>, callback: (EntityType) -> Unit) {
-        mobsFeed.updateView {
-            for (i in 0..mobs.size step 3) {
-                addViewContainer(
-                    modifier = Modifier()
-                        .size(MATCH_PARENT, 50),
-                    background = Color.fromARGB(0, 0, 0, 0)
-                ) {
-                    for (j in 0..2) {
-                        if (mobs.size > i + j) {
-                            val mob = mobs[i + j]
-                            addButtonView(
-                                modifier = Modifier()
-                                    .size(WRAP_CONTENT, WRAP_CONTENT)
-                                    .x(-600 + (600 * j))
-                                    .centerVertically(),
-                                text = "${ChatColor.GOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
-                                size = 5,
-                            ) {
-                                callback.invoke(mob)
+        mobsFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                for (i in 0..mobs.size step 3) {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 50),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                for (j in 0..2) {
+                                    if (mobs.size > i + j) {
+                                        val mob = mobs[i + j]
+                                        addButtonView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .x(-600 + (600 * j))
+                                                .centerVertically(),
+                                            text = "${ChatColor.GOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
+                                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${mob.name.lowercase().replace('_', ' ').titlecase()}",
+                                            size = 5,
+                                            callback = object : Listener {
+                                                override fun invoke() {
+                                                    callback.invoke(mob)
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
-                    }
+                    )
                 }
             }
-        }
+        })
     }
 
     override fun createView() {

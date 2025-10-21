@@ -1,9 +1,12 @@
 package com.mcmlr.system.products.market
 
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
@@ -82,98 +85,105 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
         )
     }
 
-    override fun setMyOffersListener(listener: () -> Unit) = myOffersButton.addListener(listener)
+    override fun setMyOffersListener(listener: Listener) = myOffersButton.addListener(listener)
 
     override fun setFeed(orders: List<Pair<Material, Order>>, listener: (Pair<Material, Order>) -> Unit) {
-        feedView.updateView {
-            var row: ViewContainer? = null
+        feedView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                var row: ViewContainer? = null
 
-            orders.forEach { model ->
-                val modifier = row?.let {
-                    Modifier()
+                orders.forEach { model ->
+                    val modifier = row?.let {
+                        Modifier()
+                            .size(800, 100)
+                            .alignTopToBottomOf(it)
+                            .centerHorizontally()
+                    } ?: Modifier()
                         .size(800, 100)
-                        .alignTopToBottomOf(it)
+                        .alignTopToTopOf(this)
                         .centerHorizontally()
-                } ?: Modifier()
-                    .size(800, 100)
-                    .alignTopToTopOf(this)
-                    .centerHorizontally()
 
-                row = addViewContainer(
-                    modifier = modifier,
-                    clickable = true,
-                    background = Color.fromARGB(0, 0, 255, 0),
-                    backgroundHighlight = Color.fromARGB(64, 255, 255, 255),
-                    listener = { listener.invoke(model) },
-                ) {
+                    row = addViewContainer(
+                        modifier = modifier,
+                        clickable = true,
+                        background = Color.fromARGB(0, 0, 255, 0),
+                        backgroundHighlight = Color.fromARGB(64, 255, 255, 255),
+                        listener = object : Listener {
+                            override fun invoke() {
+                                listener.invoke(model)
+                            }
+                        },
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {                    val icon = addItemView(
+                                modifier = Modifier()
+                                    .size(40, 40)
+                                    .alignStartToStartOf(this)
+                                    .centerVertically()
+                                    .margins(start = 100),
+                                item = model.first,
+                            )
 
-                    val icon = addItemView(
-                        modifier = Modifier()
-                            .size(40, 40)
-                            .alignStartToStartOf(this)
-                            .centerVertically()
-                            .margins(start = 100),
-                        item = model.first,
-                    )
+                                val itemName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(icon)
+                                        .alignTopToTopOf(icon)
+                                        .margins(start = 150, top = -20),
+                                    text = "${model.second.quantity} of ${model.first.name.fromMCItem()}",
+                                    size = 6,
+                                    alignment = Alignment.LEFT,
+                                )
 
-                    val itemName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(icon)
-                            .alignTopToTopOf(icon)
-                            .margins(start = 150, top = -20),
-                        text = "${model.second.quantity} of ${model.first.name.fromMCItem()}",
-                        size = 6,
-                        alignment = Alignment.LEFT,
-                    )
+                                val head = ItemStack(Material.PLAYER_HEAD)
+                                val headMeta = head.itemMeta as SkullMeta
+                                headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(model.second.playerId))
+                                head.itemMeta = headMeta
 
-                    val head = ItemStack(Material.PLAYER_HEAD)
-                    val headMeta = head.itemMeta as SkullMeta
-                    headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(model.second.playerId))
-                    head.itemMeta = headMeta
+                                val sellerIcon = addItemView(
+                                    modifier = Modifier()
+                                        .size(32, 32)
+                                        .alignStartToStartOf(itemName)
+                                        .alignTopToBottomOf(itemName),
+                                    item = head,
+                                )
 
-                    val sellerIcon = addItemView(
-                        modifier = Modifier()
-                            .size(32, 32)
-                            .alignStartToStartOf(itemName)
-                            .alignTopToBottomOf(itemName),
-                        item = head,
-                    )
+                                val sellerName = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(sellerIcon)
+                                        .alignTopToTopOf(sellerIcon)
+                                        .alignBottomToBottomOf(sellerIcon),
+                                    text = "${ChatColor.GRAY}${Bukkit.getOfflinePlayer(model.second.playerId).name ?: "Dumbass don't have a name"}",
+                                    size = 5,
+                                )
 
-                    val sellerName = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(sellerIcon)
-                            .alignTopToTopOf(sellerIcon)
-                            .alignBottomToBottomOf(sellerIcon),
-                        text = "${ChatColor.GRAY}${Bukkit.getOfflinePlayer(model.second.playerId).name ?: "Dumbass don't have a name"}",
-                        size = 5,
-                    )
-
-                    val price = addTextView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(sellerName)
-                            .alignTopToTopOf(itemName)
-                            .alignBottomToBottomOf(sellerIcon)
-                            .margins(start = 500),
-                        text = "${ChatColor.GRAY}$${"%.2f".format(model.second.price / 100f)}",
-                        size = 10,
+                                val price = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToEndOf(sellerName)
+                                        .alignTopToTopOf(itemName)
+                                        .alignBottomToBottomOf(sellerIcon)
+                                        .margins(start = 500),
+                                    text = "${ChatColor.GRAY}$${"%.2f".format(model.second.price / 100f)}",
+                                    size = 10,
+                                )
+                            }
+                        }
                     )
                 }
             }
-        }
+        })
     }
 
-    override fun setSearchListener(listener: (String) -> Unit) = searchButton.addTextChangedListener(listener)
+    override fun setSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 }
 
 interface MarketPresenter: Presenter {
-    fun setMyOffersListener(listener: () -> Unit)
+    fun setMyOffersListener(listener: Listener)
 
     fun setFeed(orders: List<Pair<Material, Order>>, listener: (Pair<Material, Order>) -> Unit)
 
-    fun setSearchListener(listener: (String) -> Unit)
+    fun setSearchListener(listener: TextListener)
 }
 
 class MarketInteractor(
@@ -192,15 +202,19 @@ class MarketInteractor(
             routeTo(purchaseBlock)
         }
 
-        presenter.setSearchListener { searchTerm ->
-            presenter.setFeed(marketRepository.getOrders(searchTerm)) {
-                orderRepository.purchaseOrder = it
-                routeTo(purchaseBlock)
+        presenter.setSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                presenter.setFeed(marketRepository.getOrders(text)) {
+                    orderRepository.purchaseOrder = it
+                    routeTo(purchaseBlock)
+                }
             }
-        }
+        })
 
-        presenter.setMyOffersListener {
-            routeTo(myOffersBlock)
-        }
+        presenter.setMyOffersListener(object : Listener {
+            override fun invoke() {
+                routeTo(myOffersBlock)
+            }
+        })
     }
 }
