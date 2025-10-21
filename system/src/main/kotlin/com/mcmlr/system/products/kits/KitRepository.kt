@@ -60,7 +60,7 @@ class KitRepository @Inject constructor(
                 item.amount = it.amount
                 player.inventory.add(player.location, item)
             }
-            
+
             val cost = kit.kitPrice / 100.0
             if (!ignorePrice) vaultRepository.economy?.withdrawPlayer(player, cost)
 
