@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.ChatColor
+import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -21,6 +22,7 @@ import org.joml.Vector3f
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
