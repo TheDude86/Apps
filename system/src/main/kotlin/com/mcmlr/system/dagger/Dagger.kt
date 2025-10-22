@@ -43,6 +43,7 @@ class SubcomponentModule
         TutorialAppComponent::class,
         CheatsAppComponent::class,
         PongAppComponent::class,
+        YAMLAppComponent::class,
     ]
 )
 class HomeSubcomponentModule
@@ -118,6 +119,8 @@ interface SystemAppComponent {
 
     fun pongSubcomponent(): PongAppComponent.Builder
 
+    fun yamlSubcomponent(): YAMLAppComponent.Builder
+
     fun inject(app: SystemApp)
 }
 
@@ -131,7 +134,7 @@ class SystemAppModule {
     @Provides
     fun origin(player: Player): Location {
         val o = player.eyeLocation.clone()
-        o.pitch = 0f //TODO: Fix pitch translation issue & remove
+        o.pitch = 0f
 
         val direction = o.direction.normalize()
         return o.add(direction.multiply(0.15))
