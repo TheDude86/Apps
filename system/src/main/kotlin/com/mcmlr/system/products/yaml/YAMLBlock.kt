@@ -14,7 +14,7 @@ import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.formattedLocalTime
 import com.mcmlr.blocks.core.titlecase
-import com.mcmlr.system.products.support.YAMLEditorBlock
+import com.mcmlr.system.products.support.FileEditorBlock
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -23,18 +23,14 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Date
 import javax.inject.Inject
-import kotlin.time.ExperimentalTime
 
 class YAMLBlock @Inject constructor(
     player: Player,
     origin: Location,
     resources: Resources,
-    yamlEditorBlock: YAMLEditorBlock,
+    fileEditorBlock: FileEditorBlock,
 ): Block(player, origin) {
     companion object {
         val EDITABLE_FILE_TYPES = setOf("yml")
@@ -42,7 +38,7 @@ class YAMLBlock @Inject constructor(
 
 
     private val view = YAMLViewController(player, origin)
-    private val interactor = YAMLInteractor(player, resources, view, yamlEditorBlock)
+    private val interactor = YAMLInteractor(player, resources, view, fileEditorBlock)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -57,6 +53,10 @@ class YAMLViewController(
     private lateinit var filePathContainer: ViewContainer
     private lateinit var selectedFileContainer: ViewContainer
 
+    override fun clearSelectedFile() {
+        selectedFileContainer.updateView()
+    }
+
     override fun setSelectedFile(file: File, callback: (File) -> Unit) {
         selectedFileContainer.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
@@ -66,8 +66,8 @@ class YAMLViewController(
                         .size(100, 100)
                         .alignTopToTopOf(this)
                         .centerHorizontally()
-                        .margins(top = 200),
-                    size = 40,
+                        .margins(top = 400),
+                    size = 80,
                     text = icon,
                 )
 
@@ -106,12 +106,6 @@ class YAMLViewController(
                 val modifiedTime = Instant.ofEpochMilli(file.lastModified()).atZone(ZoneId.systemDefault())
                 val modifiedString = "${modifiedTime.month.name.titlecase()} ${modifiedTime.dayOfMonth}, ${createdTime.year} at ${createdTime.formattedLocalTime()}"
 
-//                val lastModifiedTime = LocalDate.ofEpochDay(file.lastModified() / (1000 * 60 * 60 * 24))
-//
-//                val dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy")
-//                val timeFormatter = DateTimeFormatter.ofPattern("hh:mm")
-//                val modifiedTimeString = "${lastModifiedTime.format(dateFormatter)} at ${lastModifiedTime.format(timeFormatter)}"
-
                 val fileModified = addTextView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -130,6 +124,11 @@ class YAMLViewController(
                         .centerHorizontally(),
                     text = "${ChatColor.GOLD}Open",
                     highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Open",
+                    callback = object : Listener {
+                        override fun invoke() {
+                            callback.invoke(file)
+                        }
+                    }
                 )
             }
         })
@@ -280,19 +279,22 @@ interface YAMLPresenter: Presenter {
     fun setDirectory(directory: File, callback: (File) -> Unit)
     fun setPath(directories: List<File>, callback: (File?) -> Unit)
     fun setSelectedFile(file: File, callback: (File) -> Unit)
+    fun clearSelectedFile()
 }
 
 class YAMLInteractor(
     private val player: Player,
     private val resources: Resources,
     private val presenter: YAMLPresenter,
-    private val yamlEditorBlock: YAMLEditorBlock,
+    private val fileEditorBlock: FileEditorBlock,
 ): Interactor(presenter) {
 
     private var currentDirectory = resources.dataFolder().parentFile
     private var directoryPath = mutableListOf<File>()
+    private var selectedFile: File? = null
 
     val backCallback: (File?) -> Unit = {
+        presenter.clearSelectedFile()
         if (it == null) {
             currentDirectory = resources.dataFolder().parentFile
             directoryPath = mutableListOf<File>()
@@ -320,8 +322,10 @@ class YAMLInteractor(
             directoryPath.add(it)
             updateDirectoryState(it)
         } else {
+            selectedFile = it
             presenter.setSelectedFile(it) {
-
+                fileEditorBlock.setFile(it)
+                routeTo(fileEditorBlock)
             }
         }
     }
@@ -338,5 +342,12 @@ class YAMLInteractor(
         currentDirectory.path
         presenter.setDirectory(currentDirectory, callback)
         presenter.setPath(directoryPath, backCallback)
+
+        selectedFile?.let {
+            presenter.setSelectedFile(it) {
+                fileEditorBlock.setFile(it)
+                routeTo(fileEditorBlock)
+            }
+        }
     }
 }
