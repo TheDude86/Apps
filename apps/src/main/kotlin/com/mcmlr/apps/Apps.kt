@@ -13,7 +13,6 @@ import com.mcmlr.system.CommandRepository
 import com.mcmlr.system.PlayerEventRepository
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.SystemEnvironment
-import com.mcmlr.system.placeholder.AppsDefaultPlayerExpansion
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.NotificationManager
 import com.mcmlr.system.products.homes.HomesEnvironment
@@ -82,10 +81,6 @@ class Apps : JavaPlugin() {
             .plugin(this)
             .build()
         managerComponent.inject(this)
-
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            AppsDefaultPlayerExpansion().register()
-        }
 
         systemEnvironment = SystemEnvironment(this)
         systemEnvironment.configure(inputRepository, resources)

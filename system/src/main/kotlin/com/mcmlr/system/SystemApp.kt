@@ -43,7 +43,6 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     private var foregroundApp: App? = null
     private var moveJob: Job? = null
 
-
     @Inject
     lateinit var rootBlock: LandingBlock
 
