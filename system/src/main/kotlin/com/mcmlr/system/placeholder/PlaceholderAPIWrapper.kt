@@ -30,6 +30,8 @@ class AppsDefaultPlayerExpansion : PlaceholderExpansion() {
 
     override fun getVersion(): String = "1.0"
 
+
+
     override fun persist(): Boolean = true
 
     override fun onPlaceholderRequest(player: Player?, params: String): String? {
