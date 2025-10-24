@@ -36,6 +36,7 @@ class ApplicationsRepository @Inject constructor(
         "workbenches",
         "recipes",
         "kits",
+        "files",
         "tutorial",
         "pong",
         "cheats",

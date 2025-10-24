@@ -14,7 +14,7 @@ import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.formattedLocalTime
 import com.mcmlr.blocks.core.titlecase
-import com.mcmlr.system.products.support.FileEditorBlock
+import com.mcmlr.system.products.support.FileViewerBlock
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -30,7 +30,7 @@ class YAMLBlock @Inject constructor(
     player: Player,
     origin: Location,
     resources: Resources,
-    fileEditorBlock: FileEditorBlock,
+    fileViewerBlock: FileViewerBlock,
 ): Block(player, origin) {
     companion object {
         val EDITABLE_FILE_TYPES = setOf("yml")
@@ -38,7 +38,7 @@ class YAMLBlock @Inject constructor(
 
 
     private val view = YAMLViewController(player, origin)
-    private val interactor = YAMLInteractor(player, resources, view, fileEditorBlock)
+    private val interactor = YAMLInteractor(player, resources, view, fileViewerBlock)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -116,20 +116,23 @@ class YAMLViewController(
                     text = "${ChatColor.GRAY}Modified - ${ChatColor.RESET}$modifiedString",
                 )
 
-                addButtonView(
-                    modifier = Modifier()
-                        .size(WRAP_CONTENT, WRAP_CONTENT)
-                        .alignTopToBottomOf(fileModified)
-                        .alignBottomToBottomOf(this)
-                        .centerHorizontally(),
-                    text = "${ChatColor.GOLD}Open",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Open",
-                    callback = object : Listener {
-                        override fun invoke() {
-                            callback.invoke(file)
+                if (file.length() < 1000000) {
+                    addButtonView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(fileModified)
+                            .alignBottomToBottomOf(this)
+                            .centerHorizontally(),
+                        text = "${ChatColor.GOLD}Open",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Open",
+                        callback = object : Listener {
+                            override fun invoke() {
+                                callback.invoke(file)
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
             }
         })
     }
@@ -286,7 +289,7 @@ class YAMLInteractor(
     private val player: Player,
     private val resources: Resources,
     private val presenter: YAMLPresenter,
-    private val fileEditorBlock: FileEditorBlock,
+    private val fileViewerBlock: FileViewerBlock,
 ): Interactor(presenter) {
 
     private var currentDirectory = resources.dataFolder().parentFile
@@ -324,8 +327,8 @@ class YAMLInteractor(
         } else {
             selectedFile = it
             presenter.setSelectedFile(it) {
-                fileEditorBlock.setFile(it)
-                routeTo(fileEditorBlock)
+                fileViewerBlock.setFile(it)
+                routeTo(fileViewerBlock)
             }
         }
     }
@@ -345,8 +348,8 @@ class YAMLInteractor(
 
         selectedFile?.let {
             presenter.setSelectedFile(it) {
-                fileEditorBlock.setFile(it)
-                routeTo(fileEditorBlock)
+                fileViewerBlock.setFile(it)
+                routeTo(fileViewerBlock)
             }
         }
     }
