@@ -16,7 +16,7 @@ class YAMLEnvironment(): Environment<YAMLApp>() {
 
     override fun getInstance(player: Player): YAMLApp = YAMLApp(player)
 
-    override fun name(): String = "File Editor"
+    override fun name(): String = "Files"
 
     override fun icon(): String = "http://textures.minecraft.net/texture/c73e8bd3c43c4514c76481ca1daf55149dfc93bd1bcfa8ab9437b9f7eb3392d9"
 

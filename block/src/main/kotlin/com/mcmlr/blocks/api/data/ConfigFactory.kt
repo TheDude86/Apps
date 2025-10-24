@@ -24,6 +24,7 @@ data class AppConfigModel(
         "workbenches",
         "recipes",
         "kits",
+        "files",
         "tutorial",
         "pong",
         "cheats",
