@@ -1,6 +1,5 @@
 package com.mcmlr.system.products.support
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -8,7 +7,6 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -50,6 +48,35 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
 
     override fun setPathListener(listener: (Any?) -> Unit) {
         pathListener = listener
+    }
+
+    override fun setPrimitive(name: String, datum: Any) {
+        fileView.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                val nameView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToStartOf(this)
+                        .alignTopToTopOf(this)
+                        .alignBottomToBottomOf(this)
+                        .margins(start = 500),
+                    alignment = Alignment.LEFT,
+                    size = 6,
+                    text = "${ChatColor.GOLD}${ChatColor.BOLD}$name:",
+                )
+
+                addTextInputView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignStartToEndOf(nameView)
+                        .alignBottomToTopOf(nameView)
+                        .margins(start = 100),
+                    alignment = Alignment.LEFT,
+                    size = 6,
+                    text = datum.toString(),
+                )
+            }
+        })
     }
 
     override fun setPath(models: List<Any>) {
@@ -190,7 +217,6 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     }
 
     private fun makeMapLine(key: Any?, data: Any?): String {
-        log(Log.DEBUG, "${key?.javaClass?.name} ${data?.javaClass?.name}")
         return "$key: ${ChatColor.GOLD}$data"
     }
 
@@ -233,6 +259,7 @@ interface FileEditorPresenter: Presenter {
     fun setList(modelList: List<*>)
     fun setMap(modelMap: Map<*, *>)
     fun setPath(models: List<Any>)
+    fun setPrimitive(name: String, datum: Any)
 }
 
 class FileEditorInteractor(
@@ -264,9 +291,7 @@ class FileEditorInteractor(
                 MemorySection::class.java -> loadNewObject(it.second as MemorySection)
                 ArrayList::class.java -> loadList(YMLListModel(it.first, it.second as List<*>))
                 LinkedHashMap::class.java -> loadMap(YMLMapModel(it.first, it.second as Map<*, *>))
-                else -> {
-
-                }
+                else -> presenter.setPrimitive(it.first, it.second)
             }
         }
 

@@ -18,9 +18,10 @@ class AdminBlock @Inject constructor(
     permissionsBlock: PermissionsBlock,
     enabledAppsBlock: EnabledAppsBlock,
     configureAppsBlock: ConfigureAppsBlock,
+    titleBlock: TitleBlock,
 ) : Block(player, origin) {
     private val view: AdminBlockViewController = AdminBlockViewController(player, origin)
-    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock)
+    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock, titleBlock)
 
     override fun interactor(): Interactor = interactor
 
@@ -29,11 +30,15 @@ class AdminBlock @Inject constructor(
 
 class AdminBlockViewController(player: Player, origin: Location): NavigationViewController(player, origin), AdminPresenter {
 
+    private lateinit var titleButton: ButtonView
+
     private lateinit var permissionsButton: ButtonView
 
     private lateinit var enabledAppsButton: ButtonView
 
     private lateinit var configureAppsButton: ButtonView
+
+    override fun setTitleListener(listener: Listener) = titleButton.addListener(listener)
 
     override fun setPermissionsListener(listener: Listener) = permissionsButton.addListener(listener)
 
@@ -54,12 +59,22 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
             size = 16,
         )
 
-        permissionsButton = addButtonView(
+        titleButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(title)
                 .alignTopToBottomOf(title)
                 .margins(top = 500),
+            text = "${ChatColor.GOLD}Set Title",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Set Title",
+        )
+
+        permissionsButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToStartOf(titleButton)
+                .alignTopToBottomOf(titleButton)
+                .margins(top = 50),
             text = "${ChatColor.GOLD}Permissions",
             highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Permissions",
         )
@@ -87,6 +102,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
 }
 
 interface AdminPresenter: Presenter {
+    fun setTitleListener(listener: Listener)
+
     fun setPermissionsListener(listener: Listener)
 
     fun setEnabledAppsListener(listener: Listener)
@@ -99,9 +116,16 @@ class AdminInteractor(
     private val permissionsBlock: PermissionsBlock,
     private val enabledAppsBlock: EnabledAppsBlock,
     private val configureAppsBlock: ConfigureAppsBlock,
+    private val titleBlock: TitleBlock,
 ): Interactor(presenter) {
     override fun onCreate() {
         super.onCreate()
+
+        presenter.setTitleListener(object : Listener {
+            override fun invoke() {
+                routeTo(titleBlock)
+            }
+        })
 
         presenter.setPermissionsListener(object : Listener {
             override fun invoke() {

@@ -39,10 +39,10 @@ class FileViewerViewController(player: Player, origin: Location): NavigationView
     var title = "File"
 
     private lateinit var fileView: ListFeedView
-//    private lateinit var editButton: ButtonView
+    private lateinit var editButton: ButtonView
 
     override fun setEditListener(listener: Listener) {
-//        editButton.addListener(listener)
+        editButton.addListener(listener)
     }
 
     override fun setFile(lines: List<String>) {
@@ -85,15 +85,15 @@ class FileViewerViewController(player: Player, origin: Location): NavigationView
                 .margins(top = 200, bottom = 200),
         )
 
-//        editButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignStartToStartOf(fileView)
-//                .alignBottomToTopOf(fileView)
-//                .margins(bottom = 50),
-//            text = "${ChatColor.GOLD}Edit",
-//            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit",
-//        )
+        editButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToStartOf(fileView)
+                .alignBottomToTopOf(fileView)
+                .margins(bottom = 50),
+            text = "${ChatColor.GOLD}Edit",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit",
+        )
     }
 }
 
