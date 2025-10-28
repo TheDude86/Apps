@@ -1,16 +1,7 @@
 package com.mcmlr.system.products.support
 
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.ContextListener
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.ViewController
-import com.mcmlr.blocks.api.views.Alignment
-import com.mcmlr.blocks.api.views.ListFeedView
-import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -41,6 +32,14 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     private lateinit var filePathContainer: ViewContainer
     private lateinit var modelListener: (Pair<String, Any>) -> Unit
     private lateinit var pathListener: (Any?) -> Unit
+    private lateinit var saveListener: Listener
+
+    private var inputView: TextInputView? = null
+    private var inputLabelView: TextView? = null
+
+    override fun setSaveListener(listener: Listener) {
+        saveListener = listener
+    }
 
     override fun setModelListener(listener: (Pair<String, Any>) -> Unit) {
         modelListener = listener
@@ -50,7 +49,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
         pathListener = listener
     }
 
-    override fun setPrimitive(name: String, datum: Any) {
+    override fun setPrimitive(name: String, datum: Any, listener: TextListener) {
         fileView.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 val nameView = addTextView(
@@ -59,13 +58,13 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this)
                         .alignBottomToBottomOf(this)
-                        .margins(start = 500),
+                        .margins(start = 75),
                     alignment = Alignment.LEFT,
                     size = 6,
                     text = "${ChatColor.GOLD}${ChatColor.BOLD}$name:",
                 )
 
-                addTextInputView(
+                inputView = addTextInputView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToEndOf(nameView)
@@ -75,8 +74,39 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                     size = 6,
                     text = datum.toString(),
                 )
+
+                inputView?.addTextChangedListener(listener)
+
+                val saveButton = addButtonView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignBottomToBottomOf(this)
+                        .centerHorizontally()
+                        .margins(bottom = 50),
+                    text = "${ChatColor.GOLD}Save",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Save",
+                    callback = saveListener,
+                )
+
+                inputLabelView = addTextView(
+                    modifier = Modifier()
+                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                        .alignTopToBottomOf(saveButton)
+                        .centerHorizontally()
+                        .margins(top = 25),
+                    size = 4,
+                    text = "",
+                )
             }
         })
+    }
+
+    override fun setSaveLabelVisible(isVisible: Boolean) {
+        if (isVisible) {
+            inputLabelView?.setTextView("${ChatColor.GREEN}Value saved!")
+        } else {
+            inputLabelView?.setTextView("")
+        }
     }
 
     override fun setPath(models: List<Any>) {
@@ -255,11 +285,13 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
 interface FileEditorPresenter: Presenter {
     fun setPathListener(listener: (Any?) -> Unit)
     fun setModelListener(listener: (Pair<String, Any>) -> Unit)
+    fun setSaveListener(listener: Listener)
     fun setModel(lines: List<Pair<String, Any>>)
     fun setList(modelList: List<*>)
     fun setMap(modelMap: Map<*, *>)
     fun setPath(models: List<Any>)
-    fun setPrimitive(name: String, datum: Any)
+    fun setPrimitive(name: String, datum: Any, listener: TextListener)
+    fun setSaveLabelVisible(isVisible: Boolean)
 }
 
 class FileEditorInteractor(
@@ -269,9 +301,16 @@ class FileEditorInteractor(
 
     var editingFile: File? = null
     private var modelPath = mutableListOf<Any>()
+    private var fieldName: String? = null
+    private var newValue: String? = null
+
+    private lateinit var config: YamlConfiguration
 
     override fun onCreate() {
         super.onCreate()
+
+        val file = editingFile ?: return
+        config = YamlConfiguration.loadConfiguration(file)
 
         presenter.setPathListener {
             if (it == null) {
@@ -291,9 +330,27 @@ class FileEditorInteractor(
                 MemorySection::class.java -> loadNewObject(it.second as MemorySection)
                 ArrayList::class.java -> loadList(YMLListModel(it.first, it.second as List<*>))
                 LinkedHashMap::class.java -> loadMap(YMLMapModel(it.first, it.second as Map<*, *>))
-                else -> presenter.setPrimitive(it.first, it.second)
+                else -> {
+                    fieldName = it.first
+                    presenter.setPrimitive(it.first, it.second, object : TextListener {
+                        override fun invoke(text: String) {
+                            newValue = text
+                            presenter.setSaveLabelVisible(false)
+                        }
+                    })
+                }
             }
         }
+
+        presenter.setSaveListener(object : Listener {
+            override fun invoke() {
+                val data = newValue ?: return
+                val field = "${getModelPath()}$fieldName"
+                config.set(field, data)
+                config.save(file)
+                presenter.setSaveLabelVisible(true)
+            }
+        })
 
         loadRoot()
     }
@@ -328,10 +385,6 @@ class FileEditorInteractor(
     }
 
     fun loadRoot() {
-        val file = editingFile ?: return
-        val config = YamlConfiguration.loadConfiguration(file)
-
-
         val lines = config.getKeys(false).mapNotNull {
             val result = config.get(it) ?: return@mapNotNull null
             Pair(it, result)
@@ -344,6 +397,19 @@ class FileEditorInteractor(
     fun setFile(file: File) {
         editingFile = file
         modelPath.clear()
+    }
+
+    private fun getModelPath(): String {
+        val pathBuilder = StringBuilder()
+        modelPath.forEach {
+            when (it::class.java) {
+                MemorySection::class.java -> pathBuilder.append("${(it as MemorySection).name}.")
+                YMLListModel::class.java -> pathBuilder.append("${(it as YMLListModel).name}.")
+                YMLMapModel::class.java -> pathBuilder.append("${(it as YMLMapModel).index}.")
+            }
+        }
+
+        return pathBuilder.toString()
     }
 }
 
