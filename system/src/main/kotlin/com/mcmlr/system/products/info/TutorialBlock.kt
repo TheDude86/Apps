@@ -44,14 +44,14 @@ class TutorialViewController(
         pagerView?.attachAdapter(adapter)
     }
 
-    override fun setClockText(text: String) = clockTextView.setTextView(text)
+    override fun setClockText(text: String) = clockTextView.updateText(text)
 
     override fun setNextCTAListener(listener: () -> Unit) {
         nextCTACallback = listener
     }
 
     override fun setCursorPosition(x: Int, y: Int) {
-        cursor?.setPositionView(x, y)
+        cursor?.updatePosition(x, y)
     }
 
     override fun createView() {
@@ -374,7 +374,7 @@ class TutorialViewController(
                     callback = object : Listener {
                         override fun invoke() {
                             clicks++
-                            demoItemText?.setTextView("${ChatColor.GREEN}Item button clicked $clicks time${if (clicks != 1) "s" else ""}")
+                            demoItemText?.updateText("${ChatColor.GREEN}Item button clicked $clicks time${if (clicks != 1) "s" else ""}")
                         }
                     }
                 )

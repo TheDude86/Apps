@@ -43,8 +43,8 @@ open class ButtonView(
         listeners.add(listener)
     }
 
-    override fun setTextView(text: String) {
-        super.setTextView(text)
+    override fun updateText(text: String) {
+        super.updateText(text)
         this.highlightedText = text.bolden()
     }
 

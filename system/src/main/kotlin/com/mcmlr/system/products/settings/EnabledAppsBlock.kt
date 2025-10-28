@@ -7,11 +7,9 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.Alignment
-import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
-import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
@@ -55,7 +53,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setAppEnabled(app: EnabledApplicationModel) {
-        appFeedContainers[app.app.name()]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
+        appFeedContainers[app.app.name()]?.updateText(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
     override fun setEnabledAppsListener(listener: EnabledAppsListener) {

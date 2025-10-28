@@ -121,7 +121,7 @@ class AddWarpViewController(
     }
 
     override fun setUpdate(name: String?, icon: Material?) {
-        if (name !=null) warpNameButton.updateText(name)
+        if (name !=null) warpNameButton.updateInputText(name)
         setIcon(icon)
     }
 

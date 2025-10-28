@@ -63,12 +63,12 @@ class AddKitContentViewController(
     }
 
     override fun setCommand(quantity: String) {
-        commandTextInput?.updateText(quantity)
+        commandTextInput?.updateInputText(quantity)
     }
 
-    override fun showErrorMessage(message: String) = errorMessage.setTextView(message)
+    override fun showErrorMessage(message: String) = errorMessage.updateText(message)
 
-    override fun hideErrorMessage() = errorMessage.setTextView("")
+    override fun hideErrorMessage() = errorMessage.updateText("")
 
     override fun setAddContentListener(listener: Listener) = addContentButton.addListener(listener)
 
@@ -77,7 +77,7 @@ class AddKitContentViewController(
     }
 
     override fun setQuantity(quantity: String) {
-        quantityTextInput?.updateText(quantity)
+        quantityTextInput?.updateInputText(quantity)
     }
 
     override fun setIconListener(listener: Listener) {

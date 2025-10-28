@@ -14,8 +14,8 @@ class ItemView(
     }
 
     //TODO: Add override to ItemButton, Container
-    override fun setVisibleView(visible: Boolean) {
-        super.setVisibleView(visible)
+    override fun updateVisibility(visible: Boolean) {
+        super.updateVisibility(visible)
         parent.updateItemDisplay(this)
     }
 

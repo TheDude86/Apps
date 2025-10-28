@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "com.mcmlr"
-    version = "1.0.9"
+    version = "1.1.1"
 }
 
 subprojects {

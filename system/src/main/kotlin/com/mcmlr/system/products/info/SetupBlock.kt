@@ -19,7 +19,6 @@ import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
-import com.mcmlr.system.IconSelectionBlock.Companion.MATERIAL_BUNDLE_KEY
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -35,7 +34,6 @@ import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
 
 class SetupBlock @Inject constructor(
@@ -117,7 +115,7 @@ class SetupViewController(
     }
 
     override fun setAppEnabled(app: EnabledApplicationModel) {
-        appFeedContainers[app.app.name()]?.setTextView(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
+        appFeedContainers[app.app.name()]?.updateText(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
     override fun setApps(apps: List<EnabledApplicationModel>) {
@@ -126,7 +124,7 @@ class SetupViewController(
     }
 
     override fun setServerName(title: String) {
-        serverNameView?.setTextView(title)
+        serverNameView?.updateText(title)
     }
 
     override fun setCreatePostListener(listener: () -> Unit) {

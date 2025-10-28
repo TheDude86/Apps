@@ -121,9 +121,9 @@ class CreateKitViewController(
         deleteKitButton?.addListener(listener)
     }
 
-    override fun setErrorMessage(message: String) = errorMessage.setTextView(message)
+    override fun setErrorMessage(message: String) = errorMessage.updateText(message)
 
-    override fun hideErrorMessage() = errorMessage.setTextView("")
+    override fun hideErrorMessage() = errorMessage.updateText("")
 
     override fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: TextListener) {
         itemListener = removeItemCallback
@@ -235,19 +235,19 @@ class CreateKitViewController(
     override fun setDescriptionListener(listener: TextListener) = kitDescription.addTextChangedListener(listener)
 
     override fun setDescription(description: String) {
-        kitDescription.updateText(description)
+        kitDescription.updateInputText(description)
     }
 
     override fun setCooldownListener(listener: TextListener) = kitCooldown.addTextChangedListener(listener)
 
     override fun setCooldown(cooldown: String) {
-        kitCooldown.updateText(cooldown)
+        kitCooldown.updateInputText(cooldown)
     }
 
     override fun setPriceListener(listener: TextListener) = kitPrice.addTextChangedListener(listener)
 
     override fun setPrice(price: String) {
-        kitPrice.updateText(price)
+        kitPrice.updateInputText(price)
     }
 
     override fun setIconListener(listener: Listener) {
@@ -280,7 +280,7 @@ class CreateKitViewController(
     override fun setNameListener(listener: TextListener) = kitName.addTextChangedListener(listener)
 
     override fun setName(name: String) {
-        kitName.updateText(name)
+        kitName.updateInputText(name)
     }
 
     override fun createView() {

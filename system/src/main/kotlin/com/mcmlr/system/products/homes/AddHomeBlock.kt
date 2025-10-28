@@ -121,7 +121,7 @@ class AddHomeViewController(
     }
 
     override fun setUpdate(name: String?, icon: Material?) {
-        if (name != null) homeNameButton.updateText(name)
+        if (name != null) homeNameButton.updateInputText(name)
         setIcon(icon)
     }
 

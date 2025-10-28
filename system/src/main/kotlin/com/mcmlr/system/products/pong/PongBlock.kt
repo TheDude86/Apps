@@ -57,51 +57,51 @@ class PongViewController(
     override fun addStartListener(listener: Listener) = play.addListener(listener)
 
     override fun setPaddlePosition(y: Int) {
-        playerPaddle.setPositionView(y = y)
+        playerPaddle.updatePosition(y = y)
     }
 
     override fun setOpponentPaddlePosition(y: Int) {
-        opponentPaddle.setPositionView(y = y)
+        opponentPaddle.updatePosition(y = y)
     }
 
     override fun setBallPosition(x: Int, y: Int) {
-        ball.setPositionView(x, y)
+        ball.updatePosition(x, y)
     }
 
     override fun playPoint(score: PongScore, callback: Listener) {
         val title = if (score == PongScore.PLAYER) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL..."
-        point.setTextView(title)
+        point.updateText(title)
 
         CoroutineScope(Dispatchers.IO).launch {
             delay(3.seconds)
             callback.invoke()
 
             CoroutineScope(DudeDispatcher()).launch {
-                point.setTextView("")
+                point.updateText("")
             }
         }
     }
 
     override fun playGameOver(winner: Boolean, callback: Listener) {
         val title = if (winner) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}Winner!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}You Lost..."
-        point.setTextView(title)
+        point.updateText(title)
 
         CoroutineScope(Dispatchers.IO).launch {
             delay(3.seconds)
 
             CoroutineScope(DudeDispatcher()).launch {
                 callback.invoke()
-                point.setTextView("")
+                point.updateText("")
             }
         }
     }
 
     override fun setScore(score: Pair<Int, Int>) {
-        this.score.setTextView("${ChatColor.BOLD}${score.first} - ${score.second}")
+        this.score.updateText("${ChatColor.BOLD}${score.first} - ${score.second}")
     }
 
     override fun restart() {
-        play.setVisibleView(true)
+        play.updateVisibility(true)
         setScore(Pair(0, 0))
         setPaddlePosition(0)
         setOpponentPaddlePosition(0)
@@ -188,7 +188,7 @@ class PongViewController(
     }
 
     private fun startGame() {
-        play.setVisibleView(false)
+        play.updateVisibility(false)
     }
 }
 

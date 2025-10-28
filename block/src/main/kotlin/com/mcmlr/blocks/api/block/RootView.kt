@@ -71,7 +71,7 @@ class RootView(
 
     override fun updatePosition() {}
 
-    override fun setPositionView(x: Int?, y: Int?) {}
+    override fun updatePosition(x: Int?, y: Int?) {}
 
     override fun setScrolling(isScrolling: Boolean) {}
 

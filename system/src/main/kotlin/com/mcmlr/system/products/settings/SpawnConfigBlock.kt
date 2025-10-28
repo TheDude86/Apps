@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bukkit.*
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -94,7 +93,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setKitTitle(title: String) {
-        kitTitleView?.setTextView(title)
+        kitTitleView?.updateText(title)
     }
 
     override fun setKitAdapter(adapter: PagerViewAdapter) {
@@ -731,7 +730,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setMessage(message: String) {
-        messageView.setTextView(message)
+        messageView.updateText(message)
     }
 }
 

@@ -49,7 +49,7 @@ class PagerView(
                     rightView.updateView(EmptyContextListener<ViewContainer>())
                     centerView.height = 0
                     leftView.height = 4
-                    centerView.setPositionView(dimensions.width * 2 / 3)
+                    centerView.updatePosition(dimensions.width * 2 / 3)
 
                     centerView.dudeDisplay?.setTeleportDuration(0)
                     leftView.dudeDisplay?.setTeleportDuration(0)
@@ -79,7 +79,7 @@ class PagerView(
                     leftView.updateView(EmptyContextListener<ViewContainer>())
                     centerView.height = 0
                     rightView.height = 4
-                    centerView.setPositionView(- (dimensions.width * 2 / 3))
+                    centerView.updatePosition(- (dimensions.width * 2 / 3))
 
                     centerView.dudeDisplay?.setTeleportDuration(0)
                     leftView.dudeDisplay?.setTeleportDuration(0)
@@ -108,10 +108,10 @@ class PagerView(
     }
 
     private fun reset() {
-        centerView.setPositionView(0)
-        centerView.setHeightView(4)
-        leftView.setHeightView(0)
-        rightView.setHeightView(0)
+        centerView.updatePosition(0)
+        centerView.updateHeight(4)
+        leftView.updateHeight(0)
+        rightView.updateHeight(0)
 
         centerView.dudeDisplay?.setTeleportDuration(3)
         leftView.dudeDisplay?.setTeleportDuration(3)

@@ -46,23 +46,23 @@ abstract class View(
         destroyListeners.add(listener)
     }
 
-    open fun setTeleportDurationView(duration: Int) {
+    open fun updateTeleportDuration(duration: Int) {
         teleportDuration = duration
         updateDisplay()
     }
 
-    override fun setPositionView(x: Int?, y: Int?) {
+    override fun updatePosition(x: Int?, y: Int?) {
         x?.let { modifier.x(it) }
         y?.let { modifier.y(it) }
         updateDisplay()
     }
 
-    open fun setHeightView(height: Int) {
+    open fun updateHeight(height: Int) {
         this.height = height
         updateDisplay()
     }
 
-    open fun setVisibleView(visible: Boolean) {
+    open fun updateVisibility(visible: Boolean) {
         this.visible = visible
         updateDisplay()
         if (!visible) dudeDisplay = null

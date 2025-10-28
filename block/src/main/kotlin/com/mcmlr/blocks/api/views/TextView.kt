@@ -25,7 +25,7 @@ open class TextView(
         this.text = this.text.reduceToLength(maxLength)
     }
 
-    open fun setTextView(text: String) {
+    open fun updateText(text: String) {
         this.text = text.reduceToLength(maxLength)
         parent.updateTextDisplay(this)
         dependants.forEach { it.updatePosition() }

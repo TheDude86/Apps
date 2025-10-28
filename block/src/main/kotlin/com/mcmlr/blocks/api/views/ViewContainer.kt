@@ -53,8 +53,8 @@ open class ViewContainer(
         parent.updateContainerDisplay(this)
     }
 
-    override fun setHeightView(height: Int) {
-        super.setHeightView(height)
+    override fun updateHeight(height: Int) {
+        super.updateHeight(height)
         dependants.forEach { it.updatePosition() }
     }
 
@@ -70,8 +70,8 @@ open class ViewContainer(
         dependants.forEach { it.updatePosition() }
     }
 
-    override fun setPositionView(x: Int?, y: Int?) {
-        super.setPositionView(x, y)
+    override fun updatePosition(x: Int?, y: Int?) {
+        super.updatePosition(x, y)
         children.forEach { it.updatePosition() }
         dependants.forEach { it.updatePosition() }
     }

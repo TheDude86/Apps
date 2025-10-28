@@ -51,19 +51,19 @@ class KitsViewController(
     private var kitCreate: ButtonView? = null
     private var kitEdit: ButtonView? = null
 
-    override fun setErrorMessage(message: String) = errorMessage.setTextView(message)
+    override fun setErrorMessage(message: String) = errorMessage.updateText(message)
 
-    override fun clearErrorMessage() = errorMessage.setTextView("")
+    override fun clearErrorMessage() = errorMessage.updateText("")
 
     override fun setPagerListener(listener: PageListener) = kitsPager.addPagerListener(listener)
 
-    override fun setName(name: String) = kitName.setTextView("${ChatColor.BOLD}$name")
+    override fun setName(name: String) = kitName.updateText("${ChatColor.BOLD}$name")
 
-    override fun setPrice(price: String) = kitPrice.setTextView(price)
+    override fun setPrice(price: String) = kitPrice.updateText(price)
 
-    override fun setCooldown(cooldown: String) = kitCooldown.setTextView(cooldown)
+    override fun setCooldown(cooldown: String) = kitCooldown.updateText(cooldown)
 
-    override fun setDescription(description: String) = kitDescription.setTextView(description)
+    override fun setDescription(description: String) = kitDescription.updateText(description)
 
     override fun setKitContents(items: List<KitItem>, commands: List<String>) {
         kitItemList.updateView(object : ContextListener<ViewContainer>() {

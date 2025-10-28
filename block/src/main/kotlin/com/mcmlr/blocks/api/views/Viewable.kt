@@ -33,7 +33,7 @@ interface Viewable {
 
     fun updatePosition()
 
-    fun setPositionView(x: Int? = null, y: Int? = null)
+    fun updatePosition(x: Int? = null, y: Int? = null)
 
     fun updateDisplay()
 

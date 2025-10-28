@@ -51,8 +51,8 @@ class TextInputView(
         })
     }
 
-    override fun setTextView(text: String) {
-        super.setTextView(text)
+    override fun updateText(text: String) {
+        super.updateText(text)
         this.highlightedText = text.bolden()
     }
 
@@ -91,9 +91,9 @@ class TextInputView(
         textChangedListeners.add(listener)
     }
 
-    fun updateText(text: String) {
+    fun updateInputText(text: String) {
         this.text = text
-        highlightedText = "${ChatColor.BOLD}$text"
+        highlightedText = text.bolden()
 
         updateDisplay()
         dependants.forEach { it.updatePosition() }
