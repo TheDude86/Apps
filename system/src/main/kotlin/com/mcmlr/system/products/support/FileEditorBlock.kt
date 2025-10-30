@@ -102,11 +102,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     }
 
     override fun setSaveLabelVisible(isVisible: Boolean) {
-        if (isVisible) {
-            inputLabelView?.setTextView("${ChatColor.GREEN}Value saved!")
-        } else {
-            inputLabelView?.setTextView("")
-        }
+        inputLabelView?.updateText(if (isVisible) "${ChatColor.GREEN}Value saved!" else "")
     }
 
     override fun setPath(models: List<Any>) {
@@ -153,7 +149,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
         })
     }
 
-    override fun setMap(modelMap: Map<*, *>) {
+    override fun setMap(modelMap: Map<String, Any?>) {
         fileView.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 modelMap.forEach {
@@ -241,12 +237,12 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
 
     private fun makeListLine(element: Any): String {
         return when (element::class.java) {
-            LinkedHashMap::class.java -> "Object: ${ChatColor.GOLD}▶"
+            LinkedHashMap::class.java -> "${(element as? LinkedHashMap<String, Any?>)?.keys?.first()}: ${ChatColor.GOLD}▶"
             else -> element.toString()
         }
     }
 
-    private fun makeMapLine(key: Any?, data: Any?): String {
+    private fun makeMapLine(key: String, data: Any?): String {
         return "$key: ${ChatColor.GOLD}$data"
     }
 
@@ -288,7 +284,7 @@ interface FileEditorPresenter: Presenter {
     fun setSaveListener(listener: Listener)
     fun setModel(lines: List<Pair<String, Any>>)
     fun setList(modelList: List<*>)
-    fun setMap(modelMap: Map<*, *>)
+    fun setMap(modelMap: Map<String, Any?>)
     fun setPath(models: List<Any>)
     fun setPrimitive(name: String, datum: Any, listener: TextListener)
     fun setSaveLabelVisible(isVisible: Boolean)
@@ -328,8 +324,11 @@ class FileEditorInteractor(
         presenter.setModelListener {
             when (it.second::class.java) {
                 MemorySection::class.java -> loadNewObject(it.second as MemorySection)
-                ArrayList::class.java -> loadList(YMLListModel(it.first, it.second as List<*>))
-                LinkedHashMap::class.java -> loadMap(YMLMapModel(it.first, it.second as Map<*, *>))
+                ArrayList::class.java -> loadList(YMLListModel(it.first, it.second as ArrayList<Any?>))
+                LinkedHashMap::class.java -> {
+                    val data = it.second as? Map<String, Any?> ?: return@setModelListener
+                    loadMap(YMLMapModel(it.first, data))
+                }
                 else -> {
                     fieldName = it.first
                     presenter.setPrimitive(it.first, it.second, object : TextListener {
@@ -344,11 +343,18 @@ class FileEditorInteractor(
 
         presenter.setSaveListener(object : Listener {
             override fun invoke() {
-                val data = newValue ?: return
-                val field = "${getModelPath()}$fieldName"
-                config.set(field, data)
-                config.save(file)
-                presenter.setSaveLabelVisible(true)
+                val foo = modelPath.lastOrNull() ?: return
+                if (foo is YMLListModel) {
+                    foo.data[fieldName!!.toInt()] = newValue
+                    config.set(getModelPath(), foo.data)
+                    config.save(file)
+                    presenter.setSaveLabelVisible(true)
+                }
+
+//                val data = newValue ?: return
+//                val field = "${getModelPath()}$fieldName"
+//                config.set(field, data)
+//                config.save(file)
             }
         })
 
@@ -404,8 +410,14 @@ class FileEditorInteractor(
         modelPath.forEach {
             when (it::class.java) {
                 MemorySection::class.java -> pathBuilder.append("${(it as MemorySection).name}.")
-                YMLListModel::class.java -> pathBuilder.append("${(it as YMLListModel).name}.")
-                YMLMapModel::class.java -> pathBuilder.append("${(it as YMLMapModel).index}.")
+                YMLListModel::class.java -> {
+                    pathBuilder.append((it as YMLListModel).name)
+                    return pathBuilder.toString()
+                }
+                YMLMapModel::class.java -> {
+                    pathBuilder.append((it as YMLMapModel).index)
+                    return pathBuilder.toString()
+                }
             }
         }
 
@@ -413,5 +425,5 @@ class FileEditorInteractor(
     }
 }
 
-data class YMLListModel(val name: String, val data: List<*>)
-data class YMLMapModel(val index: String, val data: Map<*, *>)
+data class YMLListModel(val name: String, val data: ArrayList<Any?>)
+data class YMLMapModel(val index: String, val data: Map<String, Any?>)

@@ -39,7 +39,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
     private lateinit var titleSavedLabel: TextView
 
     override fun setTitle(title: String) {
-        serverNameView.setTextView(title)
+        serverNameView.updateText(title)
     }
 
     override fun setSaveListener(listener: Listener) = saveButtonView.addListener(listener)
@@ -47,7 +47,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
     override fun setTitleTextInputListener(listener: TextListener) = serverNameView.addTextChangedListener(listener)
 
     override fun showSavedTitleLabel() {
-        titleSavedLabel.setTextView("${ChatColor.GREEN}Your new title has been saved!")
+        titleSavedLabel.updateText("${ChatColor.GREEN}Your new title has been saved!")
     }
 
     override fun createView() {
