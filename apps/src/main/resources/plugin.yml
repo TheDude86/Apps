@@ -4,6 +4,7 @@ main: com.mcmlr.apps.Apps
 api-version: '1.20'
 authors: [ The_Dude___ ]
 description: Create intuitive front ends using Minecraft's display entities
+folia-supported: true
 softdepend: [ ProtocolLib ]
 commands:
   .:

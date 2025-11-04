@@ -1,5 +1,6 @@
 package com.mcmlr.apps
 
+import com.google.gson.Gson
 import com.mcmlr.blocks.api.AppInjectionListener
 import com.mcmlr.blocks.api.AppInjector
 import com.mcmlr.blocks.api.Resources
@@ -64,6 +65,9 @@ class Apps : JavaPlugin() {
     @Inject
     lateinit var playerCursorCaptureTask: PlayerCursorCaptureTask
 
+//    @Inject
+//    lateinit var foliaTask: FoliaTestTask
+
     @Inject
     lateinit var resources: Resources
 
@@ -77,6 +81,9 @@ class Apps : JavaPlugin() {
         Metrics(this, 27644)
 
         instance = this
+
+//        val lines = this::class.java.getResourceAsStream("file.txt")?.reader()
+//        Gson().fromJson(lines, String.javaClass)
 
         managerComponent = DaggerManagerComponent.builder()
             .plugin(this)
@@ -146,7 +153,7 @@ class Apps : JavaPlugin() {
         getCommand("c")?.setExecutor(eventHandler)
         getCommand("k")?.setExecutor(eventHandler)
 
-        playerCursorCaptureTask.runTaskTimer(instance, 0, 1)
+        Scheduler(this).runTimer(playerCursorCaptureTask, 0, 1)
 
 //        packetManager.initListeners()
     }

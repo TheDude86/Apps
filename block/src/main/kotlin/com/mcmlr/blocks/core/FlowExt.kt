@@ -1,6 +1,8 @@
 package com.mcmlr.blocks.core
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.bukkit.Bukkit
@@ -51,7 +53,9 @@ fun Job.disposeOn(collection: String = FlowDisposer.DEFAULT, disposer: FlowDispo
 class DudeDispatcher: CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         try {
-            Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("Apps")!!, block)
-        } catch (_: Exception) { } //TODO: Fix crash when app is disabled
+            Scheduler(Bukkit.getPluginManager().getPlugin("Apps")!!).run(block)
+        } catch (_: Exception) {
+            log(Log.ASSERT, "#JOE CRASH")
+        } //TODO: Fix crash when app is disabled
     }
 }

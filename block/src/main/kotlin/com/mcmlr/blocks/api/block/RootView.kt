@@ -213,7 +213,8 @@ class RootView(
         val dimensions = view.getDimensions()
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = player.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
+        val display = player.world.spawn(location, TextDisplay::class.java)
+
         if (isSpigotServer()) display.teleport(location)
 
         display.addScoreboardTag("mcmlr.apps")
