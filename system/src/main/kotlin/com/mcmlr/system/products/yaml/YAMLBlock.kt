@@ -33,7 +33,7 @@ class YAMLBlock @Inject constructor(
     fileViewerBlock: FileViewerBlock,
 ): Block(player, origin) {
     companion object {
-        val EDITABLE_FILE_TYPES = setOf("yml")
+        val EDITABLE_FILE_TYPES = setOf("yml", "yaml")
     }
 
 

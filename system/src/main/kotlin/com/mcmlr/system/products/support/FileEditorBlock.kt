@@ -1,6 +1,8 @@
 package com.mcmlr.system.products.support
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
@@ -149,10 +151,12 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
         })
     }
 
-    override fun setMap(modelMap: Map<String, Any?>) {
+    override fun setMap(modelMap: HashMap<String, Any?>) {
+        log(Log.VERBOSE, modelMap.toString())
         fileView.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
-                modelMap.forEach {
+                modelMap.keys.forEach {  key ->
+                    val model = modelMap[key]
                     addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -161,11 +165,13 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                         alignment = Alignment.LEFT,
                         lineWidth = 600,
                         size = 6,
-                        text = makeMapLine(it.key, it.value),
-                        highlightedText = makeMapLine(it.key, it.value).bolden(),
+                        text = makeMapLine(key, model),
+                        highlightedText = makeMapLine(key, model).bolden(),
                         callback = object : Listener {
                             override fun invoke() {
-//                                modelListener.invoke(Pair(i.toString(), model))
+                                model?.let {
+                                    modelListener.invoke(Pair(key, it))
+                                }
                             }
                         }
                     )
@@ -179,6 +185,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
             override fun ViewContainer.invoke() {
                 modelList.forEachIndexed { i, it ->
                     val model = it ?: return@forEachIndexed
+
                     addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -191,10 +198,61 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                         highlightedText = makeListLine(model).bolden(),
                         callback = object : Listener {
                             override fun invoke() {
-                                modelListener.invoke(Pair(i.toString(), model))
+                                val data = if (model is LinkedHashMap<*, *>) {
+                                    model[model.keys.first()]
+                                } else {
+                                    model
+                                } ?: return
+                                modelListener.invoke(Pair(i.toString(), data))
                             }
                         }
                     )
+
+//                    addViewContainer(
+//                        modifier = Modifier()
+//                            .size(MATCH_PARENT, 100),
+//                        content = object : ContextListener<ViewContainer>() {
+//                            override fun ViewContainer.invoke() {
+//                                val deleteButton = addButtonView(
+//                                    modifier = Modifier()
+//                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+//                                        .alignStartToStartOf(this)
+//                                        .margins(start = 50, top = 100),
+//                                    text = "${ChatColor.RED}\uD83D\uDDD1",
+//                                    highlightedText = "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1",
+//                                    callback = object : Listener {
+//                                        override fun invoke() {
+//
+//                                        }
+//                                    }
+//                                )
+//
+//                                addButtonView(
+//                                    modifier = Modifier()
+//                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+//                                        .alignStartToEndOf(deleteButton)
+//                                        .alignTopToTopOf(deleteButton)
+//                                        .alignBottomToBottomOf(deleteButton)
+//                                        .margins(start = 100),
+//                                    alignment = Alignment.LEFT,
+//                                    lineWidth = 600,
+//                                    size = 6,
+//                                    text = makeListLine(model),
+//                                    highlightedText = makeListLine(model).bolden(),
+//                                    callback = object : Listener {
+//                                        override fun invoke() {
+//                                            val data = if (model is LinkedHashMap<*, *>) {
+//                                                model[model.keys.first()]
+//                                            } else {
+//                                                model
+//                                            } ?: return
+//                                            modelListener.invoke(Pair(i.toString(), data))
+//                                        }
+//                                    }
+//                                )
+//                            }
+//                        }
+//                    )
                 }
             }
         })
@@ -237,13 +295,17 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
 
     private fun makeListLine(element: Any): String {
         return when (element::class.java) {
-            LinkedHashMap::class.java -> "${(element as? LinkedHashMap<String, Any?>)?.keys?.first()}: ${ChatColor.GOLD}▶"
+            LinkedHashMap::class.java -> "${(element as LinkedHashMap<*, *>).keys.first()}: ${ChatColor.GOLD}▶"
             else -> element.toString()
         }
     }
 
     private fun makeMapLine(key: String, data: Any?): String {
-        return "$key: ${ChatColor.GOLD}$data"
+        val model = data ?: return "null"
+        return when (model::class.java) {
+            LinkedHashMap::class.java -> "${(model as LinkedHashMap<*, *>).keys.first()}: ${ChatColor.GOLD}▶"
+            else -> "$key: ${ChatColor.GOLD}$model"
+        }
     }
 
     override fun createView() {
@@ -284,7 +346,7 @@ interface FileEditorPresenter: Presenter {
     fun setSaveListener(listener: Listener)
     fun setModel(lines: List<Pair<String, Any>>)
     fun setList(modelList: List<*>)
-    fun setMap(modelMap: Map<String, Any?>)
+    fun setMap(modelMap: HashMap<String, Any?>)
     fun setPath(models: List<Any>)
     fun setPrimitive(name: String, datum: Any, listener: TextListener)
     fun setSaveLabelVisible(isVisible: Boolean)
@@ -298,15 +360,54 @@ class FileEditorInteractor(
     var editingFile: File? = null
     private var modelPath = mutableListOf<Any>()
     private var fieldName: String? = null
-    private var newValue: String? = null
+    private var newValue: Any? = null
 
     private lateinit var config: YamlConfiguration
+
+
+    private fun printConfig(key: String, data: Any?, indent: Int = 0) {
+        var indents = ">"
+        repeat(indent) {
+            indents = "-$indents"
+        }
+
+        if (data == null) {
+            log(Log.ASSERT, "#JOE$indents$key=$data")
+        } else if (data::class == MemorySection::class) {
+            val memory = (data as MemorySection)
+            log(Log.DEBUG, "#JOE$indents$key:")
+            memory.getKeys(false).forEach {
+                printConfig(it, memory.get(it), indent + 2)
+            }
+        } else if (data::class == ArrayList::class) {
+            val list = (data as ArrayList<*>)
+            log(Log.ERROR, "#JOE$indents$key:")
+            list.forEachIndexed { index, i ->
+                printConfig(index.toString(), list[index], indent + 2)
+            }
+        } else if (data:: class == LinkedHashMap::class) {
+            val map = (data as java.util.LinkedHashMap<*, *>)
+            log(Log.INFO, "#JOE$indents$key:")
+            map.keys.forEach {
+                val key = it as? String ?: return
+                printConfig(key, map[it], indent + 2)
+            }
+        } else {
+            log(Log.ASSERT, "#JOE$indents$key=$data (${data::class.java})")
+        }
+    }
+
+
 
     override fun onCreate() {
         super.onCreate()
 
         val file = editingFile ?: return
         config = YamlConfiguration.loadConfiguration(file)
+
+//        config.getKeys(false).forEach {
+//            printConfig(it, config.get(it))
+//        }
 
         presenter.setPathListener {
             if (it == null) {
@@ -326,14 +427,19 @@ class FileEditorInteractor(
                 MemorySection::class.java -> loadNewObject(it.second as MemorySection)
                 ArrayList::class.java -> loadList(YMLListModel(it.first, it.second as ArrayList<Any?>))
                 LinkedHashMap::class.java -> {
-                    val data = it.second as? Map<String, Any?> ?: return@setModelListener
+                    val data = it.second as? LinkedHashMap<String, Any?> ?: return@setModelListener
                     loadMap(YMLMapModel(it.first, data))
                 }
                 else -> {
                     fieldName = it.first
                     presenter.setPrimitive(it.first, it.second, object : TextListener {
                         override fun invoke(text: String) {
-                            newValue = text
+                            newValue = text.toIntOrNull() ?: text.toDoubleOrNull() ?: text.lowercase().toBooleanStrictOrNull() ?: when (text.lowercase()) {
+                                "yes", "on" -> true
+                                "no", "off" -> false
+                                else -> text
+                            }
+
                             presenter.setSaveLabelVisible(false)
                         }
                     })
@@ -343,18 +449,30 @@ class FileEditorInteractor(
 
         presenter.setSaveListener(object : Listener {
             override fun invoke() {
-                val foo = modelPath.lastOrNull() ?: return
-                if (foo is YMLListModel) {
-                    foo.data[fieldName!!.toInt()] = newValue
-                    config.set(getModelPath(), foo.data)
-                    config.save(file)
+                log(Log.DEBUG, "class=${modelPath.lastOrNull()?.javaClass}")
+                val model = modelPath.lastOrNull()
+
+                if (model == null) {
+                    val key = fieldName ?: return
+                    config.set(key, newValue)
+                    save()
+                    presenter.setSaveLabelVisible(true)
+                } else if (model is YMLListModel) {
+                    val index = fieldName?.toIntOrNull() ?: return
+                    model.data[index] = newValue
+                    save()
+                    presenter.setSaveLabelVisible(true)
+                } else if (model is YMLMapModel) {
+                    val key = fieldName ?: return
+                    model.data[key] = newValue
+                    save()
+                    presenter.setSaveLabelVisible(true)
+                } else if (model is MemorySection) {
+                    val key = fieldName ?: return
+                    model.set(key, newValue)
+                    save()
                     presenter.setSaveLabelVisible(true)
                 }
-
-//                val data = newValue ?: return
-//                val field = "${getModelPath()}$fieldName"
-//                config.set(field, data)
-//                config.save(file)
             }
         })
 
@@ -363,6 +481,7 @@ class FileEditorInteractor(
 
     fun loadMap(model: YMLMapModel) {
         modelPath.add(model)
+
         presenter.setMap(model.data)
         presenter.setPath(modelPath)
     }
@@ -405,25 +524,37 @@ class FileEditorInteractor(
         modelPath.clear()
     }
 
-    private fun getModelPath(): String {
+    private fun save() {
+        val file = editingFile ?: return
         val pathBuilder = StringBuilder()
-        modelPath.forEach {
-            when (it::class.java) {
-                MemorySection::class.java -> pathBuilder.append("${(it as MemorySection).name}.")
+        val modelPathIterator = modelPath.iterator()
+
+        while (modelPathIterator.hasNext()) {
+            val element = modelPathIterator.next()
+            when (element::class.java) {
+                MemorySection::class.java -> pathBuilder.append("${(element as MemorySection).name}.")
                 YMLListModel::class.java -> {
-                    pathBuilder.append((it as YMLListModel).name)
-                    return pathBuilder.toString()
+                    val model = element as YMLListModel
+                    pathBuilder.append(model.name)
+                    config.set(pathBuilder.toString(), model.data)
+                    config.save(file)
+
+                    return
                 }
                 YMLMapModel::class.java -> {
-                    pathBuilder.append((it as YMLMapModel).index)
-                    return pathBuilder.toString()
+                    val model = element as YMLMapModel
+                    pathBuilder.append(model.index)
+                    config.set(pathBuilder.toString(), model.data)
+                    config.save(file)
+
+                    return
                 }
             }
         }
 
-        return pathBuilder.toString()
+        config.save(file)
     }
 }
 
 data class YMLListModel(val name: String, val data: ArrayList<Any?>)
-data class YMLMapModel(val index: String, val data: Map<String, Any?>)
+data class YMLMapModel(val index: String, val data: HashMap<String, Any?>)

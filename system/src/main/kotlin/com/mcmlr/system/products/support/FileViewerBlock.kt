@@ -12,6 +12,7 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.products.yaml.YAMLBlock
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -32,17 +33,20 @@ class FileViewerBlock @Inject constructor(
     fun setFile(file: File) {
         interactor.editingFile = file
         view.title = file.nameWithoutExtension
+        view.editable = YAMLBlock.EDITABLE_FILE_TYPES.contains(file.extension)
     }
 }
 
 class FileViewerViewController(player: Player, origin: Location): NavigationViewController(player, origin), FileViewerPresenter {
     var title = "File"
+    var editable = true
 
     private lateinit var fileView: ListFeedView
-    private lateinit var editButton: ButtonView
+
+    private var editButton: ButtonView? = null
 
     override fun setEditListener(listener: Listener) {
-        editButton.addListener(listener)
+        editButton?.addListener(listener)
     }
 
     override fun setFile(lines: List<String>) {
@@ -85,15 +89,17 @@ class FileViewerViewController(player: Player, origin: Location): NavigationView
                 .margins(top = 200, bottom = 200),
         )
 
-        editButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignStartToStartOf(fileView)
-                .alignBottomToTopOf(fileView)
-                .margins(bottom = 50),
-            text = "${ChatColor.GOLD}Edit",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit",
-        )
+        if (editable) {
+            editButton = addButtonView(
+                modifier = Modifier()
+                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                    .alignStartToStartOf(fileView)
+                    .alignBottomToTopOf(fileView)
+                    .margins(bottom = 50),
+                text = "${ChatColor.GOLD}Edit",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit",
+            )
+        }
     }
 }
 
