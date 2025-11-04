@@ -104,7 +104,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     }
 
     override fun setSaveLabelVisible(isVisible: Boolean) {
-        inputLabelView?.updateText(if (isVisible) "${ChatColor.GREEN}Value saved!" else "")
+        inputLabelView?.update(text = if (isVisible) "${ChatColor.GREEN}Value saved!" else "")
     }
 
     override fun setPath(models: List<Any>) {
@@ -152,7 +152,6 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     }
 
     override fun setMap(modelMap: HashMap<String, Any?>) {
-        log(Log.VERBOSE, modelMap.toString())
         fileView.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 modelMap.keys.forEach {  key ->
@@ -364,50 +363,11 @@ class FileEditorInteractor(
 
     private lateinit var config: YamlConfiguration
 
-
-    private fun printConfig(key: String, data: Any?, indent: Int = 0) {
-        var indents = ">"
-        repeat(indent) {
-            indents = "-$indents"
-        }
-
-        if (data == null) {
-            log(Log.ASSERT, "#JOE$indents$key=$data")
-        } else if (data::class == MemorySection::class) {
-            val memory = (data as MemorySection)
-            log(Log.DEBUG, "#JOE$indents$key:")
-            memory.getKeys(false).forEach {
-                printConfig(it, memory.get(it), indent + 2)
-            }
-        } else if (data::class == ArrayList::class) {
-            val list = (data as ArrayList<*>)
-            log(Log.ERROR, "#JOE$indents$key:")
-            list.forEachIndexed { index, i ->
-                printConfig(index.toString(), list[index], indent + 2)
-            }
-        } else if (data:: class == LinkedHashMap::class) {
-            val map = (data as java.util.LinkedHashMap<*, *>)
-            log(Log.INFO, "#JOE$indents$key:")
-            map.keys.forEach {
-                val key = it as? String ?: return
-                printConfig(key, map[it], indent + 2)
-            }
-        } else {
-            log(Log.ASSERT, "#JOE$indents$key=$data (${data::class.java})")
-        }
-    }
-
-
-
     override fun onCreate() {
         super.onCreate()
 
         val file = editingFile ?: return
         config = YamlConfiguration.loadConfiguration(file)
-
-//        config.getKeys(false).forEach {
-//            printConfig(it, config.get(it))
-//        }
 
         presenter.setPathListener {
             if (it == null) {
@@ -449,7 +409,6 @@ class FileEditorInteractor(
 
         presenter.setSaveListener(object : Listener {
             override fun invoke() {
-                log(Log.DEBUG, "class=${modelPath.lastOrNull()?.javaClass}")
                 val model = modelPath.lastOrNull()
 
                 if (model == null) {

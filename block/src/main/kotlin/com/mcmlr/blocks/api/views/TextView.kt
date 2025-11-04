@@ -11,11 +11,11 @@ open class TextView(
     modifier: Modifier,
     parent: Viewable,
     var text: String,
-    val size: Int = 10,
-    val alignment: Alignment = Alignment.LEFT,
-    val maxLength: Int = 0,
-    val lineWidth: Int = 200,
-    val background: Color = Color.fromARGB(0x00000000),
+    var size: Int = 10,
+    var alignment: Alignment = Alignment.LEFT,
+    var maxLength: Int = 0,
+    var lineWidth: Int = 200,
+    var background: Color = Color.fromARGB(0x00000000),
     visible: Boolean = true,
     teleportDuration: Int = 3,
     height: Int = 0,
@@ -25,8 +25,27 @@ open class TextView(
         this.text = this.text.reduceToLength(maxLength)
     }
 
-    open fun updateText(text: String) {
-        this.text = text.reduceToLength(maxLength)
+    open fun update(
+        modifier: Modifier? = null,
+        text: String? = null,
+        size: Int? = null,
+        alignment: Alignment? = null,
+        maxLength: Int? = null,
+        lineWidth: Int? = null,
+        background: Color? = null,
+        visible: Boolean? = null,
+        teleportDuration: Int? = null,
+        height: Int? = null,
+    ) {
+        update(modifier, visible, teleportDuration, height, false)
+
+        maxLength?.let { this.maxLength = it }
+        text?.let { this.text = it.reduceToLength(maxLength ?: this.maxLength) }
+        size?.let { this.size = it }
+        alignment?.let { this.alignment = it }
+        lineWidth?.let { this.lineWidth = it }
+        background?.let { this.background = it }
+
         parent.updateTextDisplay(this)
         dependants.forEach { it.updatePosition() }
     }

@@ -80,23 +80,23 @@ class AnnouncementEditorViewController(
     private var deletePostCallback: Listener = EmptyListener()
 
     override fun setErrorMessage(message: String) {
-        errorMessageView.updateText(message)
+        errorMessageView.update(text = message)
     }
 
     override fun setTitleText(text: String) {
-        titleView.updateText(text)
+        titleView.update(text = text)
     }
 
     override fun setMessageText(text: String) {
-        messageView.updateText(text)
+        messageView.update(text = text)
     }
 
     override fun setCTAActionType(text: String) {
-        ctaActionTypeView?.updateText(text)
+        ctaActionTypeView?.update(text = text)
     }
 
     override fun setCTAText(text: String) {
-        ctaTextView?.updateText(text)
+        ctaTextView?.update(text = text)
     }
 
     override fun setCreatePostListener(listener: Listener) {
@@ -188,7 +188,7 @@ class AnnouncementEditorViewController(
 
     override fun setIsUpdating(isUpdating: Boolean) {
         val titleText = if (isUpdating) "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Create Post" else "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Update Post"
-        title.updateText(titleText)
+        title.update(text = titleText)
 
         buttonsContainer.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {

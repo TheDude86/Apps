@@ -93,7 +93,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setKitTitle(title: String) {
-        kitTitleView?.updateText(title)
+        kitTitleView?.update(text = title)
     }
 
     override fun setKitAdapter(adapter: PagerViewAdapter) {
@@ -730,7 +730,7 @@ class SpawnConfigViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setMessage(message: String) {
-        messageView.updateText(message)
+        messageView.update(text = message)
     }
 }
 

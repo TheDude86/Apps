@@ -10,7 +10,7 @@ import org.bukkit.Location
 import org.bukkit.entity.BlockDisplay
 
 abstract class View(
-    protected val modifier: Modifier,
+    protected var modifier: Modifier,
     var visible: Boolean = true,
     var teleportDuration: Int = 3,
     var height: Int = 0,
@@ -29,6 +29,21 @@ abstract class View(
     protected var dependants: MutableList<Viewable> = mutableListOf()
     protected var destroyListeners: MutableList<Listener> = mutableListOf()
 
+    open fun update(
+        modifier: Modifier? = null,
+        visible: Boolean? = null,
+        teleportDuration: Int? = null,
+        height: Int? = null,
+        reconfigure: Boolean = true,
+    ) {
+        modifier?.let { this.modifier = it }
+        visible?.let { this.visible = it }
+        teleportDuration?.let { this.teleportDuration = it }
+        height?.let { this.height = it }
+
+        if (reconfigure) updateDisplay()
+    }
+
     fun attach(parent: Viewable) {
         modifier.start?.view?.addDependant(this)
         modifier.top?.view?.addDependant(this)
@@ -46,26 +61,10 @@ abstract class View(
         destroyListeners.add(listener)
     }
 
-    open fun updateTeleportDuration(duration: Int) {
-        teleportDuration = duration
-        updateDisplay()
-    }
-
     override fun updatePosition(x: Int?, y: Int?) {
         x?.let { modifier.x(it) }
         y?.let { modifier.y(it) }
         updateDisplay()
-    }
-
-    open fun updateHeight(height: Int) {
-        this.height = height
-        updateDisplay()
-    }
-
-    open fun updateVisibility(visible: Boolean) {
-        this.visible = visible
-        updateDisplay()
-        if (!visible) dudeDisplay = null
     }
 
     fun addCorners(corners: List<BlockDisplay>) {
