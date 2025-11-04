@@ -262,7 +262,7 @@ class WarpsInteractor(
             val parent = this
             var delay = warpsConfigRepository.model.delay
             while (delay > 0) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     val message = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
                     //TODO: Check spigot vs paper
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(message))
@@ -272,7 +272,7 @@ class WarpsInteractor(
                 delay--
             }
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 val location = Location(
                     Bukkit.getWorld(warp.world),
                     warp.x,

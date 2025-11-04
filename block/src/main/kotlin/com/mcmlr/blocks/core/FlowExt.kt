@@ -1,16 +1,19 @@
 package com.mcmlr.blocks.core
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 
-fun delay(dispatcher: CoroutineDispatcher = Dispatchers.IO, duration: Duration, callback: Listener) = CoroutineScope(dispatcher).launch {
+fun delay(dispatcher: CoroutineDispatcher = Dispatchers.IO, duration: Duration, player: Player? = null, callback: Listener) = CoroutineScope(dispatcher).launch {
     delay(duration)
 }.invokeOnCompletion {
-    CoroutineScope(DudeDispatcher()).launch {
+    CoroutineScope(DudeDispatcher(player)).launch {
         callback.invoke()
     }
 }
@@ -21,8 +24,8 @@ fun <T> MutableSharedFlow<T>.emitBackground(data: T) {
     CoroutineScope(Dispatchers.IO).launch { emit(data) }
 }
 
-fun <T> MutableSharedFlow<T>.emitForeground(data: T) {
-    CoroutineScope(DudeDispatcher()).launch { emit(data) }
+fun <T> MutableSharedFlow<T>.emitForeground(data: T, player: Player? = null) {
+    CoroutineScope(DudeDispatcher(player)).launch { emit(data) }
 }
 
 fun <T> Flow<T>.collectFirst(dispatcher: CoroutineDispatcher = Dispatchers.IO, callback: Flow<T>.(T) -> Unit) {
@@ -48,10 +51,14 @@ fun Job.disposeOn(collection: String = FlowDisposer.DEFAULT, disposer: FlowDispo
     disposer.addJob(collection, this)
 }
 
-class DudeDispatcher: CoroutineDispatcher() {
+class DudeDispatcher(private val player: Player? = null): CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         try {
-            Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("Apps")!!, block)
-        } catch (_: Exception) { } //TODO: Fix crash when app is disabled
+            if (player != null) {
+                Scheduler(Bukkit.getPluginManager().getPlugin("Apps")!!).run(block, player)
+            } else {
+                Scheduler(Bukkit.getPluginManager().getPlugin("Apps")!!).run(block)
+            }
+        } catch (_: Exception) {} //TODO: Fix crash when app is disabled
     }
 }

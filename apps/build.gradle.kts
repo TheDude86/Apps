@@ -17,6 +17,9 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/") {
         name = "protocollib"
     }
+    maven("https://repo.papermc.io/repository/maven-public/") {
+        name = "papermc"
+    }
     maven("https://repo.extendedclip.com/releases/")
     maven("https://jitpack.io")
 }
@@ -24,6 +27,7 @@ repositories {
 dependencies {
     implementation(project(":block"))
     implementation(project(":system"))
+    implementation(project(":folia"))
 
     //Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

@@ -196,7 +196,7 @@ class CheatsInteractor(
 
         cheatRepository
             .getSelectedCheatStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 detachChildren()
                 presenter.setDetailsContainer(it)

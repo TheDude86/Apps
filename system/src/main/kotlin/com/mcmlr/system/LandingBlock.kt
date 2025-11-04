@@ -39,16 +39,10 @@ import javax.inject.Inject
 class LandingBlock @Inject constructor(
     player: Player,
     origin: Location,
-    homesBlock: HomesBlock,
-    warpsBlock: WarpsBlock,
-    teleportBlock: TeleportBlock,
-    marketBlock: MarketBlock,
-    pongBlock: PongBlock,
     appsListBlock: AppsListBlock,
     applicationsBlock: ApplicationsBlock,
     spawnShortcutBlock: SpawnShortcutBlock,
     feedBlock: FeedBlock,
-    tutorialBlock: TutorialBlock,
     setupBlock: SetupBlock,
     permissionsRepository: PermissionsRepository,
     spawnRepository: SpawnRepository,
@@ -59,16 +53,10 @@ class LandingBlock @Inject constructor(
     private val interactor: LandingInteractor = LandingInteractor(
         player,
         view,
-        homesBlock,
-        warpsBlock,
-        teleportBlock,
-        marketBlock,
-        pongBlock,
         appsListBlock,
         spawnShortcutBlock,
         applicationsBlock,
         feedBlock,
-        tutorialBlock,
         setupBlock,
         permissionsRepository,
         spawnRepository,
@@ -181,16 +169,10 @@ interface LandingPresenter: Presenter {
 class LandingInteractor(
     private val player: Player,
     private val presenter: LandingPresenter,
-    private val homesBlock: HomesBlock,
-    private val warpsBlock: WarpsBlock,
-    private val teleportBlock: TeleportBlock,
-    private val marketBlock: MarketBlock,
-    private val pongBlock: PongBlock,
     private val appsListBlock: AppsListBlock,
     private val spawnShortcutBlock: SpawnShortcutBlock,
     private val applicationsBlock: ApplicationsBlock,
     private val feedBlock: FeedBlock,
-    private val tutorialBlock: TutorialBlock,
     private val setupBlock: SetupBlock,
     private val permissionsRepository: PermissionsRepository,
     private val spawnRepository: SpawnRepository,
@@ -226,8 +208,6 @@ class LandingInteractor(
 
         attachChild(appsListBlock, presenter.getAppsBlockContainer())
         attachChild(feedBlock, presenter.getFeedBlockContainer())
-
-
 
         if (spawnRepository.model.enabled == true && permissionsRepository.checkPermission(player, PermissionNode.SPAWN) ||
             permissionsRepository.checkPermission(player, PermissionNode.BACK)) {

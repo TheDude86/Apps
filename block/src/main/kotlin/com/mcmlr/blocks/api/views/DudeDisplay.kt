@@ -3,6 +3,7 @@ package com.mcmlr.blocks.api.views
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.checkVersion
+import com.mcmlr.folia.FoliaFactory
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.BlockDisplay
@@ -72,17 +73,17 @@ abstract class DudeDisplay(
             blockDisplay?.teleportDuration = 5
         }
 
-        textDisplay?.teleport(textDisplay.location.add(0.0, direction, 0.0))
-        itemDisplay?.teleport(itemDisplay.location.add(0.0, direction, 0.0))
-        blockDisplay?.teleport(blockDisplay.location.add(0.0, direction, 0.0))
-        entityDisplay?.teleport(entityDisplay.location.add(0.0, direction, 0.0))
+        textDisplay?.let { FoliaFactory.teleport(it, it.location.add(0.0, direction, 0.0)) }
+        itemDisplay?.let { FoliaFactory.teleport(it, it.location.add(0.0, direction, 0.0)) }
+        blockDisplay?.let { FoliaFactory.teleport(it, it.location.add(0.0, direction, 0.0)) }
+        entityDisplay?.let { FoliaFactory.teleport(it, it.location.add(0.0, direction, 0.0)) }
     }
 
     fun updateLocation(location: Location) {
-        textDisplay?.teleport(location)
-        itemDisplay?.teleport(location)
-        blockDisplay?.teleport(location)
-        entityDisplay?.teleport(location)
+        textDisplay?.let { FoliaFactory.teleport(it, location) }
+        itemDisplay?.let { FoliaFactory.teleport(it, location) }
+        blockDisplay?.let { FoliaFactory.teleport(it, location) }
+        entityDisplay?.let { FoliaFactory.teleport(it, location) }
     }
 
     fun remove() {

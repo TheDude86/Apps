@@ -2,9 +2,11 @@ package com.mcmlr.apps
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.data.CursorRepository
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.CommandModel
 import com.mcmlr.system.CommandRepository
 import com.mcmlr.system.PlayerEventRepository
@@ -28,9 +30,6 @@ import javax.inject.Singleton
 @Singleton
 class EventHandlerFactory @Inject constructor(
     private val commandRepository: CommandRepository,
-    private val cursorRepository: CursorRepository,
-    private val playerChatRepository: PlayerChatRepository,
-    private val playerEventRepository: PlayerEventRepository,
     private val inputRepository: InputRepository,
 ): Listener, CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

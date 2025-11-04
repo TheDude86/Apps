@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.folia.FoliaFactory
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -206,6 +207,8 @@ class RootView(
         if (buttonModel.visible) buttonModel.listeners.forEach { it.invoke() }
     }
 
+    override fun player(): Player = player
+
     override fun addContainerDisplay(view: ViewContainer): TextDudeDisplay? {
         if (!view.visible) return null
         showCorners(view, Material.STONE)
@@ -213,8 +216,9 @@ class RootView(
         val dimensions = view.getDimensions()
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = player.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
-        if (isSpigotServer()) display.teleport(location)
+        val display = player.world.spawn(location, TextDisplay::class.java)
+
+        if (isSpigotServer()) FoliaFactory.teleport(display, location)
 
         display.addScoreboardTag("mcmlr.apps")
         display.text = "....."
@@ -250,7 +254,7 @@ class RootView(
         val textSize = 0.04f * (view.size / 10.0f)
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         val display = player.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
-        if (isSpigotServer()) display.teleport(location)
+        if (isSpigotServer()) FoliaFactory.teleport(display, location)
 
         display.addScoreboardTag("mcmlr.apps")
         display.text = view.text
@@ -282,7 +286,7 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         val display = (view.dudeDisplay as? TextDudeDisplay)?.display ?: return
-        display.teleport(location)
+        FoliaFactory.teleport(display, location)
 
         display.backgroundColor = view.background
         display.transformation = Transformation(
@@ -320,7 +324,7 @@ class RootView(
         val textSize = 0.04f * (view.size / 10.0f)
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         val display = (view.dudeDisplay as? TextDudeDisplay)?.display ?: return
-        display.teleport(location)
+        FoliaFactory.teleport(display, location)
 
         display.text = view.text
         display.lineWidth = view.lineWidth
@@ -353,7 +357,7 @@ class RootView(
         display.addScoreboardTag("mcmlr.apps")
         Attribute.SCALE
 
-        if (isSpigotServer()) display.teleport(location)
+        if (isSpigotServer()) FoliaFactory.teleport(display, location)
 
         return EntityDudeDisplay(display)
     }
@@ -377,7 +381,7 @@ class RootView(
         location.yaw -= 180
         val display = player.world.spawnEntity(location, EntityType.ITEM_DISPLAY) as ItemDisplay
         display.addScoreboardTag("mcmlr.apps")
-        if (isSpigotServer()) display.teleport(location)
+        if (isSpigotServer()) FoliaFactory.teleport(display, location)
 
         display.itemStack = view.item
         if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
@@ -405,7 +409,7 @@ class RootView(
         location.yaw -= 180
         val display = player.world.spawnEntity(location, EntityType.ITEM_DISPLAY) as ItemDisplay
         display.addScoreboardTag("mcmlr.apps")
-        if (isSpigotServer()) display.teleport(location)
+        if (isSpigotServer()) FoliaFactory.teleport(display, location)
 
         view.item?.let { display.itemStack = it }
         if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
@@ -441,7 +445,7 @@ class RootView(
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
         val display = (view.dudeDisplay as? ItemDudeDisplay)?.display ?: return
-        display.teleport(location)
+        FoliaFactory.teleport(display, location)
 
         display.itemStack = ItemStack(view.item)
         if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
@@ -474,7 +478,7 @@ class RootView(
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
         val display = (view.dudeDisplay as? ItemDudeDisplay)?.display ?: return
-        display.teleport(location)
+        FoliaFactory.teleport(display, location)
 
         view.item?.let { display.itemStack = ItemStack(it) }
         if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
