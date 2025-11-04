@@ -1,7 +1,6 @@
 package com.mcmlr.system.placeholder
 
 import me.clip.placeholderapi.PlaceholderAPI
-import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 

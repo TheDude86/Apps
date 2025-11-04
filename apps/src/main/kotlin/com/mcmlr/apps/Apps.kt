@@ -26,6 +26,7 @@ import com.mcmlr.system.products.settings.AdminEnvironment
 import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
+import com.mcmlr.system.products.yaml.YAMLEnvironment
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -103,6 +104,7 @@ class Apps : JavaPlugin() {
 //        AppInjector.register(WorkbenchesEnvironment())
         AppInjector.register(RecipeEnvironment())
         AppInjector.register(KitsEnvironment())
+        AppInjector.register(YAMLEnvironment())
         AppInjector.register(PongEnvironment())
         AppInjector.register(TutorialEnvironment())
 //        AppInjector.register(CheatsEnvironment())
