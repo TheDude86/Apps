@@ -51,11 +51,6 @@ class TextInputView(
         })
     }
 
-    override fun updateText(text: String) {
-        super.updateText(text)
-        this.highlightedText = text.bolden()
-    }
-
     override fun updateFocus(view: Viewable) {
         if (view == this) {
             waitingInput = true

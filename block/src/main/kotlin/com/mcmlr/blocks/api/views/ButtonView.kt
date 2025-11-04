@@ -16,7 +16,7 @@ open class ButtonView(
     lineWidth: Int = 200,
     var highlightedText: String?,
     override var highlighted: Boolean = false,
-    val close: Boolean = false,
+    var close: Boolean = false,
     override var listeners: MutableList<Listener>,
     visible: Boolean = true,
     teleportDuration: Int = 3,
@@ -43,9 +43,42 @@ open class ButtonView(
         listeners.add(listener)
     }
 
-    override fun updateText(text: String) {
-        super.updateText(text)
-        this.highlightedText = text.bolden()
+    fun update(
+        modifier: Modifier? = null,
+        text: String? = null,
+        size: Int? = null,
+        alignment: Alignment? = null,
+        maxLength: Int? = null,
+        lineWidth: Int? = null,
+        background: Color? = null,
+        visible: Boolean? = null,
+        teleportDuration: Int? = null,
+        height: Int? = null,
+        highlightedText: String? = null,
+        highlighted: Boolean? = null,
+        close: Boolean? = null,
+        listeners: MutableList<Listener>? = null,
+    ) {
+        super.update(
+            modifier,
+            text,
+            size,
+            alignment,
+            maxLength,
+            lineWidth,
+            background,
+            visible,
+            teleportDuration,
+            height
+        )
+
+        if (text != null && highlightedText == null) {
+            this.highlightedText = text.bolden()
+        }
+
+        highlighted?.let { this.highlighted = it }
+        close?.let { this.close = it }
+        listeners?.let { this.listeners = it }
     }
 
     override fun collides(position: Coordinates): Boolean {

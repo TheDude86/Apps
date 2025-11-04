@@ -53,17 +53,6 @@ open class ViewContainer(
         parent.updateContainerDisplay(this)
     }
 
-    override fun updateHeight(height: Int) {
-        super.updateHeight(height)
-        dependants.forEach { it.updatePosition() }
-    }
-
-    fun setSize(width: Int, height: Int) {
-        modifier.size(width, height)
-        parent.updateContainerDisplay(this)
-        dependants.forEach { it.updatePosition() }
-    }
-
     fun updateDimensions(width: Int, height: Int) {
         modifier.size(width, height)
         parent.updateDisplay()
@@ -125,28 +114,6 @@ open class ViewContainer(
         }
     }
 
-    private fun updateItemButton(itemButtonView: ItemButtonView, highlighted: Boolean) {
-        if (highlighted) {
-            val dimensions = itemButtonView.getDimensions()
-            itemButtonView.setSize(dimensions.width * 1.2f, dimensions.height * 1.2f)
-            itemButtonView.highlighted = true
-        } else {
-            val dimensions = itemButtonView.getDimensions()
-            itemButtonView.setSize(dimensions.width.toFloat(), dimensions.height.toFloat())
-            itemButtonView.highlighted = false
-        }
-    }
-
-    private fun updateButton(buttonView: ButtonView, highlighted: Boolean) {
-        if (highlighted) {
-            (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.highlightedText ?: "${ChatColor.BOLD}${buttonView.text}"
-            buttonView.highlighted = true
-        } else {
-            (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.text
-            buttonView.highlighted = false
-        }
-    }
-
     open fun updateView(
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ) {
@@ -157,15 +124,6 @@ open class ViewContainer(
         children.clear()
         content.invokeContext(this)
         render()
-    }
-
-    private fun click() {
-        val buttonModel = buttonMap.values.find { it.highlighted } ?: return
-        if (buttonModel.visible) buttonModel.listeners.forEach { it.invoke() }
-
-        if (buttonModel.close) {
-
-        }
     }
 
     fun addPagerView(

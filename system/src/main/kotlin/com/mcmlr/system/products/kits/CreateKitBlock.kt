@@ -121,9 +121,9 @@ class CreateKitViewController(
         deleteKitButton?.addListener(listener)
     }
 
-    override fun setErrorMessage(message: String) = errorMessage.updateText(message)
+    override fun setErrorMessage(message: String) = errorMessage.update(text = message)
 
-    override fun hideErrorMessage() = errorMessage.updateText("")
+    override fun hideErrorMessage() = errorMessage.update(text = "")
 
     override fun setKitCallbacks(removeItemCallback: (KitItem) -> Unit, removeCommandCallback: TextListener) {
         itemListener = removeItemCallback

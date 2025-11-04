@@ -41,6 +41,18 @@ class ItemButtonView(
         dudeDisplay = parent.addItemDisplay(this)
     }
 
+    fun update(
+        modifier: Modifier? = null,
+        item: ItemStack? = null,
+        teleportDuration: Int? = null,
+        visible: Boolean? = null,
+        height: Int? = null,
+    ) {
+        update(modifier = modifier, teleportDuration = teleportDuration, visible = visible, height = height, reconfigure = false)
+        item?.let { this.item = it }
+        parent.updateItemDisplay(this)
+    }
+
     override fun updateDisplay() {
         updateItemDisplay(this)
     }

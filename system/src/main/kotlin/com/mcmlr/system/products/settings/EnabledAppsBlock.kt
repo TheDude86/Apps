@@ -53,7 +53,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setAppEnabled(app: EnabledApplicationModel) {
-        appFeedContainers[app.app.name()]?.updateText(if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
+        appFeedContainers[app.app.name()]?.update(text = if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
     }
 
     override fun setEnabledAppsListener(listener: EnabledAppsListener) {

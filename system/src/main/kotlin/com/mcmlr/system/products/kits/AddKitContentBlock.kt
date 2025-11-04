@@ -66,9 +66,9 @@ class AddKitContentViewController(
         commandTextInput?.updateInputText(quantity)
     }
 
-    override fun showErrorMessage(message: String) = errorMessage.updateText(message)
+    override fun showErrorMessage(message: String) = errorMessage.update(text = message)
 
-    override fun hideErrorMessage() = errorMessage.updateText("")
+    override fun hideErrorMessage() = errorMessage.update(text = "")
 
     override fun setAddContentListener(listener: Listener) = addContentButton.addListener(listener)
 

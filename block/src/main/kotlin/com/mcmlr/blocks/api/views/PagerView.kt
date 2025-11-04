@@ -17,9 +17,9 @@ class PagerView(
 ): ViewContainer(modifier, false, background, height = height) {
 
     private var index = 0
-    private lateinit var centerView: ViewContainer
-    private lateinit var leftView: ViewContainer
-    private lateinit var rightView: ViewContainer
+    private val centerView: ViewContainer
+    private val leftView: ViewContainer
+    private val rightView: ViewContainer
 
     private var adapter: PagerViewAdapter? = null
 
@@ -109,9 +109,9 @@ class PagerView(
 
     private fun reset() {
         centerView.updatePosition(0)
-        centerView.updateHeight(4)
-        leftView.updateHeight(0)
-        rightView.updateHeight(0)
+        centerView.update(height = 4)
+        leftView.update(height = 0)
+        rightView.update(height = 0)
 
         centerView.dudeDisplay?.setTeleportDuration(3)
         leftView.dudeDisplay?.setTeleportDuration(3)

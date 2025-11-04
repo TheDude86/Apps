@@ -41,7 +41,7 @@ class AnnouncementsViewController(
     private lateinit var statusMessage: TextView
 
     override fun setStatusMessageText(text: String) {
-        statusMessage.updateText(text)
+        statusMessage.update(text = text)
     }
 
     override fun setCreateListener(listener: Listener) = createButton.addListener(listener)

@@ -13,9 +13,15 @@ class ItemView(
         dudeDisplay = parent.addItemDisplay(this)
     }
 
-    //TODO: Add override to ItemButton, Container
-    override fun updateVisibility(visible: Boolean) {
-        super.updateVisibility(visible)
+    fun update(
+        modifier: Modifier? = null,
+        item: ItemStack? = null,
+        teleportDuration: Int? = null,
+        visible: Boolean? = null,
+        height: Int? = null,
+    ) {
+        update(modifier = modifier, teleportDuration = teleportDuration, visible = visible, height = height, reconfigure = false)
+        item?.let { this.item = it }
         parent.updateItemDisplay(this)
     }
 

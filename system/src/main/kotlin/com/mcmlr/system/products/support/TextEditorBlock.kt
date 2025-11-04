@@ -72,18 +72,18 @@ class TextEditorBlockViewController(
     }
 
     override fun resetInput() {
-        textInputView.updateText("Write message here...")
+        textInputView.update(text = "Write message here...")
     }
 
     override fun setFormattedInput(input: String) {
-        textInputView.updateText(input)
+        textInputView.update(text = input)
     }
 
     override fun setMessage(lines: TextModel, selectedLine: Int) {
         if (selectedLine > -1) {
-            editLinesButton.updateText("${ChatColor.GOLD}Finish edits")
+            editLinesButton.update(text = "${ChatColor.GOLD}Finish edits")
         } else {
-            editLinesButton.updateText("${ChatColor.GOLD}Edit lines")
+            editLinesButton.update(text = "${ChatColor.GOLD}Edit lines")
         }
 
         messageContainer.updateView(object : ContextListener<ViewContainer>() {
