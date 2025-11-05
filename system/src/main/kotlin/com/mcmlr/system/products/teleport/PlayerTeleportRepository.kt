@@ -80,7 +80,7 @@ class GlobalTeleportRepository @Inject constructor(
         loadModel("Spawn/Players", "${e.player.uniqueId}", PlayerTeleportModel()) { model ->
             if (model.firstSpawn) {
                 spawnRepository.model.spawnLocation?.toLocation()?.let {
-                    CoroutineScope(DudeDispatcher()).launch {
+                    CoroutineScope(DudeDispatcher(e.player)).launch {
                         e.player.teleport(it)
                     }
 

@@ -189,7 +189,7 @@ class TeleportResponseInteractor(
                     log(Log.ASSERT, "Background wait...")
                     var delay = teleportConfigRepository.model.delay
                     while (delay > 0) {
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player)).launch {
                             val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
                             val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
                             val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
@@ -204,7 +204,7 @@ class TeleportResponseInteractor(
                         delay--
                     }
 
-                    CoroutineScope(DudeDispatcher()).launch {
+                    CoroutineScope(DudeDispatcher(player)).launch {
                         log(Log.ASSERT, "Foreground teleport Type=${request.type}")
                         if (request.type == TeleportRequestType.GOTO) {
                             request.sender.teleport(player)

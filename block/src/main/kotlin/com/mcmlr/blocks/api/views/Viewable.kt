@@ -3,6 +3,7 @@ package com.mcmlr.blocks.api.views
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.block.Listener
 import org.bukkit.Location
+import org.bukkit.entity.Player
 
 interface Viewable {
     var offset: Int
@@ -36,6 +37,8 @@ interface Viewable {
     fun updatePosition(x: Int? = null, y: Int? = null)
 
     fun updateDisplay()
+
+    fun player(): Player
 
     fun addContainerDisplay(
         view: ViewContainer

@@ -1005,7 +1005,7 @@ class SpawnConfigInteractor(
             var countdown = 3
 
             while (countdown > 0) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     player.sendTitle("${ChatColor.GREEN}$countdown", null, 0, 10, 8)
                 }
                 kotlinx.coroutines.delay(1.seconds)
@@ -1014,7 +1014,7 @@ class SpawnConfigInteractor(
         }
 
         countdownJob.invokeOnCompletion {
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 newSpawn = player.location.clone()
                 state = SpawnConfigState.LOCATION
                 maximize()

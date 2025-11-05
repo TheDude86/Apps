@@ -43,11 +43,3 @@ class FoliaTask(private val task: ScheduledTask) {
         task.cancel()
     }
 }
-
-class FoliaFoo {
-
-    fun spawn() {
-//        Bukkit.getWorlds().first().spawn
-    }
-
-}

@@ -28,6 +28,9 @@ import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
 import com.mcmlr.system.products.yaml.YAMLEnvironment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -132,18 +135,24 @@ class Apps : JavaPlugin() {
 
         commandRepository
             .commandStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(Dispatchers.IO)
             .collectLatest {
                 val player = it.sender as? Player ?: return@collectLatest
                 val command = it.command.name.lowercase()
                 val arg = it.args.firstOrNull()?.lowercase()
-                if (command == ".") {
-                    //TODO: Handle deeplinks
-                    systemEnvironment.launch(player, arg)
-                } else if (command == "c") {
-                    systemEnvironment.shutdown(player)
-                } else if (command == "k") {
-                    Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
+
+                CoroutineScope(DudeDispatcher(player)).launch {
+                    if (command == ".") {
+                        systemEnvironment.launch(player, arg)
+                    } else if (command == "c") {
+                        systemEnvironment.shutdown(player)
+                    }
+                }
+
+                if (command == "k") {
+                    CoroutineScope(DudeDispatcher()).launch {
+                        Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
+                    }
                 }
             }
             .disposeOn(disposer = disposer)
@@ -161,5 +170,14 @@ class Apps : JavaPlugin() {
     override fun onDisable() {
         disposer.clear()
         systemEnvironment.onDisable()
+    }
+
+    private fun isFolia(): Boolean {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer")
+            return true
+        } catch (e: ClassNotFoundException) {
+            return false
+        }
     }
 }

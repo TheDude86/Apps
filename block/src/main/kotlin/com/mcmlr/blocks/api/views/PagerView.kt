@@ -57,7 +57,7 @@ class PagerView(
 
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(150)
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player())).launch {
                             index = if (index == 0) (adapter?.getCount() ?: 1) - 1 else index - 1
                             pageListeners.forEach { it.invoke(index) }
                             reset()
@@ -87,7 +87,7 @@ class PagerView(
 
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(150)
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player())).launch {
                             index = if (index == (adapter?.getCount() ?: 1) - 1) 0 else index + 1
                             pageListeners.forEach { it.invoke(index) }
                             reset()

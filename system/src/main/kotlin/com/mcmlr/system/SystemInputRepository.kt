@@ -1,11 +1,14 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerOnlineEvent
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.emitBackground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +29,7 @@ class SystemInputRepository: InputRepository {
     private val onlinePlayersEventStream = MutableSharedFlow<PlayerOnlineEvent>()
     private val playerChatFlow = MutableStateFlow<AsyncPlayerChatEvent?>(null)
     private val inputUsers = HashSet<UUID>()
-    private val cursorFlowMap = HashMap<UUID, MutableStateFlow<CursorModel>>()
+    private val cursorFlowMap = HashMap<UUID, MutableStateFlow<CursorModel?>>()
     private val playerMoveFlowMap = HashMap<UUID, MutableSharedFlow<PlayerMoveEvent>>()
     private val cursorScrollMap = HashMap<UUID, MutableSharedFlow<ScrollModel>>()
     private val scrollingUsers = HashSet<UUID>()
@@ -67,7 +70,17 @@ class SystemInputRepository: InputRepository {
         if (scrollingUsers.contains(event.player.uniqueId)) event.isCancelled = true
     }
 
-    override fun cursorStream(playerId: UUID): Flow<CursorModel> = cursorFlowMap[playerId] ?: flow { }
+    override fun cursorStream(playerId: UUID): Flow<CursorModel> {
+        val entry = cursorFlowMap[playerId]
+
+        return if (entry == null) {
+            val flow = MutableStateFlow<CursorModel?>(null)
+            cursorFlowMap[playerId] = flow
+            flow.filterNotNull()
+        } else {
+            entry.filterNotNull()
+        }
+    }
 
     override fun playerMoveStream(playerId: UUID): Flow<PlayerMoveEvent> {
         return if (playerMoveFlowMap.containsKey(playerId)) {

@@ -43,7 +43,7 @@ class PongBlock @Inject constructor(
 }
 
 class PongViewController(
-    player: Player,
+    private val player: Player,
     origin: Location
 ): NavigationViewController(player, origin), PongPresenter {
 
@@ -76,7 +76,7 @@ class PongViewController(
             delay(3.seconds)
             callback.invoke()
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 point.update(text = "")
             }
         }
@@ -89,7 +89,7 @@ class PongViewController(
         CoroutineScope(Dispatchers.IO).launch {
             delay(3.seconds)
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 callback.invoke()
                 point.update(text = "")
             }
@@ -225,35 +225,35 @@ class PongInteractor(
 
     private fun startGame() {
         context.cursorStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 pongRepository.updatePlayerPaddlePosition(min(600, max(-600, ((-it.data.pitch + 3.1) * 19.3).toInt())))
             }
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
         pongRepository.playerPaddlePositionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 presenter.setPaddlePosition(it)
             }
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
         pongRepository.ballPositionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 presenter.setBallPosition(it.position.x, it.position.y)
             }
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
         pongRepository.opponentPaddlePositionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 presenter.setOpponentPaddlePosition(it)
             }
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
         pongRepository.gameStateStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 if (it == PongGameState.POINT) {
                     val score = pongRepository.score ?: return@collectLatest
@@ -276,7 +276,7 @@ class PongInteractor(
             .disposeOn(collection = GAME_DISPOSAL, disposer = this)
 
         pongRepository.scoreStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 presenter.setScore(it)
             }

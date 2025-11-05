@@ -480,7 +480,7 @@ class OfferCreatorInteractor(
                 selectedMaterial?.let { material ->
                     val order = builder.playerId(player.uniqueId).build() ?: return
                     if (checkValidQuantity()) {
-                        orderRepository.setOrder(material, order).collectFirst(DudeDispatcher()) {
+                        orderRepository.setOrder(material, order).collectFirst(DudeDispatcher(player)) {
                             val type = material.type
                             player.inventory.remove(type, material.itemMeta?.asComponentString, order.quantity)
                             presenter.animateOrderSuccess(type, order, object : Listener {

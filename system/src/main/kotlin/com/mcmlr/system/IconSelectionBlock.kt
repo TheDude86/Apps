@@ -35,7 +35,7 @@ class IconSelectionBlock @Inject constructor(
     }
 
     private val view = IconSelectionBlockViewController(player, origin)
-    private val interactor = IconSelectionInteractor(view, materialsRepository)
+    private val interactor = IconSelectionInteractor(player, view, materialsRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -151,6 +151,7 @@ interface IconSelectionPresenter: Presenter {
 }
 
 class IconSelectionInteractor(
+    private val player: Player,
     private val presenter: IconSelectionPresenter,
     private val materialsRepository: MaterialsRepository,
 ): Interactor(presenter) {
@@ -159,7 +160,7 @@ class IconSelectionInteractor(
         super.onCreate()
 
         materialsRepository.materialsStream().collectFirst {
-            collectOn(DudeDispatcher()) { materials ->
+            collectOn(DudeDispatcher(player)) { materials ->
                 presenter.setFeed(materials) {
                     addBundleData(IconSelectionBlock.MATERIAL_BUNDLE_KEY, it)
                     routeBack()
@@ -170,7 +171,7 @@ class IconSelectionInteractor(
         presenter.addSearchListener(object : TextListener {
             override fun invoke(text: String) {
                 materialsRepository.searchMaterialsStream(text).collectFirst {
-                    collectOn(DudeDispatcher()) { materials ->
+                    collectOn(DudeDispatcher(player)) { materials ->
                         presenter.setFeed(materials) {
                             addBundleData(IconSelectionBlock.MATERIAL_BUNDLE_KEY, it)
                             routeBack()

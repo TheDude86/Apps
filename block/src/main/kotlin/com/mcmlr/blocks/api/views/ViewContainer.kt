@@ -274,7 +274,7 @@ open class ViewContainer(
                 delay(50)
             }
         }
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player()))
             .collectLatest {
                 view.updateLocation(it)
             }

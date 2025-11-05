@@ -3,11 +3,20 @@ package com.mcmlr.blocks.core
 import com.mcmlr.folia.FoliaScheduler
 import com.mcmlr.folia.FoliaTask
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitTask
 
 class Scheduler(private val plugin: Plugin) {
     private val foliaScheduler = FoliaScheduler(plugin)
+
+    fun run(runnable: Runnable, player: Player) {
+        if (isFolia()) {
+            foliaScheduler.run(runnable, player)
+        } else {
+            Bukkit.getScheduler().runTask(plugin, runnable)
+        }
+    }
 
     fun run(runnable: Runnable) {
         if (isFolia()) {

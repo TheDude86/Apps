@@ -29,7 +29,7 @@ class ActiveCheatsRepository @Inject constructor(
         serverEventsRepository.setCancelBlock(player)
         serverEventsRepository
             .getPlayerInteractEventStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
 
                 if (it.clickedBlock?.type == Material.SPAWNER) {

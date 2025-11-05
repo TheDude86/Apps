@@ -586,7 +586,7 @@ class TutorialInteractor(
 
         clockJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     presenter.setClockText("${ChatColor.DARK_AQUA}You have been looking at this screen for $timer second${if (timer == 1) "" else "s"}.")
                 }
                 timer++

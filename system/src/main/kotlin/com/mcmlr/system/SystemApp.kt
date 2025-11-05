@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
 import com.mcmlr.blocks.api.app.BaseApp
@@ -12,6 +13,7 @@ import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -60,7 +62,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.updateActivePlayer(player.uniqueId, true)
         inputRepository.cursorStream(player.uniqueId)
             .filter { it.event != CursorEvent.CLEAR }
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val originYaw = head.origin.yaw
                 val currentYaw = it.data.yaw
@@ -127,7 +129,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 //            .disposeOn(disposer = this)
 
         inputRepository.scrollStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -139,7 +141,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .disposeOn(disposer = this)
 
         inputRepository.playerMoveStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -153,7 +155,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .disposeOn(disposer = this)
 
         inputRepository.chatStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -189,7 +191,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                     }
                     currentCoroutineContext().cancel()
                 }
-                .collectOn(DudeDispatcher())
+                .collectOn(DudeDispatcher(player))
                 .collectLatest {
                     //Do nothing, coroutines quirk I guess
                 }
