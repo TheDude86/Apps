@@ -35,10 +35,13 @@ abstract class BaseEnvironment<out T: BaseApp>: FlowDisposer() {
 
     fun getAppIcon(): ItemStack {
         val item = ItemStack(Material.PLAYER_HEAD)
-        val meta = item.itemMeta as SkullMeta
-        meta.ownerProfile = getProfile(icon())
+        val icon = icon()
+        if (icon.isNotEmpty()) {
+            val meta = item.itemMeta as SkullMeta
+            meta.ownerProfile = getProfile(icon())
+            item.itemMeta = meta
+        }
 
-        item.itemMeta = meta
         return item
     }
 

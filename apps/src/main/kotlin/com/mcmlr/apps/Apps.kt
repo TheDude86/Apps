@@ -15,6 +15,7 @@ import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.NotificationManager
+import com.mcmlr.system.products.heads.HeadsEnvironment
 import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.info.TutorialEnvironment
 import com.mcmlr.system.products.kits.KitsEnvironment
@@ -105,6 +106,7 @@ class Apps : JavaPlugin() {
         AppInjector.register(RecipeEnvironment())
         AppInjector.register(KitsEnvironment())
         AppInjector.register(YAMLEnvironment())
+        AppInjector.register(HeadsEnvironment())
         AppInjector.register(PongEnvironment())
         AppInjector.register(TutorialEnvironment())
 //        AppInjector.register(CheatsEnvironment())

@@ -44,6 +44,7 @@ class SubcomponentModule
         CheatsAppComponent::class,
         PongAppComponent::class,
         YAMLAppComponent::class,
+        HeadsAppComponent::class,
     ]
 )
 class HomeSubcomponentModule
@@ -90,6 +91,8 @@ interface SystemAppComponent {
         fun app(app: SystemApp): Builder
         fun build(): SystemAppComponent
     }
+
+    fun headsSubcomponent(): HeadsAppComponent.Builder
 
     fun homeSubcomponent(): HomesAppComponent.Builder
 
