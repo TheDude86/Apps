@@ -19,6 +19,7 @@ abstract class ConfigurableEnvironment<out T:  ConfigurableApp>: Environment<T>(
         this.parentEnvironment = parentEnvironment
         this.parentApp = parentApp
 
+        R.loadStrings(name(), player.locale)
         val app = getInstance(player)
         app.configure(appManager, this.parentEnvironment, this.parentApp, inputRepository, deeplink, origin)
         app.createConfig(resources)

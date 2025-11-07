@@ -1,10 +1,13 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.DaggerSystemEnvironmentComponent
 import com.mcmlr.system.dagger.SystemEnvironmentComponent
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -60,6 +63,7 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
     }
 
     fun launch(player: Player, deeplink: String?) {
+        R.loadStrings(name(), player.locale)
         val app = getInstance(player)
         app.configure(this, deeplink, origin(player), inputRepository)
 

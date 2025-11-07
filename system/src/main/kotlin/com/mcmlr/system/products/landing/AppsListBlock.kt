@@ -4,6 +4,8 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.app.S
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -33,7 +35,7 @@ class AppsListBlock @Inject constructor(
 }
 
 class AppsListViewController(
-    player: Player,
+    private val player: Player,
     origin: Location,
 ): ViewController(player, origin), AppsListPresenter {
 
@@ -91,7 +93,7 @@ class AppsListViewController(
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}Apps",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${R.getString(player, S.APPS.resource())}",
             size = 6,
         )
 
@@ -101,7 +103,7 @@ class AppsListViewController(
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(this)
                 .margins(top = 50, start = 50),
-            text = "${ChatColor.GRAY}${ChatColor.BOLD}Favorites",
+            text = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.FAVORITES.resource())}",
             size = 5,
         )
 

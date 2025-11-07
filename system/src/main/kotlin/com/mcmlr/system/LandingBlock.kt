@@ -1,5 +1,7 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.app.S
 import com.mcmlr.system.products.applications.ApplicationsBlock
 import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.info.SetupBlock
@@ -155,8 +157,8 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .x(-200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
+            text = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.HOME.resource())}",
         )
 
         appsButton = addButtonView(
@@ -165,8 +167,8 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .x(200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}Apps",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Apps",
+            text = "${ChatColor.GOLD}${R.getString(player, S.APPS.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.APPS.resource())}",
         )
     }
 }
@@ -226,8 +228,6 @@ class LandingInteractor(
 
         attachChild(appsListBlock, presenter.getAppsBlockContainer())
         attachChild(feedBlock, presenter.getFeedBlockContainer())
-
-
 
         if (spawnRepository.model.enabled == true && permissionsRepository.checkPermission(player, PermissionNode.SPAWN) ||
             permissionsRepository.checkPermission(player, PermissionNode.BACK)) {
