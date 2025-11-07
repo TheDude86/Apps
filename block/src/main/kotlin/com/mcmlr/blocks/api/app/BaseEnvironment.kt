@@ -19,6 +19,8 @@ import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.profile.PlayerProfile
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 abstract class BaseEnvironment<out T: BaseApp>: FlowDisposer() {
@@ -86,9 +88,7 @@ object R {
         val appName = app.lowercase()
         val appStringsResource = appsStringMaps[appName]
         if (appStringsResource == null || appStringsResource[locale] == null) {
-            val lines = this::class.java.classLoader.getResource("$appName/$locale.json")?.readText()
-            log(Log.ASSERT, "$appName${File.separatorChar}$locale.json")
-
+            val lines = this::class.java.classLoader.getResource("${appName}${File.separatorChar}$locale.json")?.readText()
             if (appStringsResource == null) {
                 val entry = mutableMapOf<String, JsonObject>()
                 entry[locale] = JsonParser.parseString(lines).asJsonObject
@@ -108,14 +108,4 @@ object R {
     }
 }
 
-enum class S {
-    HOME,
-    APPS,
-    FAVORITES,
-    ;
-
-    fun resource(): StringResource = StringResource("system", this.name)
-}
-
 data class StringResource(val app: String, val id: String)
-

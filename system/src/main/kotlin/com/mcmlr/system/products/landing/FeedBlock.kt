@@ -170,18 +170,6 @@ class FeedInteractor(
 
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onResume(newOrigin: Location?) {
-        super.onResume(newOrigin)
-    }
-
-    override fun onClose() {
-        super.onClose()
-    }
-
     fun updateFeed(announcements: List<AnnouncementModel>) {
         customFeed = announcements
         presenter.setFeed(announcements)

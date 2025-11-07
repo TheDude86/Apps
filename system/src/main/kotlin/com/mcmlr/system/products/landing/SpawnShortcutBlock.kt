@@ -1,5 +1,7 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.system.S
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -59,7 +61,7 @@ class SpawnShortcutViewController(
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) "Spawn" else "Back"}",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) R.getString(player, S.SPAWN.resource()) else S.BACK.resource()}",
             size = 6,
         )
 
@@ -69,7 +71,7 @@ class SpawnShortcutViewController(
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(this)
                 .margins(top = 50, start = 50),
-            text = "${ChatColor.GRAY}${ChatColor.BOLD}Teleports",
+            text = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.TELEPORTS.resource())}",
             size = 5,
         )
 
@@ -89,8 +91,8 @@ class SpawnShortcutViewController(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
                                 .alignStartToStartOf(this),
-                            text = "${ChatColor.GOLD}Spawn",
-                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
+                            text = "${ChatColor.GOLD}${R.getString(player, S.SPAWN.resource())}",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.SPAWN.resource())}",
                             size = 8,
                         )
                     }
@@ -100,8 +102,8 @@ class SpawnShortcutViewController(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
                                 .alignStartToStartOf(this),
-                            text = "${ChatColor.GOLD}Back",
-                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                            text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                             size = 8,
                         )
                     }

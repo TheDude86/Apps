@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.homes
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -41,7 +42,7 @@ class HomesBlock @Inject constructor(
 }
 
 class HomesViewController(
-    player: Player,
+    private val player: Player,
     origin: Location
 ): NavigationViewController(player, origin), HomesPresenter {
 
@@ -59,7 +60,7 @@ class HomesViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Homes",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.HOMES.resource())}",
             size = 16,
         )
 
@@ -77,8 +78,8 @@ class HomesViewController(
                 .position(-600, 0)
                 .alignTopToBottomOf(container)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Add new home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Add new home"
+            text = "${ChatColor.GOLD}${R.getString(player, S.ADD_NEW_HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.ADD_NEW_HOME.resource())}"
         )
 
         removeHomeButton = addButtonView(
@@ -87,8 +88,8 @@ class HomesViewController(
                 .position(600, 0)
                 .alignTopToBottomOf(container)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Remove home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove home"
+            text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
         )
 
         messageView = addTextView(
@@ -113,11 +114,11 @@ class HomesViewController(
 
     override fun setHomes(homes: List<HomeModel>, deleteMode: Boolean, listener: HomeActionListener) {
         if (deleteMode) {
-            removeHomeButton.text = "${ChatColor.GOLD}Cancel"
-            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Cancel"
+            removeHomeButton.text = "${ChatColor.GOLD}${R.getString(player, S.CANCEL.resource())}"
+            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CANCEL.resource())}"
         } else {
-            removeHomeButton.text = "${ChatColor.GOLD}Remove home"
-            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove home"
+            removeHomeButton.text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
+            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
         }
 
         container.updateView(object : ContextListener<ViewContainer>() {
@@ -129,7 +130,7 @@ class HomesViewController(
                             .alignTopToTopOf(this)
                             .centerHorizontally()
                             .margins(top = 10),
-                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}You don't have any\nhomes yet...",
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}${R.getString(player, S.EMPTY_HOMES_MESSAGE.resource())}",
                         size = 8,
                     )
 
@@ -145,14 +146,12 @@ class HomesViewController(
                             .centerHorizontally()
                             .margins(top = 10)
                     } else {
-                        homeView?.let {
-                            Modifier()
-                                .size(WRAP_CONTENT, WRAP_CONTENT)
-                                .alignTopToBottomOf(it)
-                                .centerHorizontally()
-                                .margins(top = 25)
-                        }
-                    } ?: return@forEach
+                        Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(homeView)
+                            .centerHorizontally()
+                            .margins(top = 25)
+                    }
 
 
                     homeView = addButtonView(
@@ -169,9 +168,9 @@ class HomesViewController(
                     addItemView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignEndToStartOf(homeView!!)
-                            .alignTopToTopOf(homeView!!)
-                            .alignBottomToBottomOf(homeView!!)
+                            .alignEndToStartOf(homeView)
+                            .alignTopToTopOf(homeView)
+                            .alignBottomToBottomOf(homeView)
                             .margins(end = 64),
                         item = home.icon,
                     )
@@ -179,9 +178,9 @@ class HomesViewController(
                     addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(homeView!!)
-                            .alignTopToTopOf(homeView!!)
-                            .alignBottomToBottomOf(homeView!!)
+                            .alignStartToEndOf(homeView)
+                            .alignTopToTopOf(homeView)
+                            .alignBottomToBottomOf(homeView)
                             .margins(start = 64),
                         text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
                         highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",

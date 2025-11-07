@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.announcements
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.announcements.AnnouncementSelectorBlock.Companion.ANNOUNCEMENT_SELECT_BUNDLE_KEY
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -38,7 +39,7 @@ class AnnouncementSelectorBlock @Inject constructor(
 }
 
 class AnnouncementSelectorViewController(
-    player: Player,
+    private val player: Player,
     origin: Location,
 ): NavigationViewController(player, origin), AnnouncementSelectorPresenter {
 
@@ -140,7 +141,7 @@ class AnnouncementSelectorViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Select Post to Edit",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.ANNOUNCEMENT_SELECTOR_TITLE.resource())}",
             size = 16,
         )
 

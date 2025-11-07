@@ -1,0 +1,9 @@
+{
+  "homes": "Homes",
+  "add_new_home": "Add new home",
+  "remove_home": "Remove home",
+  "cancel": "Cancel",
+  "empty_home_message": "You don't have any\nhomes yet...",
+  "delete_icon": "\uD83D\uDDD1",
+  "pencil_icon": "✎"
+}

@@ -94,6 +94,7 @@ class CheatsListInteractor(
     }
 }
 
+//TODO: Add to strings file
 enum class CheatType(val title: String, val cta: String, val description: String) {
     SPAWNER("spawner", "Choose Mob", "This cheat will let you select a mob and the next mob spawner you left click will be set to that mob."),
     SUICIDE("suicide", "Die X(", "This cheat allows you to kill yourself. (It's painless)"),

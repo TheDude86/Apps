@@ -1,10 +1,10 @@
 package com.mcmlr.system.products.support
 
-import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.*
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.system.products.yaml.S
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -27,8 +27,11 @@ class FileEditorBlock @Inject constructor(player: Player, origin: Location,): Bl
     }
 }
 
-class FileEditorViewController(player: Player, origin: Location): NavigationViewController(player, origin), FileEditorPresenter {
-    var title = "File"
+class FileEditorViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin), FileEditorPresenter {
+    var title = R.getString(player, S.FILE.resource())
 
     private lateinit var fileView: ListFeedView
     private lateinit var filePathContainer: ViewContainer
@@ -85,8 +88,8 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                         .alignBottomToBottomOf(this)
                         .centerHorizontally()
                         .margins(bottom = 50),
-                    text = "${ChatColor.GOLD}Save",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Save",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.SAVE.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.SAVE.resource())}",
                     callback = saveListener,
                 )
 
@@ -104,7 +107,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     }
 
     override fun setSaveLabelVisible(isVisible: Boolean) {
-        inputLabelView?.update(text = if (isVisible) "${ChatColor.GREEN}Value saved!" else "")
+        inputLabelView?.update(text = if (isVisible) "${ChatColor.GREEN}${R.getString(player, S.VALUE_SAVED.resource())}" else "")
     }
 
     override fun setPath(models: List<Any>) {
@@ -206,52 +209,6 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
                             }
                         }
                     )
-
-//                    addViewContainer(
-//                        modifier = Modifier()
-//                            .size(MATCH_PARENT, 100),
-//                        content = object : ContextListener<ViewContainer>() {
-//                            override fun ViewContainer.invoke() {
-//                                val deleteButton = addButtonView(
-//                                    modifier = Modifier()
-//                                        .size(WRAP_CONTENT, WRAP_CONTENT)
-//                                        .alignStartToStartOf(this)
-//                                        .margins(start = 50, top = 100),
-//                                    text = "${ChatColor.RED}\uD83D\uDDD1",
-//                                    highlightedText = "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1",
-//                                    callback = object : Listener {
-//                                        override fun invoke() {
-//
-//                                        }
-//                                    }
-//                                )
-//
-//                                addButtonView(
-//                                    modifier = Modifier()
-//                                        .size(WRAP_CONTENT, WRAP_CONTENT)
-//                                        .alignStartToEndOf(deleteButton)
-//                                        .alignTopToTopOf(deleteButton)
-//                                        .alignBottomToBottomOf(deleteButton)
-//                                        .margins(start = 100),
-//                                    alignment = Alignment.LEFT,
-//                                    lineWidth = 600,
-//                                    size = 6,
-//                                    text = makeListLine(model),
-//                                    highlightedText = makeListLine(model).bolden(),
-//                                    callback = object : Listener {
-//                                        override fun invoke() {
-//                                            val data = if (model is LinkedHashMap<*, *>) {
-//                                                model[model.keys.first()]
-//                                            } else {
-//                                                model
-//                                            } ?: return
-//                                            modelListener.invoke(Pair(i.toString(), data))
-//                                        }
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    )
                 }
             }
         })
@@ -285,7 +242,7 @@ class FileEditorViewController(player: Player, origin: Location): NavigationView
     private fun makeLine(element: Pair<String, Any>): String {
         val result = when (element.second::class.java) {
             MemorySection::class.java-> "▶"
-            ArrayList::class.java -> "List"
+            ArrayList::class.java -> R.getString(player, S.LIST.resource())
             else -> element.second
         }
 

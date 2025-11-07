@@ -20,7 +20,7 @@ class YAMLEnvironment(): Environment<YAMLApp>() {
 
     override fun icon(): String = "http://textures.minecraft.net/texture/c73e8bd3c43c4514c76481ca1daf55149dfc93bd1bcfa8ab9437b9f7eb3392d9"
 
-    override fun permission(): String? = PermissionNode.ADMIN.node
+    override fun permission(): String = PermissionNode.ADMIN.node
 
     override fun summary(): String = "A file editor to edit plugin configs in game."
 }
