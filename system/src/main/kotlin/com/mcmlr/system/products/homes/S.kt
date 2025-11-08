@@ -10,5 +10,5 @@ enum class S {
     EMPTY_HOMES_MESSAGE,
     ;
 
-    fun resource(): StringResource = StringResource("files", this.name)
+    fun resource(): StringResource = StringResource("homes", this.name)
 }

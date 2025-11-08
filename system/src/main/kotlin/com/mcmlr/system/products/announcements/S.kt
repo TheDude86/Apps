@@ -38,5 +38,5 @@ enum class S {
     ANNOUNCEMENT_SELECTOR_TITLE,
     ;
 
-    fun resource(): StringResource = StringResource("files", this.name)
+    fun resource(): StringResource = StringResource("announcements", this.name)
 }
