@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.warps
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -11,6 +12,7 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.IconSelectionBlock
 import com.mcmlr.system.IconSelectionBlock.Companion.MATERIAL_BUNDLE_KEY
 import org.bukkit.ChatColor
@@ -35,7 +37,7 @@ class AddWarpsBlock @Inject constructor(
 }
 
 class AddWarpViewController(
-    player: Player,
+    private val player: Player,
     origin: Location
 ): NavigationViewController(player, origin), AddWarpPresenter {
 
@@ -55,7 +57,7 @@ class AddWarpViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Add A New Warp",
+            text = R.getString(player, S.ADD_WARP_TITLE.resource()),
             size = 16,
         )
 
@@ -63,8 +65,8 @@ class AddWarpViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .center(),
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}Click to set warp name...",
-            highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}Click to set warp name...",
+            text = R.getString(player, S.WARP_NAME_PLACEHOLDER.resource()),
+            highlightedText = R.getString(player, S.WARP_NAME_PLACEHOLDER.resource()).bolden(),
         )
 
         iconContainer = addViewContainer(
@@ -82,8 +84,8 @@ class AddWarpViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
                         size = 6,
-                        text = "${ChatColor.GRAY}Select\nIcon...",
-                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
+                        text = R.getString(player, S.SELECT_ICON.resource()),
+                        highlightedText = R.getString(player, S.SELECT_ICON.resource()).bolden(),
                     )
 
                     warpIconItemButton = addItemButtonView(
@@ -103,8 +105,8 @@ class AddWarpViewController(
                 .alignTopToBottomOf(warpNameButton)
                 .centerHorizontally()
                 .margins(top = 75),
-            text = "${ChatColor.GOLD}Save warp",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Save warp"
+            text = R.getString(player, S.SAVE_WARP.resource()),
+            highlightedText = R.getString(player, S.SAVE_WARP.resource()).bolden(),
         )
 
         errorMessage = addTextView(
@@ -116,7 +118,7 @@ class AddWarpViewController(
             size = 4,
             alignment = Alignment.LEFT,
             visible = false,
-            text = "${ChatColor.RED}Error: The dev was too lazy to figure out what went wrong...",
+            text = R.getString(player, S.WARP_ERROR_MESSAGE.resource()),
         )
     }
 

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.info
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
@@ -64,7 +65,7 @@ class TutorialViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Tutorial",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.TUTORIAL_TITLE.resource())}",
             size = 16,
         )
 
@@ -99,7 +100,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}The End",
+                    text = R.getString(player, S.PAGE_SIX_TITLE.resource()),
                     size = 12,
                 )
 
@@ -109,7 +110,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "That's all for now!  We hope you enjoy this new way to use plugins.",
+                    text = R.getString(player, S.PAGE_SIX_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -120,8 +121,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Finish ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.FINISH_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.FINISH_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             routeBack()
@@ -140,7 +141,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Apps",
+                    text = R.getString(player, S.PAGE_FIVE_TITLE.resource()),
                     size = 12,
                 )
 
@@ -150,7 +151,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "Opening ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} with ${ChatColor.BOLD}/.${ChatColor.RESET} will open the home screen where server staff can customize the title and message for players.  Also you can navigate to the Apps screen and explore all the apps available to you on the server.",
+                    text = R.getString(player, S.PAGE_FIVE_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -162,7 +163,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(paragraphOne)
                         .alignStartToStartOf(paragraphOne)
                         .margins(top = 20),
-                    text = "Currently there are only a handful of 1st party apps since this is still a new project but as development progresses, more 1st party apps will be added as well as 3rd party app support and the developers of your favorite plugins will be able to integrate and display there apps on this screen as well.",
+                    text = R.getString(player, S.PAGE_FIVE_PARAGRAPH_TWO.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -173,8 +174,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Next ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             nextCTACallback.invoke()
@@ -193,7 +194,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Complex Elements",
+                    text = R.getString(player, S.PAGE_FOUR_TITLE.resource()),
                     size = 12,
                 )
 
@@ -203,7 +204,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "There are also a few more complex elements, here is the Carousel View and the Feed View.",
+                    text = R.getString(player, S.PAGE_FOUR_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -225,7 +226,7 @@ class TutorialViewController(
                             .alignTopToBottomOf(it)
                             .alignStartToStartOf(it)
                             .alignEndToEndOf(it),
-                        text = "Click on the first or last element to cycle through the carousel.",
+                        text = R.getString(player, S.PAGE_FOUR_PAGER_VIEW_TEXT.resource()),
                         size = 4,
                     )
 
@@ -242,7 +243,7 @@ class TutorialViewController(
                                         modifier = Modifier()
                                             .size(WRAP_CONTENT, WRAP_CONTENT)
                                             .alignStartToStartOf(this),
-                                        text = "Element $it",
+                                        text = R.getString(player, S.ELEMENT_INDEX.resource(), it),
                                         size = 4,
                                     )
                                 }
@@ -256,7 +257,7 @@ class TutorialViewController(
                             .alignTopToBottomOf(feed)
                             .alignStartToStartOf(feed)
                             .alignEndToEndOf(feed),
-                        text = "Scroll up and down while looking at at the feed to scroll through the content.",
+                        text = R.getString(player, S.PAGE_FOUR_FEED_VIEW_TEXT.resource()),
                         size = 4,
                     )
                 }
@@ -267,8 +268,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Next ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             nextCTACallback.invoke()
@@ -287,7 +288,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Live updates",
+                    text = R.getString(player, S.PAGE_THREE_TITLE.resource()),
                     size = 12,
                 )
 
@@ -297,7 +298,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} is also very reactive so screens can update rapidly as you can see by the little cursor following where you're looking and by the clock below.",
+                    text = R.getString(player, S.PAGE_THREE_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -326,8 +327,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Next ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             nextCTACallback.invoke()
@@ -346,7 +347,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Interactive Elements",
+                    text = R.getString(player, S.PAGE_TWO_TITLE.resource()),
                     size = 12,
                 )
 
@@ -356,7 +357,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "Text buttons aren't the only interactive element in ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET}.  There's also item buttons and text inputs, like the ones below.  Item buttons work the same as text buttons and text inputs need to be clicked like a button and the next line of text you send in chat will be used as your text input.  Try it out on the two below.",
+                    text = R.getString(player, S.PAGE_TWO_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -374,7 +375,9 @@ class TutorialViewController(
                     callback = object : Listener {
                         override fun invoke() {
                             clicks++
-                            demoItemText?.update(text = "${ChatColor.GREEN}Item button clicked $clicks time${if (clicks != 1) "s" else ""}")
+                            val plural = if (clicks != 1) R.getString(player, S.PLURAL.resource()) else ""
+                            val message = R.getString(player, S.DEMO_ITEM_BUTTON_TEXT.resource(), clicks, plural)
+                            demoItemText?.update(text = message)
                         }
                     }
                 )
@@ -397,8 +400,8 @@ class TutorialViewController(
                         .alignTopToTopOf(demoItemButton)
                         .alignBottomToBottomOf(demoItemButton)
                         .margins(start = 200),
-                    text = "${ChatColor.GRAY}Click here to input text...",
-                    highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Click here to input text...",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.INPUT_TEXT_PLACEHOLDER.resource())}",
+                    highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.INPUT_TEXT_PLACEHOLDER.resource())}",
                     teleportDuration = 0,
                 )
 
@@ -407,8 +410,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Next ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             nextCTACallback.invoke()
@@ -427,7 +430,7 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Welcome to ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET}${ChatColor.BOLD}!",
+                    text = R.getString(player, S.PAGE_ONE_TITLE.resource()),
                     size = 12,
                 )
 
@@ -437,7 +440,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "${ChatColor.GOLD}${ChatColor.BOLD}Apps ${ChatColor.RESET}is an ambitious new project that is currently in beta. The goal is to provide a framework for plugin developers to display graphical user interfaces for their plugins instead of having to rely on players memorizing dozens of commands. I still have a lot of work to do before I achieve that goal but in the mean time, this plugin is currently a simple demo of how these apps can work in the future. Expect plenty of new updates and features in the near future!",
+                    text = R.getString(player, S.PAGE_ONE_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -449,7 +452,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(paragraphOne)
                         .alignStartToStartOf(paragraphOne)
                         .margins(top = 50),
-                    text = "As you can see, you can now display significantly more content rich GUIs for you and your players.  Also, along with text, you can also display items, blocks and entities in these GUIs.  Not only does ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} allow for displaying more complex content but it is also interactive.  Try looking at the \"${ChatColor.GOLD}Next ➡${ChatColor.RESET}\" button in the bottom right, you'll see it turns bold when you do.  This means the button is highlighted and left clicking your mouse will click that button!",
+                    text = R.getString(player, S.PAGE_ONE_PARAGRAPH_TWO.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -461,7 +464,7 @@ class TutorialViewController(
                         .alignTopToBottomOf(paragraphTwo)
                         .alignStartToStartOf(paragraphTwo)
                         .margins(top = 50),
-                    text = "Click on the \"${ChatColor.GOLD}Next ➡${ChatColor.RESET}\" button when you're ready to explore more features ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} offers.",
+                    text = R.getString(player, S.PAGE_ONE_PARAGRAPH_THREE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -472,8 +475,8 @@ class TutorialViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignEndToEndOf(this)
                         .alignBottomToBottomOf(this),
-                    text = "${ChatColor.GOLD}Next ➡",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             nextCTACallback.invoke()
@@ -569,7 +572,7 @@ class TutorialInteractor(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
                                 .center(),
-                            text = "Element $index",
+                            text = R.getString(player, S.ELEMENT_INDEX.resource(), index),
                             size = 4,
                         )
                     }
@@ -587,7 +590,9 @@ class TutorialInteractor(
         clockJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 CoroutineScope(DudeDispatcher()).launch {
-                    presenter.setClockText("${ChatColor.DARK_AQUA}You have been looking at this screen for $timer second${if (timer == 1) "" else "s"}.")
+                    val string = if (timer == 1) "" else R.getString(player, S.PLURAL.resource())
+                    val message = R.getString(player, S.TIMER_TEXT.resource(), timer, string)
+                    presenter.setClockText("${ChatColor.DARK_AQUA}$message")
                 }
                 timer++
 

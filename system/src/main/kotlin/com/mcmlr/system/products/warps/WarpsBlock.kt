@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.warps
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -57,7 +58,7 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Warps",
+            text = R.getString(player, S.WARPS_TITLE.resource()),
             size = 16,
         )
 
@@ -77,8 +78,8 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                     .position(-600, 0)
                     .alignTopToBottomOf(container)
                     .margins(top = 50),
-                text = "${ChatColor.GOLD}Add new warp",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Add new warp"
+                text = "${ChatColor.GOLD}${R.getString(player, S.ADD_NEW_WARP.resource())}",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.ADD_NEW_WARP.resource())}",
             )
 
             removeWarpButton = addButtonView(
@@ -87,8 +88,8 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                     .position(600, 0)
                     .alignTopToBottomOf(container)
                     .margins(top = 50),
-                text = "${ChatColor.GOLD}Remove warp",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove warp"
+                text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_WARP.resource())}",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_WARP.resource())}",
             )
         }
 
@@ -105,11 +106,11 @@ class WarpsViewController(private val player: Player, origin: Location, private 
 
     override fun setWarps(warps: List<WarpModel>, deleteMode: Boolean, listener: WarpActionListener) {
         if (deleteMode) {
-            removeWarpButton?.text = "${ChatColor.GOLD}Cancel"
-            removeWarpButton?.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Cancel"
+            removeWarpButton?.text = "${ChatColor.GOLD}${R.getString(player, S.CANCEL.resource())}"
+            removeWarpButton?.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CANCEL.resource())}"
         } else {
-            removeWarpButton?.text = "${ChatColor.GOLD}Remove warp"
-            removeWarpButton?.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove warp"
+            removeWarpButton?.text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_WARP.resource())}"
+            removeWarpButton?.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_WARP.resource())}"
         }
 
         container.updateView(object : ContextListener<ViewContainer>() {
@@ -121,7 +122,7 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                             .alignTopToTopOf(this)
                             .centerHorizontally()
                             .margins(top = 10),
-                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no warps\nset yet...",
+                        text = R.getString(player, S.EMPTY_WARPS_LIST.resource()),
                         size = 8,
                     )
 
@@ -169,6 +170,7 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                     )
 
                     if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN)) {
+                        val text = R.getString(player, (if (deleteMode) S.DELETE else S.EDIT).resource())
                         addButtonView(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -176,8 +178,8 @@ class WarpsViewController(private val player: Player, origin: Location, private 
                                 .alignTopToTopOf(homeView!!)
                                 .alignBottomToBottomOf(homeView!!)
                                 .margins(start = 64),
-                            text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
-                            highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
+                            text = if (deleteMode) "${ChatColor.RED}$text" else text,
+                            highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}$text" else "${ChatColor.BOLD}$text",
                             callback = object : Listener {
                                 override fun invoke() {
                                     listener.edit(home, deleteMode)
@@ -254,7 +256,7 @@ class WarpsInteractor(
     override fun teleport(warp: WarpModel) {
         val wait = warpsRepository.canTeleport(player) / 1000
         if (wait > 0) {
-            presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+            presenter.setMessage(R.getString(player, S.COOLDOWN_ERROR_MESSAGE.resource(), wait, if (wait != 1L) R.getString(player, S.PLURAL.resource()) else ""))
             return
         }
 
@@ -263,7 +265,7 @@ class WarpsInteractor(
             var delay = warpsConfigRepository.model.delay
             while (delay > 0) {
                 CoroutineScope(DudeDispatcher()).launch {
-                    val message = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
+                    val message = R.getString(player, S.DELAY_MESSAGE.resource(), delay, if (delay != 1) R.getString(player, S.PLURAL.resource()) else "")
                     //TODO: Check spigot vs paper
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(message))
                 }

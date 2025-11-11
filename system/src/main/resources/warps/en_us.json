@@ -1,0 +1,17 @@
+{
+  "warps_title": "§l§o§nWarps",
+  "add_new_warp": "Add new warp",
+  "remove_warp": "Remove warp",
+  "cancel": "Cancel",
+  "empty_warps_list": "§7§oThere are no warps\nset yet...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cYou must wait %s second%s before you can teleport",
+  "delay_message": "You will be teleported in %s second%s}",
+  "plural": "s",
+  "add_warp_title": "§l§o§nAdd A New Warp",
+  "warp_name_placeholder": "§7§oClick to set warp name...",
+  "select_icon": "§7Select\nIcon...",
+  "save_warp": "§6Save warp",
+  "warp_error_message": "§cError: The dev was too lazy to figure out what went wrong..."
+}

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.kits
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -97,7 +98,7 @@ class KitsViewController(
                                         .alignStartToEndOf(icon)
                                         .centerVertically()
                                         .margins(start = 10),
-                                    text = "${it.amount} x ${it.material.fromMCItem()}",
+                                    text = R.getString(player, S.KIT_CONTENTS_ROW_NAME.resource(), it.amount, it.material.fromMCItem()),
                                     size = 4,
                                 )
                             }
@@ -148,7 +149,7 @@ class KitsViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Kits",
+            text = R.getString(player, S.KITS_TITLE.resource()),
             size = 16,
         )
 
@@ -175,7 +176,7 @@ class KitsViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToBottomOf(kitsPager)
                             .centerHorizontally(),
-                        text = "${ChatColor.BOLD}Kit Name",
+                        text = R.getString(player, S.KIT_NAME.resource()),
                         teleportDuration = 0,
                     )
 
@@ -185,7 +186,7 @@ class KitsViewController(
                             .alignStartToStartOf(this)
                             .alignTopToBottomOf(kitName)
                             .margins(start = 50, top = 50),
-                        text = "Kit Price",
+                        text = R.getString(player, S.KIT_PRICE.resource()),
                         teleportDuration = 0,
                     )
 
@@ -195,7 +196,7 @@ class KitsViewController(
                             .alignTopToBottomOf(kitPrice)
                             .alignStartToStartOf(kitPrice)
                             .margins(top = 20),
-                        text = "Kit Cooldown",
+                        text = R.getString(player, S.KIT_COOLDOWN.resource()),
                         size = 6,
                         lineWidth = 150,
                         alignment = Alignment.LEFT,
@@ -208,7 +209,7 @@ class KitsViewController(
                             .alignTopToBottomOf(kitCooldown)
                             .alignStartToStartOf(kitCooldown)
                             .margins(top = 20),
-                        text = "${ChatColor.GRAY}Kit Description",
+                        text = R.getString(player, S.KIT_DESCRIPTION.resource()),
                         teleportDuration = 0,
                         alignment = Alignment.LEFT,
                         size = 6,
@@ -220,7 +221,7 @@ class KitsViewController(
                             .alignTopToBottomOf(kitName)
                             .alignEndToEndOf(this)
                             .margins(top = 50, end = 200),
-                        text = "${ChatColor.BOLD}Kit Contents",
+                        text = R.getString(player, S.KIT_CONTENTS_TITLE.resource()),
                         size = 6,
                     )
 
@@ -242,8 +243,8 @@ class KitsViewController(
                 .alignTopToBottomOf(kitContainer)
                 .centerHorizontally()
                 .margins(top = 20),
-            text = "${ChatColor.GOLD}Get Kit",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Get Kit",
+            text = "${ChatColor.GOLD}${R.getString(player, S.GET_KIT.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.GET_KIT.resource())}",
         )
 
         errorMessage = addTextView(
@@ -262,8 +263,8 @@ class KitsViewController(
                     .alignTopToBottomOf(errorMessage)
                     .alignEndToStartOf(kitPurchase)
                     .margins(top = 50),
-                text = "${ChatColor.GOLD}Create Kit",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Kit",
+                text = "${ChatColor.GOLD}${R.getString(player, S.CREATE_KIT.resource())}",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CREATE_KIT.resource())}",
             )
 
             kitEdit = addButtonView(
@@ -272,8 +273,8 @@ class KitsViewController(
                     .alignTopToBottomOf(errorMessage)
                     .alignStartToEndOf(kitPurchase)
                     .margins(top = 50),
-                text = "${ChatColor.GOLD}Edit Kit",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit Kit",
+                text = "${ChatColor.GOLD}${R.getString(player, S.EDIT_KIT.resource())}",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.EDIT_KIT.resource())}",
             )
         }
     }
@@ -360,11 +361,11 @@ class KitsInteractor(
                         val balance = vaultRepository.economy?.getBalance(player) ?: 0.0
 
                         if (cooldown == null) {
-                            presenter.setErrorMessage("${ChatColor.RED}You've already claimed this kit!")
+                            presenter.setErrorMessage(R.getString(player, S.CLAIMED_KIT_ERROR.resource()))
                         } else if (cooldown > 0) {
-                            presenter.setErrorMessage("${ChatColor.RED}You need to wait for the cooldown to finish before collecting this kit again!")
+                            presenter.setErrorMessage(R.getString(player, S.KIT_COOLDOWN_ERROR.resource()))
                         } else if (balance < kit.kitPrice / 100.0) {
-                            presenter.setErrorMessage("${ChatColor.RED}You don't have enough money to buy this kit!")
+                            presenter.setErrorMessage(R.getString(player, S.KIT_MONEY_ERROR.resource()))
                         } else {
                             kitRepository.givePlayerKit(player, kit)
                             updateSelectedKit()
@@ -401,16 +402,16 @@ class KitsInteractor(
             .collectFirst(DudeDispatcher()) { cooldown ->
                 if (selectedKit.kitCooldown < 0) {
                     if (cooldown != null) {
-                        presenter.setCooldown("Single Use")
+                        presenter.setCooldown(R.getString(player, S.SINGLE_USE.resource()))
                     } else {
-                        presenter.setCooldown("${ChatColor.GRAY}Kit Claimed")
+                        presenter.setCooldown(R.getString(player, S.KIT_CLAIMED.resource()))
                     }
                 } else {
                     if ((cooldown ?: 0) > 0) {
                         val cooldownSeconds = (cooldown ?: 0) / 1000
                         startClockJob(cooldownSeconds)
                     } else {
-                        presenter.setCooldown("${ChatColor.GREEN}Available now")
+                        presenter.setCooldown(R.getString(player, S.AVAILABLE_NOW.resource()))
                     }
                 }
             }
@@ -432,11 +433,11 @@ class KitsInteractor(
                 timeRemainder %= 60
                 val seconds = timeRemainder
 
-                val clockTextBuilder = StringBuilder("${ChatColor.GRAY}Available in ")
-                if (days > 0) clockTextBuilder.append("$days days ")
-                if (hours > 0 || days > 0) clockTextBuilder.append("$hours hours ")
-                if (minutes > 0 || days > 0 || hours > 0) clockTextBuilder.append("$minutes minutes ")
-                clockTextBuilder.append("$seconds seconds.")
+                val clockTextBuilder = StringBuilder(R.getString(player, S.AVAILABLE_IN.resource()))
+                if (days > 0) clockTextBuilder.append(R.getString(player, S.DAYS_INPUT.resource(), days))
+                if (hours > 0 || days > 0) clockTextBuilder.append(R.getString(player, S.HOURS_INPUT.resource(), hours))
+                if (minutes > 0 || days > 0 || hours > 0) clockTextBuilder.append(R.getString(player, S.MINUTES_INPUT.resource(), minutes))
+                clockTextBuilder.append(R.getString(player, S.SECONDS_INPUT_SENTENCE.resource(), seconds))
 
                 CoroutineScope(DudeDispatcher()).launch {
                     presenter.setCooldown(clockTextBuilder.toString())

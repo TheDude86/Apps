@@ -1,0 +1,34 @@
+package com.mcmlr.system.products.info
+
+import com.mcmlr.blocks.api.app.StringResource
+
+enum class S {
+    TUTORIAL_TITLE,
+    ELEMENT_INDEX,
+    TIMER_TEXT,
+    PLURAL,
+    NEXT_ARROW,
+    FINISH_ARROW,
+    PAGE_ONE_TITLE,
+    PAGE_ONE_PARAGRAPH_ONE,
+    PAGE_ONE_PARAGRAPH_TWO,
+    PAGE_ONE_PARAGRAPH_THREE,
+    INPUT_TEXT_PLACEHOLDER,
+    PAGE_TWO_TITLE,
+    PAGE_TWO_PARAGRAPH_ONE,
+    DEMO_ITEM_BUTTON_TEXT,
+    PAGE_THREE_TITLE,
+    PAGE_THREE_PARAGRAPH_ONE,
+    PAGE_FOUR_TITLE,
+    PAGE_FOUR_PARAGRAPH_ONE,
+    PAGE_FOUR_PAGER_VIEW_TEXT,
+    PAGE_FOUR_FEED_VIEW_TEXT,
+    PAGE_FIVE_TITLE,
+    PAGE_FIVE_PARAGRAPH_ONE,
+    PAGE_FIVE_PARAGRAPH_TWO,
+    PAGE_SIX_TITLE,
+    PAGE_SIX_PARAGRAPH_ONE,
+    ;
+
+    fun resource(): StringResource = StringResource("tutorial", this.name)
+}

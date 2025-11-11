@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -11,6 +12,8 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.underline
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -32,7 +35,10 @@ class TeleportBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class TeleportViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin),
     TeleportPresenter {
     private lateinit var feedView: FeedView
     private lateinit var players: ButtonView
@@ -47,7 +53,7 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Teleport",
+            text = R.getString(player, S.TELEPORT_TITLE.resource()),
             size = 16,
         )
 
@@ -57,8 +63,8 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                 .position(-500, 0)
                 .alignTopToBottomOf(title)
                 .margins(top = 200),
-            text = "${ChatColor.BLUE}${ChatColor.BOLD}Players",
-            highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}${ChatColor.UNDERLINE}Players",
+            text = R.getString(player, S.PLAYERS_TAB.resource()),
+            highlightedText = R.getString(player, S.PLAYERS_TAB.resource()).underline(),
         )
 
         requests = addButtonView(
@@ -67,8 +73,8 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                 .position(500, 0)
                 .alignTopToBottomOf(title)
                 .margins(top = 200),
-            text = "${ChatColor.BLUE}Requests",
-            highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}Requests",
+            text = R.getString(player, S.REQUESTS_TAB.resource()),
+            highlightedText = R.getString(player, S.REQUESTS_TAB.resource()).bolden(),
         )
 
         feedView = addFeedView(
@@ -86,11 +92,11 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
     override fun setRequestsButtonCallback(callback: Listener) = requests.addListener(callback)
 
     override fun setRequestList(requests: List<TeleportRequestModel>, callback: (TeleportRequestModel) -> Unit) {
-        this.players.text = "${ChatColor.BLUE}Players"
-        this.players.highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}Players"
+        this.players.text = R.getString(player, S.PLAYERS_BUTTON.resource())
+        this.players.highlightedText = R.getString(player, S.PLAYERS_BUTTON.resource()).bolden()
 
-        this.requests.text = "${ChatColor.BLUE}${ChatColor.BOLD}Requests"
-        this.requests.highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}${ChatColor.UNDERLINE}Requests"
+        this.requests.text = R.getString(player, S.REQUESTS_BUTTON.resource()).bolden()
+        this.requests.highlightedText = R.getString(player, S.REQUESTS_BUTTON.resource()).bolden().underline()
 
         updateTextDisplay(this.players)
         updateTextDisplay(this.requests)
@@ -104,7 +110,7 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                             .alignTopToTopOf(this)
                             .centerHorizontally()
                             .margins(top = 10),
-                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}You have no pending\nteleport requests...",
+                        text = R.getString(player, S.EMPTY_REQUESTS_TEXT.resource()),
                         size = 8,
                     )
 
@@ -176,11 +182,11 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
     }
 
     override fun setPlayerList(players: List<Pair<Player, ItemStack>>, callback: (Player) -> Unit) {
-        this.players.text = "${ChatColor.BLUE}${ChatColor.BOLD}Players"
-        this.players.highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}${ChatColor.UNDERLINE}Players"
+        this.players.text = R.getString(player, S.PLAYERS_BUTTON.resource()).bolden()
+        this.players.highlightedText = R.getString(player, S.PLAYERS_BUTTON.resource()).bolden().underline()
 
-        this.requests.text = "${ChatColor.BLUE}Requests"
-        this.requests.highlightedText = "${ChatColor.BLUE}${ChatColor.BOLD}Requests"
+        this.requests.text = R.getString(player, S.REQUESTS_BUTTON.resource())
+        this.requests.highlightedText = R.getString(player, S.REQUESTS_BUTTON.resource()).bolden()
 
         updateTextDisplay(this.players)
         updateTextDisplay(this.requests)
@@ -194,7 +200,7 @@ class TeleportViewController(player: Player, origin: Location): NavigationViewCo
                             .alignTopToTopOf(this)
                             .centerHorizontally()
                             .margins(top = 10),
-                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}There are no other\nplayers online...",
+                        text = R.getString(player, S.EMPTY_PLAYERS_TEXT.resource()),
                         size = 8,
                     )
 

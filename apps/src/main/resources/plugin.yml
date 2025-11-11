@@ -1,5 +1,5 @@
 name: Apps
-version: 1.1.4
+version: 1.1.7
 main: com.mcmlr.apps.Apps
 api-version: '1.20'
 authors: [ The_Dude___ ]

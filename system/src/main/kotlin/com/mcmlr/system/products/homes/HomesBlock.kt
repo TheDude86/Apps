@@ -226,7 +226,7 @@ class HomesInteractor(
                 val model = homesRepository.latest(player) ?: return
                 val maxHomes = homesConfigRepository.model.maxHomes
                 if (model.homes.size >= maxHomes) {
-                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
+                    presenter.setMessage("${ChatColor.RED}${R.getString(player, S.MAX_HOMES_ERROR.resource())}")
                     return
                 }
 
@@ -269,7 +269,15 @@ class HomesInteractor(
     override fun teleport(home: HomeModel) {
         val wait = homesRepository.canTeleport(player) / 1000
         if (wait > 0) {
-            presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+
+            val string = R.getString(
+                player,
+                S.TELEPORT_WAIT_MESSAGE.resource(),
+                wait,
+                if (wait != 1L) R.getString(player, S.PLURAL.resource()) else ""
+            )
+            val message = "${ChatColor.RED}$string"
+            presenter.setMessage(message)
             return
         }
 
@@ -278,7 +286,14 @@ class HomesInteractor(
             var delay = homesConfigRepository.model.delay
             while (delay > 0) {
                 CoroutineScope(DudeDispatcher()).launch {
-                    val message = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
+
+                    val string = R.getString(
+                        player,
+                        S.TELEPORT_DELAY_MESSAGE.resource(),
+                        delay,
+                        if (delay != 1) R.getString(player, S.PLURAL.resource()) else ""
+                    )
+                    val message = "${ChatColor.DARK_AQUA}$string"
                     //TODO: Check spigot vs paper
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(message))
                 }

@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.homes
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -35,7 +36,7 @@ class AddHomeBlock @Inject constructor(
 }
 
 class AddHomeViewController(
-    player: Player,
+    private val player: Player,
     origin: Location
 ): NavigationViewController(player, origin), AddHomePresenter {
 
@@ -55,7 +56,7 @@ class AddHomeViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Add A New Home",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.ADD_HOME_TITLE.resource())}",
             size = 16,
         )
 
@@ -63,8 +64,8 @@ class AddHomeViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .center(),
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}Click to set home name...",
-            highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}Click to set home name...",
+            text = "${ChatColor.GRAY}${ChatColor.ITALIC}${R.getString(player, S.ADD_HOME_INPUT.resource())}",
+            highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}${R.getString(player, S.ADD_HOME_INPUT.resource())}",
         )
 
         iconContainer = addViewContainer(
@@ -82,8 +83,8 @@ class AddHomeViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
                         size = 6,
-                        text = "${ChatColor.GRAY}Select\nIcon...",
-                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Select\nIcon..."
+                        text = "${ChatColor.GRAY}${R.getString(player, S.SELECT_ICON.resource())}",
+                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.SELECT_ICON.resource())}"
                     )
 
                     homeIconItemButton = addItemButtonView(
@@ -103,8 +104,8 @@ class AddHomeViewController(
                 .alignTopToBottomOf(homeNameButton)
                 .centerHorizontally()
                 .margins(top = 75),
-            text = "${ChatColor.GOLD}Save home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Save home"
+            text = "${ChatColor.GOLD}${R.getString(player, S.SAVE_HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.SAVE_HOME.resource())}"
         )
 
         errorMessage = addTextView(
@@ -116,7 +117,7 @@ class AddHomeViewController(
             size = 4,
             alignment = Alignment.LEFT,
             visible = false,
-            text = "${ChatColor.RED}Error: The dev was too lazy to figure out what went wrong...",
+            text = "${ChatColor.RED}${R.getString(player, S.UNKNOWN_ERROR_MESSAGE.resource())}",
         )
     }
 
