@@ -2,6 +2,7 @@ package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -30,7 +31,7 @@ class FavoritesBlock @Inject constructor(
 }
 
 class FavoritesViewController(
-    player: Player,
+    private val player: Player,
     origin: Location,
 ): ViewController(player, origin), FavoritesPresenter {
 
@@ -77,7 +78,7 @@ class FavoritesViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(this)
                 .alignTopToTopOf(this),
-            text = "${ChatColor.BOLD}Favorite Apps"
+            text = R.getString(player, S.FAVORITE_APPS_TITLE.resource()),
         )
 
         val favoriteAppsSubtitle = addTextView(
@@ -87,7 +88,7 @@ class FavoritesViewController(
                 .alignStartToStartOf(favoriteAppsTitle)
                 .margins(top = 40),
             alignment = Alignment.LEFT,
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}Select up to 5 Apps to be your favorites." //TODO: Fix text line measurements
+            text = R.getString(player, S.FAVORITE_APPS_SUBTITLE.resource()) //TODO: Fix text line measurements
         )
 
         val slotSize = 150

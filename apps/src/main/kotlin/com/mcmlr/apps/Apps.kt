@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.AppInjector
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
@@ -92,6 +93,10 @@ class Apps : JavaPlugin() {
                 systemEnvironment.register(environment)
             }
         })
+
+        systemConfigRepository.model.defaultLanguage.toLocale()?.let {
+            R.defaultLocale = it
+        }
 
         AppInjector.register(AdminEnvironment())
         AppInjector.register(AnnouncementsEnvironment())

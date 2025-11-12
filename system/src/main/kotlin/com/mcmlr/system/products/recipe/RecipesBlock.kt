@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.recipe
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.EmptyContextListener
@@ -13,6 +14,7 @@ import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -128,7 +130,7 @@ class RecipesViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Recipes",
+            text = R.getString(player, S.RECIPES_TITLE.resource()),
             size = 16,
         )
 
@@ -228,8 +230,8 @@ class RecipesViewController(
                 .centerHorizontally()
                 .margins(top = 30),
             size = 8,
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}\uD83D\uDD0D Search for items or blocks...",
-            highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}\uD83D\uDD0D Search for items or blocks...",
+            text = R.getString(player, S.SEARCH_PLACEHOLDER.resource()),
+            highlightedText = R.getString(player, S.SEARCH_PLACEHOLDER.resource()).bolden(),
         )
 
         feedView = addListFeedView(

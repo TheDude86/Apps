@@ -19,9 +19,10 @@ class AdminBlock @Inject constructor(
     enabledAppsBlock: EnabledAppsBlock,
     configureAppsBlock: ConfigureAppsBlock,
     titleBlock: TitleBlock,
+    defaultLanguageBlock: DefaultLanguageBlock,
 ) : Block(player, origin) {
     private val view: AdminBlockViewController = AdminBlockViewController(player, origin)
-    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock, titleBlock)
+    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock, titleBlock, defaultLanguageBlock)
 
     override fun interactor(): Interactor = interactor
 
@@ -38,6 +39,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
 
     private lateinit var configureAppsButton: ButtonView
 
+    private lateinit var languageButton: ButtonView
+
     override fun setTitleListener(listener: Listener) = titleButton.addListener(listener)
 
     override fun setPermissionsListener(listener: Listener) = permissionsButton.addListener(listener)
@@ -45,6 +48,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
     override fun setEnabledAppsListener(listener: Listener) = enabledAppsButton.addListener(listener)
 
     override fun setConfigurableAppsListener(listener: Listener) = configureAppsButton.addListener(listener)
+
+    override fun setDefaultLanguageListener(listener: Listener) = languageButton.addListener(listener)
 
     override fun createView() {
         super.createView()
@@ -98,6 +103,16 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
             text = "${ChatColor.GOLD}Configure Apps",
             highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Configure Apps",
         )
+
+        languageButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToStartOf(enabledAppsButton)
+                .alignTopToBottomOf(configureAppsButton)
+                .margins(top = 50),
+            text = "${ChatColor.GOLD}Set Default Language",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Set Default Language",
+        )
     }
 }
 
@@ -109,6 +124,8 @@ interface AdminPresenter: Presenter {
     fun setEnabledAppsListener(listener: Listener)
 
     fun setConfigurableAppsListener(listener: Listener)
+
+    fun setDefaultLanguageListener(listener: Listener)
 }
 
 class AdminInteractor(
@@ -117,6 +134,7 @@ class AdminInteractor(
     private val enabledAppsBlock: EnabledAppsBlock,
     private val configureAppsBlock: ConfigureAppsBlock,
     private val titleBlock: TitleBlock,
+    private val defaultLanguageBlock: DefaultLanguageBlock,
 ): Interactor(presenter) {
     override fun onCreate() {
         super.onCreate()
@@ -142,6 +160,12 @@ class AdminInteractor(
         presenter.setConfigurableAppsListener(object : Listener {
             override fun invoke() {
                 routeTo(configureAppsBlock)
+            }
+        })
+
+        presenter.setDefaultLanguageListener(object : Listener {
+            override fun invoke() {
+                routeTo(defaultLanguageBlock)
             }
         })
     }

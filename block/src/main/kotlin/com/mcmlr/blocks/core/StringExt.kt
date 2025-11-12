@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.core
 
 import org.bukkit.ChatColor
+import java.util.Locale
 
 fun String.titlecase(): String {
     val chars = mapIndexed { i, c ->
@@ -98,4 +99,14 @@ fun String.priceFormat(): String {
     val dollars = components.first().ifEmpty { "0" }.toInt()
 
     return "$dollars.$cents"
+}
+
+fun String.toLocale(): Locale? {
+    var locale = split("_")
+    if (locale.size != 2) return null
+
+    val language = locale[0]
+    val country = locale[1]
+
+    return Locale(language, country)
 }

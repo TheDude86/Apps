@@ -1,29 +1,21 @@
 package com.mcmlr.blocks.api.app
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.blocks.api.data.InputRepository
-import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.FlowDisposer
 import kotlinx.coroutines.flow.flow
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.profile.PlayerProfile
 import java.io.File
-import java.io.FileWriter
-import java.io.InputStream
 import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 
 abstract class BaseEnvironment<out T: BaseApp>: FlowDisposer() {
@@ -66,7 +58,20 @@ abstract class BaseEnvironment<out T: BaseApp>: FlowDisposer() {
 
 object R {
 
+    var defaultLocale: Locale = Locale.US
     val appsStringMaps = mutableMapOf<String, MutableMap<String, JsonObject>>()
+
+    private val localeMap = mapOf(
+        "en_us" to "en_us",
+        "en_pt" to "en_us",
+        "en_au" to "en_us",
+        "en_ca" to "en_us",
+        "en_gb" to "en_us",
+        "en_nz" to "en_us",
+        "en_ud" to "en_us",
+        "enp" to "en_us",
+        "enws" to "en_us",
+    )
 
     fun loadStringsAsync(app: String, locale: String) = flow {
         val appName = app.lowercase()
@@ -88,16 +93,21 @@ object R {
     }
 
     fun loadStrings(app: String, locale: String) {
+        val mappedLocale = getMappedLocale(locale)
+
         val appName = app.lowercase()
         val appStringsResource = appsStringMaps[appName]
-        if (appStringsResource == null || appStringsResource[locale] == null) {
-            val lines = this::class.java.classLoader.getResource("${appName}/$locale.json")?.readText() ?: return
+        if (appStringsResource == null || appStringsResource[mappedLocale] == null) {
+            val lines = this::class.java.classLoader.getResource("${appName}/$mappedLocale.json")?.readText()
+                ?: this::class.java.classLoader.getResource("${appName}/${defaultLocale.toString().lowercase()}.json")?.readText()
+                ?: return
+
             if (appStringsResource == null) {
                 val entry = mutableMapOf<String, JsonObject>()
-                entry[locale] = JsonParser.parseString(lines).asJsonObject
+                entry[mappedLocale] = JsonParser.parseString(lines).asJsonObject
                 appsStringMaps[appName] = entry
             } else {
-                appStringsResource[locale] = JsonParser.parseString(lines).asJsonObject
+                appStringsResource[mappedLocale] = JsonParser.parseString(lines).asJsonObject
             }
         }
     }
@@ -134,8 +144,9 @@ object R {
 //    }
 
     fun getString(player: Player, resource: StringResource): String {
+        val locale = getMappedLocale(player.locale)
         val appStringsResource = appsStringMaps[resource.app] ?: return "#ERROR"
-        val json = appStringsResource[player.locale] ?: return "#ERROR"
+        val json = appStringsResource[locale] ?: appStringsResource[defaultLocale.toString().lowercase()] ?: return "#ERROR"
         val string = json.get(resource.id.lowercase())?.asString ?: return "#ERROR"
 
         return string
@@ -152,6 +163,8 @@ object R {
 
         return string
     }
+
+    private fun getMappedLocale(locale: String): String = localeMap[locale] ?: locale
 }
 
 data class StringResource(val app: String, val id: String)

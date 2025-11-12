@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.preferences
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -27,7 +28,7 @@ class PreferencesBlock @Inject constructor(
 }
 
 class PreferencesViewController(
-    player: Player,
+    private val player: Player,
     origin: Location,
 ): NavigationViewController(player, origin), PreferencesPresenter {
 
@@ -44,7 +45,7 @@ class PreferencesViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Preferences",
+            text = R.getString(player, S.PREFERENCES_TITLE.resource()),
             size = 16,
         )
 

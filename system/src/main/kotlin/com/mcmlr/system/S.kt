@@ -32,6 +32,9 @@ enum class S {
     DISCORD,
     MODRINTH,
     SPIGOT,
+    SETTINGS_SET_LANGUAGE_TITLE,
+    CURRENT_LANGUAGE_TITLE,
+    CURRENT_LANGUAGE_MESSAGE,
     ;
 
     fun resource(): StringResource = StringResource("system", this.name)

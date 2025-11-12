@@ -27,5 +27,9 @@
   "get_support_links": "Get Support Links",
   "discord": "Discord",
   "modrinth": "Modrinth",
-  "spigot": "Spigot"
+  "spigot": "Spigot",
+
+  "settings_set_language_title": "§l§o§nSet Language",
+  "current_language_title": "Current Language",
+  "current_language_message": "§7When a player opens Apps, Apps will check the player's set language and attempt to load the plugin in their preferred language.  However we do not yet support all languages and not all 3rd party apps are guaranteed to support all languages either.  So, when a player is using an unsupported language, Apps will default to the language you set here."
 }

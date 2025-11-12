@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.pong
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -43,7 +44,7 @@ class PongBlock @Inject constructor(
 }
 
 class PongViewController(
-    player: Player,
+    private val player: Player,
     origin: Location
 ): NavigationViewController(player, origin), PongPresenter {
 
@@ -69,8 +70,7 @@ class PongViewController(
     }
 
     override fun playPoint(score: PongScore, callback: Listener) {
-        val title = if (score == PongScore.PLAYER) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL..."
-        point.update(text = title)
+        point.update(text = R.getString(player, (if (score == PongScore.PLAYER) S.WIN_GOAL else S.LOSE_GOAL).resource()))
 
         CoroutineScope(Dispatchers.IO).launch {
             delay(3.seconds)

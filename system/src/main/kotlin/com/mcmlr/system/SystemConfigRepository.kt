@@ -1,8 +1,10 @@
 package com.mcmlr.system
 
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.AppConfigModel
 import com.mcmlr.blocks.api.data.Repository
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,6 +12,13 @@ import javax.inject.Singleton
 class SystemConfigRepository @Inject constructor(
     resources: Resources,
 ): Repository<AppConfigModel>(resources.dataFolder()) {
+    companion object {
+        val supportedLocals = listOf(
+            Locale.US,
+            Locale.UK,
+            Locale.CANADA,
+        )
+    }
 
     init {
         loadModel("", "config", AppConfigModel())
@@ -30,5 +39,10 @@ class SystemConfigRepository @Inject constructor(
 
     fun toggleUsePermissions() = save {
         model.usePermissions = !model.usePermissions
+    }
+
+    fun updateDefaultLanguage(locale: Locale) = save {
+        model.defaultLanguage = locale.toString()
+        R.defaultLocale = locale
     }
 }
