@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.market
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -25,8 +26,8 @@ import javax.inject.Inject
 class OfferCreatorBlock @Inject constructor(
     player: Player,
     origin: Location,
-    private val iconSelectionBlock: IconSelectionBlock,
-    private val orderRepository: OrderRepository,
+    iconSelectionBlock: IconSelectionBlock,
+    orderRepository: OrderRepository,
 ): Block(player, origin) {
     private val view = OfferCreatorViewController(player, origin)
     private val interactor = OfferCreatorInteractor(player, view, iconSelectionBlock, orderRepository)
@@ -35,7 +36,10 @@ class OfferCreatorBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class OfferCreatorViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class OfferCreatorViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin),
     OfferCreatorPresenter {
 
     private lateinit var pageTitle: TextView
@@ -59,7 +63,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Create Offer",
+            text = R.getString(player, S.CREATE_OFFER_TITLE.resource()),
             size = 16,
         )
 
@@ -87,8 +91,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .centerHorizontally()
                             .alignTopToBottomOf(head)
                             .margins(top = 150),
-                        text = "Select Item",
-                        highlightedText = "${ChatColor.BOLD}Select item",
+                        text = R.getString(player, S.SELECT_ITEM_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.SELECT_ITEM_BUTTON.resource()).bolden(),
                     )
 
                     price = addTextInputView(
@@ -97,8 +101,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignTopToBottomOf(name)
                             .centerHorizontally()
                             .margins(top = 20),
-                        text = "${ChatColor.GRAY}Price",
-                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Price",
+                        text = R.getString(player, S.PRICE_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.PRICE_BUTTON.resource()).bolden(),
                     )
 
                     quantity = addTextInputView(
@@ -107,8 +111,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignTopToBottomOf(price)
                             .centerHorizontally()
                             .margins(top = 100),
-                        text = "${ChatColor.GRAY}Quantity",
-                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
+                        text = R.getString(player, S.QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     add = addButtonView(
@@ -118,8 +122,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignBottomToBottomOf(quantity)
                             .alignStartToEndOf(quantity)
                             .margins(start = 300),
-                        text = "${ChatColor.GOLD}+",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
+                        text = R.getString(player, S.ADD_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.ADD_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     max = addButtonView(
@@ -129,8 +133,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignBottomToBottomOf(add)
                             .alignStartToEndOf(add)
                             .margins(start = 40),
-                        text = "${ChatColor.GOLD}Max",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
+                        text = R.getString(player, S.MAX_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.MAX_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     subtract = addButtonView(
@@ -140,8 +144,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignBottomToBottomOf(quantity)
                             .alignEndToStartOf(quantity)
                             .margins(end = 300),
-                        text = "${ChatColor.GOLD}-",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
+                        text = R.getString(player, S.LOWER_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.LOWER_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     zero = addButtonView(
@@ -151,8 +155,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignBottomToBottomOf(subtract)
                             .alignEndToStartOf(subtract)
                             .margins(end = 40),
-                        text = "${ChatColor.GOLD}Zero",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
+                        text = R.getString(player, S.ZERO_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.ZERO_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     create = addButtonView(
@@ -161,8 +165,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                             .alignTopToBottomOf(quantity)
                             .centerHorizontally()
                             .margins(top = 50),
-                        text = "${ChatColor.GOLD}Create",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create",
+                        text = R.getString(player, S.CREATE_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.CREATE_BUTTON.resource()).bolden(),
                     )
 
                     message = addTextView(
@@ -247,7 +251,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .centerHorizontally()
                         .alignTopToBottomOf(pageTitle),
-                    text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Order Created!",
+                    text = R.getString(player, S.ORDER_CREATED_MESSAGE.resource()),
                     size = 24,
                 )
 
@@ -275,7 +279,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                         .alignStartToEndOf(materialView)
                         .alignTopToBottomOf(materialNameView)
                         .margins(start = 150),
-                    text = "${ChatColor.GRAY}Amount: ${order.quantity}",
+                    text = R.getString(player, S.CREATED_ORDER_AMOUNT.resource(), order.quantity),
                     size = 8,
                 )
 
@@ -286,7 +290,7 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                         .alignTopToBottomOf(materialNameView)
                         .alignBottomToTopOf(quantityView)
                         .margins(start = 150),
-                    text = "$${"%.2f".format(order.price / 100f)}\nper Item",
+                    text = R.getString(player, S.CREATED_ORDER_PRICE.resource(), "%.2f".format(order.price / 100f)),
                     size = 14,
                 )
 
@@ -296,8 +300,8 @@ class OfferCreatorViewController(player: Player, origin: Location): NavigationVi
                         .alignTopToBottomOf(priceView)
                         .centerHorizontally()
                         .margins(top = 150),
-                    text = "${ChatColor.GOLD}Continue",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    text = R.getString(player, S.CONTINUE_BUTTON.resource()),
+                    highlightedText = R.getString(player, S.CONTINUE_BUTTON.resource()).bolden(),
                     callback = onFinish,
                 )
             }
@@ -393,8 +397,8 @@ class OfferCreatorInteractor(
         presenter.setPriceListener(object : TextListener {
             override fun invoke(text: String) {
                 if (text.toDoubleOrNull() == null) {
-                    presenter.updatePriceText("$0")
-                    presenter.setMessage("${ChatColor.RED}Prices must be a valid number!")
+                    presenter.updatePriceText(R.getString(player, S.DEFAULT_PRICE.resource()))
+                    presenter.setMessage(R.getString(player, S.INVALID_PRICE_ERROR_MESSAGE.resource()))
                     builder.price(0)
                 } else {
                     presenter.updatePriceText("$${text.priceFormat()}")
@@ -407,8 +411,8 @@ class OfferCreatorInteractor(
         presenter.setQuantityListener(object : TextListener {
             override fun invoke(text: String) {
                 if (text.toIntOrNull() == null) {
-                    presenter.updateQuantityText("0")
-                    presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
+                    presenter.updateQuantityText(R.getString(player, S.DEFAULT_QUANTITY.resource()))
+                    presenter.setMessage(R.getString(player, S.INVALID_QUANTITY_ERROR_MESSAGE.resource()))
                     builder.quantity(0)
                 } else {
                     builder.quantity(text.toInt())
@@ -419,7 +423,7 @@ class OfferCreatorInteractor(
 
         presenter.setZeroListener(object : Listener {
             override fun invoke() {
-                presenter.updateQuantityText("0")
+                presenter.updateQuantityText(R.getString(player, S.DEFAULT_QUANTITY.resource()))
                 builder.quantity(0)
                 checkValidQuantity()
             }
@@ -463,17 +467,17 @@ class OfferCreatorInteractor(
         presenter.setCreateListener(object : Listener {
             override fun invoke() {
                 if (selectedMaterial == null) {
-                    presenter.setMessage("${ChatColor.RED}You need to select an item to sell first!")
+                    presenter.setMessage(R.getString(player, S.MISSING_MATERIAL_ERROR_MESSAGE.resource()))
                     return
                 }
 
                 if (builder.price == null) {
-                    presenter.setMessage("${ChatColor.RED}You need to specify the price of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
+                    presenter.setMessage(R.getString(player, S.MISSING_PRICE_ERROR_MESSAGE.resource(), selectedMaterial?.type?.name?.fromMCItem() ?: ""))
                     return
                 }
 
                 if (builder.quantity == null) {
-                    presenter.setMessage("${ChatColor.RED}You need to specify the amount of the ${selectedMaterial?.type?.name?.fromMCItem()} you want to sell!")
+                    presenter.setMessage(R.getString(player, S.MISSING_QUANTITY_ERROR_MESSAGE.resource(), selectedMaterial?.type?.name?.fromMCItem() ?: ""))
                     return
                 }
 
@@ -490,7 +494,7 @@ class OfferCreatorInteractor(
                             })
                         }
                     } else {
-                        presenter.setMessage("${ChatColor.RED}You don't have enough ${selectedMaterial?.type?.name?.fromMCItem()} in your inventory!")
+                        presenter.setMessage(R.getString(player, S.INSUFFICIENT_QUANTITY_ERROR_MESSAGE.resource(), selectedMaterial?.type?.name?.fromMCItem() ?: ""))
                     }
                 }
             }
@@ -507,7 +511,7 @@ class OfferCreatorInteractor(
             }
 
             if ((builder.quantity ?: 0) > count) {
-                presenter.setMessage("${ChatColor.YELLOW}You don't have enough ${selectedMaterial?.type?.name?.fromMCItem()} in your inventory!")
+                presenter.setMessage(R.getString(player, S.INSUFFICIENT_QUANTITY_WARNING_MESSAGE.resource(), selectedMaterial?.type?.name?.fromMCItem() ?: ""))
                 return false
             } else {
                 presenter.hideMessage()

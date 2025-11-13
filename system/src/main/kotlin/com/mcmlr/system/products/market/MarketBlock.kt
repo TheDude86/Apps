@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -35,7 +37,10 @@ class MarketBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class MarketViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class MarketViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin),
     MarketPresenter {
     private lateinit var searchButton: TextInputView
     private lateinit var myOffersButton: ButtonView
@@ -50,7 +55,7 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Market",
+            text = R.getString(player, S.MARKET_TITLE.resource()),
             size = 16,
         )
 
@@ -61,8 +66,8 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                 .centerHorizontally()
                 .margins(top = 100),
             size = 8,
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}\uD83D\uDD0D Search for items or blocks...",
-            highlightedText = "${ChatColor.GRAY}${ChatColor.ITALIC}${ChatColor.BOLD}\uD83D\uDD0D Search for items or blocks...",
+            text = R.getString(player, S.SEARCH_INPUT_PLACEHOLDER.resource()),
+            highlightedText = R.getString(player, S.SEARCH_INPUT_PLACEHOLDER.resource()).bolden(),
         )
 
         feedView = addFeedView(
@@ -80,8 +85,8 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                 .alignTopToBottomOf(feedView)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}My Offers",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}My Offers",
+            text = R.getString(player, S.MY_OFFERS_BUTTON.resource()),
+            highlightedText = R.getString(player, S.MY_OFFERS_BUTTON.resource()),
         )
     }
 
@@ -114,13 +119,14 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                             }
                         },
                         content = object : ContextListener<ViewContainer>() {
-                            override fun ViewContainer.invoke() {                    val icon = addItemView(
-                                modifier = Modifier()
-                                    .size(40, 40)
-                                    .alignStartToStartOf(this)
-                                    .centerVertically()
-                                    .margins(start = 100),
-                                item = model.first,
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(40, 40)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 100),
+                                    item = model.first,
                             )
 
                                 val itemName = addTextView(
@@ -129,7 +135,7 @@ class MarketViewController(player: Player, origin: Location): NavigationViewCont
                                         .alignStartToEndOf(icon)
                                         .alignTopToTopOf(icon)
                                         .margins(start = 150, top = -20),
-                                    text = "${model.second.quantity} of ${model.first.name.fromMCItem()}",
+                                    text = R.getString(player, S.OFFER_ROW.resource(), model.second.quantity, model.first.name.fromMCItem()),
                                     size = 6,
                                     alignment = Alignment.LEFT,
                                 )

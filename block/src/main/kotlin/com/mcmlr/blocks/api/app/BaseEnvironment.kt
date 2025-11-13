@@ -152,12 +152,12 @@ object R {
         return string
     }
 
-    fun getString(player: Player, resource: StringResource, vararg args: Any): String {
+    fun getString(player: Player, resource: StringResource, vararg args: Any?): String {
         val appStringsResource = appsStringMaps[resource.app] ?: return "#ERROR"
         val json = appStringsResource[player.locale] ?: return "#ERROR"
         var string = json.get(resource.id.lowercase())?.asString ?: return "#ERROR"
 
-        args.forEach {
+        args?.forEach {
             string = string.replaceFirst("%s", it.toString())
         }
 
