@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
@@ -80,7 +81,7 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
         o.pitch = 0f //TODO: Fix pitch translation issue & remove
 
         val direction = o.direction.normalize()
-        return o.add(direction.multiply(0.15))
+        return o.add(direction.multiply(BaseApp.SCREEN_DISTANCE))
     }
 
     fun register(app: Environment<App>) {

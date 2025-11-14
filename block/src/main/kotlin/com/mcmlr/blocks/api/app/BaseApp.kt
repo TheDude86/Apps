@@ -15,6 +15,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 
 abstract class BaseApp(val player: Player): FlowDisposer(), Context {
+    companion object {
+        var SCREEN_DISTANCE = 0.25
+    }
 
     private val cursorStream: MutableSharedFlow<CursorModel> = MutableSharedFlow()
 
@@ -26,6 +29,7 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     protected var deeplink: String? = null
 
     lateinit var resources: Resources
+    var calibrating = false
 
     abstract fun root(): Block
 

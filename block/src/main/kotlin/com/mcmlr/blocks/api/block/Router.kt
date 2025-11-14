@@ -86,6 +86,10 @@ open class Router {
         childNodes.forEach { it.scrollEvent(event, true) }
     }
 
+    fun calibrateEvent(event: ScrollModel) {
+        childNodes.forEach { it.calibrateEvent(event, true) }
+    }
+
     fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
         childNodes.forEach { it.cursorEvent(displays, cursor, event) }
     }

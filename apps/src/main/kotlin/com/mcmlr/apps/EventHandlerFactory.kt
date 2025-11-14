@@ -17,6 +17,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -43,6 +44,13 @@ class EventHandlerFactory @Inject constructor(
     fun playerClickEvent(e: PlayerInteractEvent) {
         if (inputRepository.updateStream(CursorModel(e.player.uniqueId, e.player.location, CursorEvent.CLICK)) &&
             (e.action == Action.LEFT_CLICK_BLOCK || e.action == Action.LEFT_CLICK_AIR || e.action == Action.RIGHT_CLICK_AIR || e.action == Action.RIGHT_CLICK_BLOCK)) {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler
+    fun playerDropItemEvent(e: PlayerDropItemEvent) {
+        if (inputRepository.updateStream(CursorModel(e.player.uniqueId, e.player.location, CursorEvent.CALIBRATE))) {
             e.isCancelled = true
         }
     }

@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
+import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
@@ -32,7 +33,7 @@ open class ViewController(
 
     fun updateOrigin(origin: Location) {
         val direction = origin.direction.normalize()
-        val o = origin.clone().add(direction.multiply(0.15))
+        val o = origin.clone().add(direction.multiply(BaseApp.SCREEN_DISTANCE))
 
         this.origin.x = o.x
         this.origin.y = o.y

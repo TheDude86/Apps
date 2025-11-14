@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.views
 
 import com.mcmlr.blocks.api.ScrollEvent
+import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.views.Area.*
 import com.mcmlr.blocks.api.views.Axis.X
@@ -55,6 +56,11 @@ abstract class View(
                 clear()
             }
         })
+    }
+
+    open fun calibrateEvent(event: ScrollModel, isChild: Boolean) {
+        //TODO: Update pos
+        updatePosition()
     }
 
     override fun addDestroyListener(listener: Listener) {

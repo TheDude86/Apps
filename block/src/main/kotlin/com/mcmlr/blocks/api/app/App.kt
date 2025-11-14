@@ -39,6 +39,10 @@ abstract class App(player: Player): BaseApp(player) {
         head.scrollEvent(event, isChild)
     }
 
+    fun calibrateEvent(event: ScrollModel, isChild: Boolean = false) {
+        head.calibrateEvent(event, isChild)
+    }
+
     fun textInputEvent(event: AsyncPlayerChatEvent) {
         head.textInputEvent(event)
     }

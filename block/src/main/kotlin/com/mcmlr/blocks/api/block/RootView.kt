@@ -93,7 +93,7 @@ class RootView(
         when(event) {
             CursorEvent.MOVE -> updateV2(position)
             CursorEvent.CLICK -> click()
-            CursorEvent.CLEAR -> { } //Do nothing
+            CursorEvent.CLEAR, CursorEvent.CALIBRATE -> { } //Do nothing
         }
     }
 
@@ -101,7 +101,7 @@ class RootView(
         when(event) {
             CursorEvent.MOVE -> update(displays, cursor)
             CursorEvent.CLICK -> click()
-            CursorEvent.CLEAR -> { } //Do nothing
+            CursorEvent.CLEAR, CursorEvent.CALIBRATE -> { } //Do nothing
         }
     }
 

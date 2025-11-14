@@ -76,7 +76,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 val modifier = min(60f, abs(yawDelta))
 
                 val direction = it.data.direction.normalize()
-                val cursor = it.data.add(direction.clone().multiply(0.15 + ((modifier / 60f) * 0.1)))
+                val cursor = it.data.add(direction.clone().multiply(SCREEN_DISTANCE + ((modifier / 60f) * 0.1)))
                 val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
                     entity is TextDisplay ||
                             entity is ItemDisplay ||
@@ -92,6 +92,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 }
 
                 if (it.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, it.data, CursorEvent.CLEAR))
+                if (it.event == CursorEvent.CALIBRATE) calibrating = !calibrating
             }
             .disposeOn(disposer = this)
 
@@ -129,11 +130,12 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.scrollStream(player.uniqueId)
             .collectOn(DudeDispatcher())
             .collectLatest {
+
                 val app = foregroundApp
                 if (app != null) {
-                    app.scrollEvent(it)
+                    if (calibrating) app.scrollEvent(it) else app.calibrateEvent(it)
                 } else {
-                    head.scrollEvent(it)
+                    if (calibrating) head.scrollEvent(it) else head.calibrateEvent(it)
                 }
             }
             .disposeOn(disposer = this)

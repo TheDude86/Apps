@@ -3,8 +3,10 @@ package com.mcmlr.blocks.api.block
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
@@ -16,6 +18,8 @@ import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import kotlin.math.max
+import kotlin.math.min
 
 abstract class Block(protected val player: Player, origin: Location): Context {
 
@@ -46,7 +50,7 @@ abstract class Block(protected val player: Player, origin: Location): Context {
             newOrigin.pitch = 0f
 
             val direction = newOrigin.direction.normalize()
-            val o = newOrigin.clone().add(direction.multiply(0.15))
+            val o = newOrigin.clone().add(direction.multiply(BaseApp.SCREEN_DISTANCE))
 
             this.origin.x = o.x
             this.origin.y = o.y
@@ -120,6 +124,18 @@ abstract class Block(protected val player: Player, origin: Location): Context {
     open fun scrollEvent(event: ScrollModel, isChild: Boolean = false) {
         view().scrollEvent(event, isChild)
         router().scrollEvent(event)
+    }
+
+    open fun calibrateEvent(event: ScrollModel, isChild: Boolean = false) {
+
+        if (event.event == ScrollEvent.UP) {
+            BaseApp.SCREEN_DISTANCE = min(0.3, BaseApp.SCREEN_DISTANCE + 0.01)
+        } else {
+            BaseApp.SCREEN_DISTANCE = max(0.1, BaseApp.SCREEN_DISTANCE - 0.01)
+        }
+
+        view().calibrateEvent(event, isChild)
+        router().calibrateEvent(event)
     }
 
     fun cursorEventV2(position: Coordinates, event: CursorEvent) {

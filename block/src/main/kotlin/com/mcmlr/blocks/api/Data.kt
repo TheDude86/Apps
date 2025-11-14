@@ -16,5 +16,6 @@ enum class ScrollEvent {
 enum class CursorEvent {
     MOVE,
     CLICK,
+    CALIBRATE,
     CLEAR,
 }

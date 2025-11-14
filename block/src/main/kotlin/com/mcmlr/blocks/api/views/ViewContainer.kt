@@ -114,6 +114,15 @@ open class ViewContainer(
         }
     }
 
+    override fun calibrateEvent(event: ScrollModel, isChild: Boolean) {
+        super.calibrateEvent(event, isChild)
+        children.forEach {
+            if (it is View) {
+                it.calibrateEvent(event, isChild)
+            }
+        }
+    }
+
     open fun updateView(
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ) {
