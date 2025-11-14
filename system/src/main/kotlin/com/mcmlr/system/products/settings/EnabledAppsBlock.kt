@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -11,6 +12,7 @@ import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.S
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -38,7 +40,10 @@ class EnabledAppsBlock @Inject constructor(
 
 }
 
-class EnabledAppsViewController(player: Player, origin: Location): NavigationViewController(player, origin), EnabledAppsPresenter {
+class EnabledAppsViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin), EnabledAppsPresenter {
 
     private lateinit var appsFeed: ListFeedView
     private lateinit var enabledAppCallback: EnabledAppsListener
@@ -53,7 +58,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
     }
 
     override fun setAppEnabled(app: EnabledApplicationModel) {
-        appFeedContainers[app.app.name()]?.update(text = if (app.enabled) "\uD83D\uDD32" else "\uD83D\uDD33")
+        appFeedContainers[app.app.name()]?.update(text = if (app.enabled) R.getString(player, S.CHECKBOX_ENABLED.resource()) else R.getString(player, S.CHECKBOX_DISABLED.resource()))
     }
 
     override fun setEnabledAppsListener(listener: EnabledAppsListener) {
@@ -81,7 +86,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
                                         .alignStartToStartOf(this)
                                         .centerVertically()
                                         .margins(start = 50),
-                                    text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
+                                    text = if (it.enabled) R.getString(player, S.CHECKBOX_ENABLED.resource()) else R.getString(player, S.CHECKBOX_DISABLED.resource())
                                 )
 
                                 appFeedContainers[it.app.name()] = selected
@@ -133,7 +138,7 @@ class EnabledAppsViewController(player: Player, origin: Location): NavigationVie
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Enabled Apps",
+            text = R.getString(player, S.ENABLED_APPS_TITLE.resource()),
             size = 16,
         )
 

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
@@ -7,6 +8,8 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.core.bolden
+import com.mcmlr.system.S
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -29,7 +32,10 @@ class AdminBlock @Inject constructor(
     override fun view() = view
 }
 
-class AdminBlockViewController(player: Player, origin: Location): NavigationViewController(player, origin), AdminPresenter {
+class AdminBlockViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin), AdminPresenter {
 
     private lateinit var titleButton: ButtonView
 
@@ -60,7 +66,7 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Settings",
+            text = R.getString(player, S.SETTINGS_TITLE.resource()),
             size = 16,
         )
 
@@ -70,8 +76,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignStartToStartOf(title)
                 .alignTopToBottomOf(title)
                 .margins(top = 500),
-            text = "${ChatColor.GOLD}Set Title",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Set Title",
+            text = R.getString(player, S.SET_TITLE_BUTTON.resource()),
+            highlightedText = R.getString(player, S.SET_TITLE_BUTTON.resource()).bolden(),
         )
 
         permissionsButton = addButtonView(
@@ -80,8 +86,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignStartToStartOf(titleButton)
                 .alignTopToBottomOf(titleButton)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Permissions",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Permissions",
+            text = R.getString(player, S.PERMISSIONS_BUTTON.resource()),
+            highlightedText = R.getString(player, S.SET_TITLE_BUTTON.resource()).bolden(),
         )
 
         enabledAppsButton = addButtonView(
@@ -90,8 +96,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignStartToStartOf(permissionsButton)
                 .alignTopToBottomOf(permissionsButton)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Enabled Apps",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Enabled Apps",
+            text = R.getString(player, S.ENABLED_APPS_BUTTON.resource()),
+            highlightedText = R.getString(player, S.ENABLED_APPS_BUTTON.resource()).bolden(),
         )
 
         configureAppsButton = addButtonView(
@@ -100,8 +106,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignStartToStartOf(enabledAppsButton)
                 .alignTopToBottomOf(enabledAppsButton)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Configure Apps",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Configure Apps",
+            text = R.getString(player, S.CONFIGURE_APPS_BUTTON.resource()),
+            highlightedText = R.getString(player, S.CONFIGURE_APPS_BUTTON.resource()).bolden(),
         )
 
         languageButton = addButtonView(
@@ -110,8 +116,8 @@ class AdminBlockViewController(player: Player, origin: Location): NavigationView
                 .alignStartToStartOf(enabledAppsButton)
                 .alignTopToBottomOf(configureAppsButton)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Set Default Language",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Set Default Language",
+            text = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()),
+            highlightedText = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()).bolden(),
         )
     }
 }

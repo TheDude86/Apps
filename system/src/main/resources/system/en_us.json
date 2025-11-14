@@ -31,5 +31,21 @@
 
   "settings_set_language_title": "§l§o§nSet Language",
   "current_language_title": "Current Language",
-  "current_language_message": "§7When a player opens Apps, Apps will check the player's set language and attempt to load the plugin in their preferred language.  However we do not yet support all languages and not all 3rd party apps are guaranteed to support all languages either.  So, when a player is using an unsupported language, Apps will default to the language you set here."
+  "current_language_message": "§7When a player opens Apps, Apps will check the player's set language and attempt to load the plugin in their preferred language.  However we do not yet support all languages and not all 3rd party apps are guaranteed to support all languages either.  So, when a player is using an unsupported language, Apps will default to the language you set here.",
+
+  "settings_title": "§l§o§nSettings",
+  "set_title_button": "§6Set Title",
+  "permissions_button": "§6Permissions",
+  "enabled_apps_button": "§6Enabled Apps",
+  "configure_apps_button": "§6Configure Apps",
+  "default_language_button": "§6Set Default Language",
+
+  "configure_apps_title": "§l§o§nConfigure Apps",
+
+  "enabled_apps_title": "§l§o§nEnabled Apps",
+  "set_title_title": "§l§o§nSet Apps Title",
+  "set_title_message": "The top text on the home screen. We recommend keeping titles no longer than 25 characters to not overlap with other text. Titles support Placeholders for customized messages.",
+  "updated_title_message": "§aYour new title has been saved!",
+  "set_title_input_placeholder": "Set Server Title",
+  "save_button": "§6Save"
 }

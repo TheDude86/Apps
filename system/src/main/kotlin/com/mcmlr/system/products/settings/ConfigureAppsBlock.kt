@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.settings
 
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -11,6 +12,7 @@ import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.S
 import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -32,7 +34,10 @@ class ConfigureAppsBlock @Inject constructor(
 
 }
 
-class ConfigureAppsViewController(player: Player, origin: Location): NavigationViewController(player, origin), ConfigureAppsPresenter {
+class ConfigureAppsViewController(
+    private val player: Player,
+    origin: Location,
+): NavigationViewController(player, origin), ConfigureAppsPresenter {
 
     private lateinit var appsConfigFeed: ListFeedView
     private lateinit var configureAppCallback: (ConfigurableEnvironment<*>) -> Unit
@@ -104,7 +109,7 @@ class ConfigureAppsViewController(player: Player, origin: Location): NavigationV
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Configure Apps",
+            text = R.getString(player, S.CONFIGURE_APPS_TITLE.resource()),
             size = 16,
         )
 
