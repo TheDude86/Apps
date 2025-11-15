@@ -9,6 +9,7 @@ enum class S {
     WINNER,
     LOSER,
     DEFAULT_SCORE,
+    SCORE_TEMPLATE,
     PLAY,
     ;
 

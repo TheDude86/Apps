@@ -84,7 +84,7 @@ class PongViewController(
     }
 
     override fun playGameOver(winner: Boolean, callback: Listener) {
-        val title = if (winner) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}Winner!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}You Lost..."
+        val title = if (winner) R.getString(player, S.WINNER.resource()) else R.getString(player, S.LOSER.resource())
         point.update(text = title)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -98,7 +98,7 @@ class PongViewController(
     }
 
     override fun setScore(score: Pair<Int, Int>) {
-        this.score.update(text = "${ChatColor.BOLD}${score.first} - ${score.second}")
+        this.score.update(text = R.getString(player, S.SCORE_TEMPLATE.resource(), score.first, score.second))
     }
 
     override fun restart() {
@@ -118,7 +118,7 @@ class PongViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Pong!",
+            text = R.getString(player, S.PONG_TITLE.resource()),
             size = 16,
         )
 
@@ -134,14 +134,14 @@ class PongViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.BOLD}0 - 0",
+                        text = R.getString(player, S.DEFAULT_SCORE.resource()),
                     )
 
                     play = addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
-                        text = "Play",
+                        text = R.getString(player, S.PLAY.resource()),
                         size = 24,
                         callback = object : Listener {
                             override fun invoke() {

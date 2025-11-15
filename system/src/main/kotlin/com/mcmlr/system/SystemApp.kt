@@ -248,6 +248,8 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 delay(2.seconds)
             }
         }
+
+        calibrationJob?.disposeOn(disposer = this)
     }
 
     @OptIn(FlowPreview::class)

@@ -59,7 +59,6 @@ class EventHandlerFactory @Inject constructor(
         if (inputRepository.isActiveUser(e.player)) {
             val lastSneak = sneakMap[e.player.uniqueId]
 
-
             if (e.isSneaking) {
                 if (lastSneak != null) {
                     val diff = Date().time - lastSneak

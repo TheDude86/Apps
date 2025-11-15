@@ -4,6 +4,7 @@
   "lose_goal": "§c§l§oGOAL...",
   "winner": "§a§l§oWinner!!!",
   "loser": "§c§l§oYou Lost...",
-  "default_score": "0 - 0",
+  "default_score": "§l0 - 0",
+  "score_template": "§l%s - %s",
   "play": "Play"
 }
