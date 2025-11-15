@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -21,7 +22,7 @@ import kotlin.math.max
 
 class HomeConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     homesConfigRepository: HomesConfigRepository,
 ) : Block(player, origin) {
     private val view: HomeConfigViewController = HomeConfigViewController(player, origin)
@@ -34,7 +35,7 @@ class HomeConfigBlock @Inject constructor(
 
 class HomeConfigViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin),
     HomeConfigPresenter {
 

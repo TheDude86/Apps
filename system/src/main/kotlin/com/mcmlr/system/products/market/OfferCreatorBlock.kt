@@ -11,6 +11,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.IconSelectionBlock
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 class OfferCreatorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     iconSelectionBlock: IconSelectionBlock,
     orderRepository: OrderRepository,
 ): Block(player, origin) {
@@ -38,7 +39,7 @@ class OfferCreatorBlock @Inject constructor(
 
 class OfferCreatorViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin),
     OfferCreatorPresenter {
 

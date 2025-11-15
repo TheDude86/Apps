@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -20,7 +21,7 @@ import javax.inject.Inject
 
 class SpawnerBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     activeCheatsRepository: ActiveCheatsRepository,
 ): Block(player, origin) {
     private val view = SpawnerViewController(player, origin)
@@ -32,7 +33,7 @@ class SpawnerBlock @Inject constructor(
 
 class SpawnerViewController(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), SpawnerPresenter {
 
     private lateinit var mobsFeed: ListFeedView

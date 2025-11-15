@@ -13,6 +13,7 @@ import com.mcmlr.blocks.api.block.NavigationPresenter
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
 import com.mcmlr.system.IconSelectionBlock
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class CreateKitBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     iconSelectionBlock: IconSelectionBlock,
     addKitContentBlock: AddKitContentBlock,
     private val kitRepository: KitRepository,
@@ -53,7 +54,7 @@ class CreateKitBlock @Inject constructor(
 
 class CreateKitViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), CreateKitPresenter {
 
     private lateinit var iconContainer: ViewContainer

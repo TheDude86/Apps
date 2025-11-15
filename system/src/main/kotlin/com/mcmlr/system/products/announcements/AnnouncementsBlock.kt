@@ -11,6 +11,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 class AnnouncementsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     announcementEditorBlock: AnnouncementEditorBlock,
     announcementSelectorBlock: AnnouncementSelectorBlock,
 ): Block(player, origin) {
@@ -34,7 +35,7 @@ class AnnouncementsBlock @Inject constructor(
 
 class AnnouncementsViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), AnnouncementsPresenter {
 
     private lateinit var createButton: ButtonView

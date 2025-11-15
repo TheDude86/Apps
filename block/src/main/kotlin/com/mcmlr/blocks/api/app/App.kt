@@ -3,12 +3,18 @@ package com.mcmlr.blocks.api.app
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import kotlin.math.max
+import kotlin.math.min
 
 abstract class App(player: Player): BaseApp(player) {
     lateinit var inputRepository: InputRepository
@@ -21,7 +27,7 @@ abstract class App(player: Player): BaseApp(player) {
         parentApp: BaseApp,
         inputRepository: InputRepository,
         deeplink: String?,
-        origin: Location,
+        origin: Origin,
     ) {
         this.appManager = appManager
         this.parentEnvironment = environment
@@ -29,6 +35,10 @@ abstract class App(player: Player): BaseApp(player) {
         this.inputRepository = inputRepository
         this.deeplink = deeplink
         this.origin = origin
+    }
+
+    fun updateCalibrating(calibrating: Boolean) {
+        head.setCalibrating(calibrating)
     }
 
     fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
@@ -40,6 +50,12 @@ abstract class App(player: Player): BaseApp(player) {
     }
 
     fun calibrateEvent(event: ScrollModel, isChild: Boolean = false) {
+        if (event.event == ScrollEvent.UP) {
+            origin.scrollOut()
+        } else {
+            origin.scrollIn()
+        }
+
         head.calibrateEvent(event, isChild)
     }
 

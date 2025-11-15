@@ -42,6 +42,8 @@ interface InputRepository {
     fun onPlayerDeath(player: Player)
 
     fun onlinePlayerEventStream(): Flow<PlayerOnlineEvent>
+
+    fun isActiveUser(player: Player): Boolean
 }
 
 data class PlayerOnlineEvent(val player: Player, val eventType: PlayerOnlineEventType)

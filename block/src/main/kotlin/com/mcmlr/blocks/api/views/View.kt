@@ -59,8 +59,7 @@ abstract class View(
     }
 
     open fun calibrateEvent(event: ScrollModel, isChild: Boolean) {
-        //TODO: Update pos
-        updatePosition()
+        updateDisplay()
     }
 
     override fun addDestroyListener(listener: Listener) {

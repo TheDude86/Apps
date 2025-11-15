@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -29,7 +30,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class HomesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     addHomeBlock: AddHomeBlock,
     homesRepository: HomesRepository,
     homesConfigRepository: HomesConfigRepository,
@@ -43,7 +44,7 @@ class HomesBlock @Inject constructor(
 
 class HomesViewController(
     private val player: Player,
-    origin: Location
+    origin: Origin
 ): NavigationViewController(player, origin), HomesPresenter {
 
     private lateinit var container: FeedView

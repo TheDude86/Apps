@@ -2,6 +2,7 @@ package com.mcmlr.system
 
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
@@ -30,7 +31,7 @@ import javax.inject.Inject
 
 class LandingBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     homesBlock: HomesBlock,
     warpsBlock: WarpsBlock,
     teleportBlock: TeleportBlock,
@@ -72,7 +73,7 @@ class LandingBlock @Inject constructor(
     override fun view() = view
 }
 
-class LandingViewController(private val player: Player, origin: Location, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
+class LandingViewController(private val player: Player, origin: Origin, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
 
     private lateinit var title: TextView
     private lateinit var appsContainer: ViewContainer

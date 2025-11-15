@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 class PermissionsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     systemConfigRepository: SystemConfigRepository,
 ): Block(player, origin) {
 
@@ -29,7 +30,7 @@ class PermissionsBlock @Inject constructor(
 
 }
 
-class PermissionsViewController(player: Player, origin: Location): NavigationViewController(player, origin), PermissionsPresenter {
+class PermissionsViewController(player: Player, origin: Origin): NavigationViewController(player, origin), PermissionsPresenter {
 
     private lateinit var permissionsButton: ButtonView
 

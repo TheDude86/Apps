@@ -12,6 +12,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class AppsListBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
     private val view = AppsListViewController(player, origin)
@@ -36,7 +37,7 @@ class AppsListBlock @Inject constructor(
 
 class AppsListViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), AppsListPresenter {
 
     private lateinit var listView: ListView

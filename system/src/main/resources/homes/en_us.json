@@ -3,7 +3,7 @@
   "add_new_home": "Add new home",
   "remove_home": "Remove home",
   "cancel": "Cancel",
-  "empty_home_message": "You don't have any\nhomes yet...",
+  "empty_homes_message": "You don't have any\nhomes yet...",
   "delete_icon": "\uD83D\uDDD1",
   "pencil_icon": "✎",
   "max_homes_error": "You already have the maximum number of homes set, please delete a home before adding a new one",

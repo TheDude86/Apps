@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -22,7 +23,7 @@ import kotlin.math.max
 
 class MarketConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     marketConfigRepository: MarketConfigRepository,
 ) : Block(player, origin) {
     private val view: MarketConfigViewController = MarketConfigViewController(player, origin)
@@ -33,7 +34,7 @@ class MarketConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class MarketConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class MarketConfigViewController(player: Player, origin: Origin): NavigationViewController(player, origin),
     MarketConfigPresenter {
 
     private lateinit var maxOrdersView: TextInputView

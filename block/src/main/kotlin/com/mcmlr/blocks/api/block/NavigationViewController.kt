@@ -1,12 +1,13 @@
 package com.mcmlr.blocks.api.block
 
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
-open class NavigationViewController(player: Player, origin: Location): ViewController(player, origin),
+open class NavigationViewController(player: Player, origin: Origin): ViewController(player, origin),
     NavigationPresenter {
 
     protected var backButton: ButtonView? = null

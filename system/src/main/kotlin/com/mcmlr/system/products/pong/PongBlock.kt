@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ItemView
 import com.mcmlr.blocks.api.views.Modifier
@@ -33,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class PongBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     pongRepository: PongRepository,
 ): Block(player, origin) {
     private val view = PongViewController(player, origin)
@@ -45,7 +46,7 @@ class PongBlock @Inject constructor(
 
 class PongViewController(
     private val player: Player,
-    origin: Location
+    origin: Origin,
 ): NavigationViewController(player, origin), PongPresenter {
 
     private lateinit var point: TextView

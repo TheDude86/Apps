@@ -10,6 +10,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 class RecipesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): Block(player, origin) {
     private val view = RecipesViewController(player, origin)
     private val interactor = RecipesInteractor(view)
@@ -38,7 +39,7 @@ class RecipesBlock @Inject constructor(
 
 class RecipesViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), RecipesPresenter {
     companion object {
         private const val RECIPE_ITEM_SIZE = 40

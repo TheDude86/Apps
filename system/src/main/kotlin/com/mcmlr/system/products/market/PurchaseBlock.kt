@@ -10,6 +10,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
@@ -22,7 +23,7 @@ import kotlin.math.max
 
 class PurchaseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     orderRepository: OrderRepository,
     marketRepository: MarketRepository,
     vaultRepository: VaultRepository,
@@ -37,7 +38,7 @@ class PurchaseBlock @Inject constructor(
 
 class PurchaseViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin),
     PurchasePresenter {
 

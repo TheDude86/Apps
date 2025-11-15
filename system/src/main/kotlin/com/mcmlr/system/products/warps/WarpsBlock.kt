@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -27,7 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class WarpsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val addWarpsBlock: AddWarpsBlock,
     private val warpsRepository: WarpsRepository,
     private val permissionsRepository: PermissionsRepository,
@@ -40,7 +41,7 @@ class WarpsBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class WarpsViewController(private val player: Player, origin: Location, private val permissionsRepository: PermissionsRepository,): NavigationViewController(player, origin),
+class WarpsViewController(private val player: Player, origin: Origin, private val permissionsRepository: PermissionsRepository,): NavigationViewController(player, origin),
     WarpsPresenter {
 
     private lateinit var container: FeedView

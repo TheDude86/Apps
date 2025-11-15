@@ -48,6 +48,9 @@ enum class S {
     UPDATED_TITLE_MESSAGE,
     SET_TITLE_INPUT_PLACEHOLDER,
     SAVE_BUTTON,
+    CALIBRATION_MESSAGE_ONE,
+    CALIBRATION_MESSAGE_TWO,
+    CALIBRATION_MESSAGE_SAVED,
     ;
 
     fun resource(): StringResource = StringResource("system", this.name)

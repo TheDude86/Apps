@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.DaggerSystemEnvironmentComponent
 import com.mcmlr.system.dagger.SystemEnvironmentComponent
@@ -66,7 +67,7 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
     fun launch(player: Player, deeplink: String?) {
         R.loadStrings(name(), player.locale)
         val app = getInstance(player)
-        app.configure(this, deeplink, origin(player), inputRepository)
+        app.configure(this, deeplink, Origin(player), inputRepository)
 
         if (appMap.containsKey(app.player.uniqueId)) {
             appMap[app.player.uniqueId]?.shutdown()
@@ -74,14 +75,6 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
 
         app.create(resources)
         appMap[app.player.uniqueId] = app
-    }
-
-    private fun origin(player: Player): Location {
-        val o = player.eyeLocation.clone()
-        o.pitch = 0f //TODO: Fix pitch translation issue & remove
-
-        val direction = o.direction.normalize()
-        return o.add(direction.multiply(BaseApp.SCREEN_DISTANCE))
     }
 
     fun register(app: Environment<App>) {

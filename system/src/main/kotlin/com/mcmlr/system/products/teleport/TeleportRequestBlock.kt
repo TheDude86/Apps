@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.data.*
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 class TeleportRequestBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     private val notificationManager: NotificationManager,
@@ -33,7 +34,7 @@ class TeleportRequestBlock @Inject constructor(
 
 class TeleportRequestViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin),
     TeleportRequestPresenter {
 

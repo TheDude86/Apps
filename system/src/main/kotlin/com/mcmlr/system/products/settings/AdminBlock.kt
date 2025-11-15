@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 class AdminBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     permissionsBlock: PermissionsBlock,
     enabledAppsBlock: EnabledAppsBlock,
     configureAppsBlock: ConfigureAppsBlock,
@@ -34,7 +35,7 @@ class AdminBlock @Inject constructor(
 
 class AdminBlockViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), AdminPresenter {
 
     private lateinit var titleButton: ButtonView

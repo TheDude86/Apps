@@ -11,6 +11,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.IconSelectionBlock
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 class AddWarpsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val iconSelectionBlock: IconSelectionBlock,
     private val warpsRepository: WarpsRepository,
 ): Block(player, origin) {
@@ -38,7 +39,7 @@ class AddWarpsBlock @Inject constructor(
 
 class AddWarpViewController(
     private val player: Player,
-    origin: Location
+    origin: Origin
 ): NavigationViewController(player, origin), AddWarpPresenter {
 
     private lateinit var warpNameButton: TextInputView

@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
@@ -18,7 +19,7 @@ import javax.inject.Inject
 
 class SpawnBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     spawnRepository: SpawnRepository,
     teleportRepository: PlayerTeleportRepository,
 ): Block(player, origin) {
@@ -31,7 +32,7 @@ class SpawnBlock @Inject constructor(
 
 class SpawnViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
     private val spawnRepository: SpawnRepository,
 ): NavigationViewController(player, origin), SpawnPresenter {
 

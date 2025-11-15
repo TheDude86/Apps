@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 class ItemsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     materialsRepository: MaterialsRepository,
 ): Block(player, origin) {
     private val view = ItemsViewController(player, origin)
@@ -37,7 +38,7 @@ class ItemsBlock @Inject constructor(
 
 class ItemsViewController(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), ItemsPresenter {
 
     private lateinit var contentView: ViewContainer

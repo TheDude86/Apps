@@ -19,6 +19,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.SystemConfigRepository
@@ -40,7 +41,7 @@ import javax.inject.Inject
 
 class SetupBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     tutorialBlock: TutorialBlock,
     feedBlock: FeedBlock,
     announcementEditorBlock: AnnouncementEditorBlock,
@@ -75,7 +76,7 @@ class SetupBlock @Inject constructor(
 
 class SetupViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), SetupPresenter {
 
     private lateinit var contentContainer: ViewContainer

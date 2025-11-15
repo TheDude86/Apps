@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -431,10 +432,10 @@ open class ViewContainer(
         return view
     }
 
-    fun moveEvent(oldOrigin: Location, newOrigin: Location) {
-        val x = newOrigin.x - oldOrigin.x
-        val y = newOrigin.y - oldOrigin.y
-        val z = newOrigin.z - oldOrigin.z
+    fun moveEvent(oldOrigin: Origin, newOrigin: Origin) {
+        val x = newOrigin.location().x - oldOrigin.location().x
+        val y = newOrigin.location().y - oldOrigin.location().y
+        val z = newOrigin.location().z - oldOrigin.location().z
 
         val location = dudeDisplay?.location?.add(x, y, z)
         if (location != null && this is ViewController) {

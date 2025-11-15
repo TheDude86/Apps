@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.products.kits.KitRepository
@@ -22,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class SpawnConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     spawnRepository: SpawnRepository,
     kitRepository: KitRepository,
 ) : Block(player, origin) {
@@ -34,7 +35,7 @@ class SpawnConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class SpawnConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewController(player, origin),
     SpawnConfigPresenter {
 
     private lateinit var contentView: ViewContainer

@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 class FileViewerBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     fileEditorBlock: FileEditorBlock,
 ): Block(player, origin) {
     private val view = FileViewerViewController(player, origin)
@@ -41,7 +42,7 @@ class FileViewerBlock @Inject constructor(
 
 class FileViewerViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), FileViewerPresenter {
     var title = R.getString(player, S.FILE.resource())
     var editable = true

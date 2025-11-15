@@ -7,6 +7,7 @@ import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.homes.HomesApp
 import com.mcmlr.system.products.pong.PongApp
+import com.mcmlr.system.products.preferences.PreferencesRepository
 import com.mcmlr.system.products.settings.AdminApp
 import dagger.BindsInstance
 import dagger.Component
@@ -144,8 +145,8 @@ class SystemAppModule {
 
     @AppScope
     @Provides
-    fun origin(player: Player): Origin {
-        return Origin(player)
+    fun origin(player: Player, preferencesRepository: PreferencesRepository): Origin {
+        return Origin(player, preferencesRepository.model.screenDistance)
     }
 }
 

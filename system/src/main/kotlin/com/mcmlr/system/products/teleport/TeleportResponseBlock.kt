@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
@@ -28,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class TeleportResponseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     teleportConfigRepository: TeleportConfigRepository
@@ -42,7 +43,7 @@ class TeleportResponseBlock @Inject constructor(
 
 class TeleportResponseViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin),
     TeleportResponsePresenter {
 

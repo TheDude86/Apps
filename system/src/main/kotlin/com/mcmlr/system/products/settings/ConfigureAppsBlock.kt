@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 class ConfigureAppsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     applicationsRepository: ApplicationsRepository,
 ): Block(player, origin) {
 
@@ -36,7 +37,7 @@ class ConfigureAppsBlock @Inject constructor(
 
 class ConfigureAppsViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), ConfigureAppsPresenter {
 
     private lateinit var appsConfigFeed: ListFeedView

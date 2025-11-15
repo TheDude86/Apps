@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.RouteToCallback
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.Location
@@ -78,8 +79,8 @@ open class Router {
         childNodes.forEach { it.onPause() }
     }
 
-    fun moveEvent(newOrigin: Location) {
-        childNodes.forEach { it.moveEventChild(newOrigin.clone()) }
+    fun moveEvent(newOrigin: Origin) {
+        childNodes.forEach { it.moveEventChild(newOrigin) }
     }
 
     fun scrollEvent(event: ScrollModel) {

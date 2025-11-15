@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class KitsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     createKitBlock: CreateKitBlock,
     kitRepository: KitRepository,
     vaultRepository: VaultRepository,
@@ -36,7 +37,7 @@ class KitsBlock @Inject constructor(
 
 class KitsViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
     private val permissionsRepository: PermissionsRepository,
 ): NavigationViewController(player, origin), KitsPresenter {
 

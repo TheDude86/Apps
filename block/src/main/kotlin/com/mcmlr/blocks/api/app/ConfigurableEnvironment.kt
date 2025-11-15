@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.app
 
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.Origin
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
@@ -13,7 +14,7 @@ abstract class ConfigurableEnvironment<out T:  ConfigurableApp>: Environment<T>(
         appManager: AppManager,
         player: Player,
         inputRepository: InputRepository,
-        origin: Location,
+        origin: Origin,
         deeplink: String?,
     ): ConfigurableApp {
         this.parentEnvironment = parentEnvironment

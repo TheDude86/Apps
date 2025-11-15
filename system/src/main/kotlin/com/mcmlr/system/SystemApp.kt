@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
 import com.mcmlr.blocks.api.app.BaseApp
@@ -10,21 +11,30 @@ import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.system.dagger.SystemAppComponent
+import com.mcmlr.system.products.preferences.PreferencesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
-import org.bukkit.Location
+import kotlinx.coroutines.launch
+import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
@@ -33,6 +43,7 @@ import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class SystemApp(player: Player): BaseApp(player), AppManager {
 
@@ -42,6 +53,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     private val backgroundApps = HashMap<String, App>()
     private var foregroundApp: App? = null
     private var moveJob: Job? = null
+    private var calibrationJob: Job? = null
 
     @Inject
     lateinit var rootBlock: LandingBlock
@@ -49,10 +61,16 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     @Inject
     lateinit var eventHandler: AppEventHandlerFactory
 
-    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Location, inputRepository: InputRepository) {
+    @Inject
+    lateinit var newOrigin: Origin
+
+    @Inject
+    lateinit var preferencesRepository: PreferencesRepository
+
+    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Origin, inputRepository: InputRepository) {
         this.parentEnvironment = environment
         this.deeplink = deeplink
-        this.origin = origin
+//        this.origin = origin
         this.inputRepository = inputRepository
     }
 
@@ -62,7 +80,8 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .filter { it.event != CursorEvent.CLEAR }
             .collectOn(DudeDispatcher())
             .collectLatest {
-                val originYaw = head.origin.yaw
+
+                val originYaw = head.origin.location().yaw
                 val currentYaw = it.data.yaw
 
                 val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
@@ -76,7 +95,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 val modifier = min(60f, abs(yawDelta))
 
                 val direction = it.data.direction.normalize()
-                val cursor = it.data.add(direction.clone().multiply(SCREEN_DISTANCE + ((modifier / 60f) * 0.1)))
+                val cursor = it.data.add(direction.clone().multiply(origin.distance + ((modifier / 60f) * 0.1)))
                 val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
                     entity is TextDisplay ||
                             entity is ItemDisplay ||
@@ -92,7 +111,19 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 }
 
                 if (it.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, it.data, CursorEvent.CLEAR))
-                if (it.event == CursorEvent.CALIBRATE) calibrating = !calibrating
+                if (it.event == CursorEvent.CALIBRATE) {
+                    calibrating = !calibrating
+                    player.inventory.heldItemSlot = 4
+
+                    if (app != null) {
+                        app.updateCalibrating(calibrating)
+                    } else {
+                        head.setCalibrating(calibrating)
+                    }
+
+                    inputRepository.updateUserScrollState(player.uniqueId, calibrating)
+                    toggleCalibratingMessage(calibrating)
+                }
             }
             .disposeOn(disposer = this)
 
@@ -130,12 +161,28 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.scrollStream(player.uniqueId)
             .collectOn(DudeDispatcher())
             .collectLatest {
-
                 val app = foregroundApp
                 if (app != null) {
-                    if (calibrating) app.scrollEvent(it) else app.calibrateEvent(it)
+                    if (calibrating) {
+                        app.calibrateEvent(it)
+                        preferencesRepository.setScreenDistance(origin.distance)
+                    } else {
+                        app.scrollEvent(it)
+                    }
                 } else {
-                    if (calibrating) head.scrollEvent(it) else head.calibrateEvent(it)
+                    if (calibrating) {
+                        if (it.event == ScrollEvent.UP) {
+                            origin.scrollOut()
+                        } else {
+                            origin.scrollIn()
+                        }
+
+                        preferencesRepository.setScreenDistance(origin.distance)
+
+                        head.calibrateEvent(it)
+                    } else {
+                        head.scrollEvent(it)
+                    }
                 }
             }
             .disposeOn(disposer = this)
@@ -174,7 +221,33 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
         systemAppComponent.inject(this)
 
+        this.origin = newOrigin
         registerEvents(eventHandler)
+    }
+
+    private fun toggleCalibratingMessage(show: Boolean) {
+        if (!show) {
+            calibrationJob?.cancel()
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(R.getString(player, S.CALIBRATION_MESSAGE_SAVED.resource())))
+            return
+        }
+
+        calibrationJob = CoroutineScope(Dispatchers.IO).launch {
+            var index = 0
+            val calibrationMessages = listOf(
+                R.getString(player, S.CALIBRATION_MESSAGE_ONE.resource()),
+                R.getString(player, S.CALIBRATION_MESSAGE_TWO.resource()),
+            )
+
+            while (true) {
+                CoroutineScope(DudeDispatcher()).launch {
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(calibrationMessages[index]))
+                    index = (index + 1) % calibrationMessages.size
+                }
+
+                delay(2.seconds)
+            }
+        }
     }
 
     @OptIn(FlowPreview::class)

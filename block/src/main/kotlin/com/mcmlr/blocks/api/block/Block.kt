@@ -1,16 +1,10 @@
 package com.mcmlr.blocks.api.block
 
-import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.app.App
-import com.mcmlr.blocks.api.app.BaseApp
-import com.mcmlr.blocks.api.app.ConfigurableApp
-import com.mcmlr.blocks.api.app.ConfigurableEnvironment
-import com.mcmlr.blocks.api.app.Environment
-import com.mcmlr.blocks.api.app.RouteToCallback
+import com.mcmlr.blocks.api.app.*
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import kotlinx.coroutines.flow.Flow
@@ -18,17 +12,18 @@ import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import kotlin.math.max
-import kotlin.math.min
 
-abstract class Block(protected val player: Player, origin: Location): Context {
+abstract class Block(protected val player: Player, val origin: Origin): Context {
 
-    val origin: Location = origin.clone()
     lateinit var context: Context
     var parent: Block? = null
 
     private val router = Router()
     private var isChild = false
+
+    fun setCalibrating(calibrating: Boolean) {
+        view().calibrating = calibrating
+    }
 
     override fun onCreate(child: Boolean) {
         isChild = child
@@ -46,15 +41,15 @@ abstract class Block(protected val player: Player, origin: Location): Context {
 
     override fun onResume(newOrigin: Location?) {
         if (newOrigin != null) {
-            newOrigin.yaw = origin.yaw
+            newOrigin.yaw = origin.location().yaw
             newOrigin.pitch = 0f
 
             val direction = newOrigin.direction.normalize()
-            val o = newOrigin.clone().add(direction.multiply(BaseApp.SCREEN_DISTANCE))
+            val o = newOrigin.clone().add(direction.multiply(origin.distance))
 
-            this.origin.x = o.x
-            this.origin.y = o.y
-            this.origin.z = o.z
+            this.origin.location().x = o.x
+            this.origin.location().y = o.y
+            this.origin.location().z = o.z
         }
 
         router().onResume(newOrigin)
@@ -127,13 +122,6 @@ abstract class Block(protected val player: Player, origin: Location): Context {
     }
 
     open fun calibrateEvent(event: ScrollModel, isChild: Boolean = false) {
-
-        if (event.event == ScrollEvent.UP) {
-            BaseApp.SCREEN_DISTANCE = min(0.3, BaseApp.SCREEN_DISTANCE + 0.01)
-        } else {
-            BaseApp.SCREEN_DISTANCE = max(0.1, BaseApp.SCREEN_DISTANCE - 0.01)
-        }
-
         view().calibrateEvent(event, isChild)
         router().calibrateEvent(event)
     }
@@ -149,17 +137,15 @@ abstract class Block(protected val player: Player, origin: Location): Context {
         router().cursorEvent(displays, cursor, event)
     }
 
-    fun moveEventChild(newOrigin: Location) {
-        newOrigin.yaw = origin.yaw
-        newOrigin.pitch = 0f
+    fun moveEventChild(newOrigin: Origin) {
+        newOrigin.location().yaw = origin.location().yaw
+        newOrigin.location().pitch = 0f
 
-        val o = newOrigin.clone()
-
-        view().moveEvent(origin, o)
-        router().moveEvent(o)
-        this.origin.x = o.x
-        this.origin.y = o.y
-        this.origin.z = o.z
+        view().moveEvent(origin, newOrigin)
+        router().moveEvent(newOrigin)
+        this.origin.location().x = newOrigin.location().x
+        this.origin.location().y = newOrigin.location().y
+        this.origin.location().z = newOrigin.location().z
     }
 
     fun attach(context: Context, parentView: ViewContainer) {

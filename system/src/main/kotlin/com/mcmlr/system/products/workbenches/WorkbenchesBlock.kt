@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 class WorkbenchesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): Block(player, origin) {
     private val view = WorkbenchesViewController(player, origin)
     private val interactor = WorkbenchesInteractor(player, view)
@@ -24,7 +25,7 @@ class WorkbenchesBlock @Inject constructor(
 
 class WorkbenchesViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), WorkbenchesPresenter {
 
     override fun createView() {

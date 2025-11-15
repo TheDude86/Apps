@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
@@ -26,7 +27,7 @@ import javax.inject.Inject
 
 class DefaultLanguageBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     systemConfigRepository: SystemConfigRepository,
 ): Block(player, origin) {
     private val view = DefaultLanguageViewController(player, origin)
@@ -38,7 +39,7 @@ class DefaultLanguageBlock @Inject constructor(
 
 class DefaultLanguageViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), DefaultLanguagePresenter {
 
     private lateinit var languageButton: ButtonView

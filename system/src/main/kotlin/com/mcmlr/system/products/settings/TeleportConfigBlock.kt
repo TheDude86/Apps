@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -22,7 +23,7 @@ import kotlin.math.max
 
 class TeleportConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     teleportConfigRepository: TeleportConfigRepository,
 ) : Block(player, origin) {
     private val view: TeleportConfigViewController = TeleportConfigViewController(player, origin)
@@ -33,7 +34,7 @@ class TeleportConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class TeleportConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportConfigViewController(player: Player, origin: Origin): NavigationViewController(player, origin),
     TeleportConfigPresenter {
 
     private lateinit var delayView: TextInputView

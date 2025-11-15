@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 class FavoritesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     selectFavoriteBlock: SelectFavoriteBlock,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
@@ -32,7 +33,7 @@ class FavoritesBlock @Inject constructor(
 
 class FavoritesViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), FavoritesPresenter {
 
     private lateinit var favoriteSlots: List<ViewContainer>

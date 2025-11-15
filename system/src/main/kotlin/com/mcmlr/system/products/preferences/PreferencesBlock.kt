@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.ChatColor
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 class PreferencesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     favoritesBlock: FavoritesBlock,
 ): Block(player, origin) {
     private val view = PreferencesViewController(player, origin)
@@ -29,7 +30,7 @@ class PreferencesBlock @Inject constructor(
 
 class PreferencesViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), PreferencesPresenter {
 
     private lateinit var favoritesBlock: ViewContainer

@@ -80,6 +80,18 @@ open class FeedView(
         }
     }
 
+    override fun calibrateEvent(event: ScrollModel, isChild: Boolean) {
+        updateDisplay()
+        renderedChildren.forEach {
+            val viewable = it.first
+            if (viewable is View) {
+                if (isViewInBounds(it.first)) {
+                    viewable.calibrateEvent(event, isChild)
+                }
+            }
+        }
+    }
+
     private fun isViewInBounds(view: Viewable): Boolean =
         top() >= view.top() + getPosition().y &&
                 bottom() <= view.bottom() + getPosition().y

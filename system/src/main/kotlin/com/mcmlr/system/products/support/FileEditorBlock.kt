@@ -2,6 +2,7 @@ package com.mcmlr.system.products.support
 
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.yaml.S
@@ -14,7 +15,7 @@ import org.bukkit.entity.Player
 import java.io.File
 import javax.inject.Inject
 
-class FileEditorBlock @Inject constructor(player: Player, origin: Location,): Block(player, origin) {
+class FileEditorBlock @Inject constructor(player: Player, origin: Origin,): Block(player, origin) {
     private val view = FileEditorViewController(player, origin)
     private val interactor = FileEditorInteractor(player, view)
 
@@ -29,7 +30,7 @@ class FileEditorBlock @Inject constructor(player: Player, origin: Location,): Bl
 
 class FileEditorViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), FileEditorPresenter {
     var title = R.getString(player, S.FILE.resource())
 

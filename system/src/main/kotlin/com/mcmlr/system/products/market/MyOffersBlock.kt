@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 class MyOffersBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     offerCreatorBlock: OfferCreatorBlock,
     offerEditorBlock: OfferEditorBlock,
     marketRepository: MarketRepository,
@@ -35,7 +36,7 @@ class MyOffersBlock @Inject constructor(
 
 class MyOffersViewController(
     private val player: Player,
-    origin: Location
+    origin: Origin
 ): NavigationViewController(player, origin),
     MyOffersPresenter {
     private lateinit var myOffersButton: ButtonView

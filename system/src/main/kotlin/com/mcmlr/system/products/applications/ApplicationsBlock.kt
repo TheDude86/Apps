@@ -13,6 +13,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.Modifier
@@ -26,7 +27,7 @@ import javax.inject.Inject
 
 class ApplicationsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val applicationsRepository: ApplicationsRepository,
 ): Block(player, origin) {
     private val view = ApplicationsViewController(player, origin)
@@ -38,7 +39,7 @@ class ApplicationsBlock @Inject constructor(
 
 class ApplicationsViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), ApplicationsPresenter {
 
     private val appPositions = listOf(

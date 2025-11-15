@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class AnnouncementSelectorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     announcementsRepository: AnnouncementsRepository,
 ): Block(player, origin) {
     companion object {
@@ -40,7 +41,7 @@ class AnnouncementSelectorBlock @Inject constructor(
 
 class AnnouncementSelectorViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), AnnouncementSelectorPresenter {
 
     private lateinit var feed: ListFeedView

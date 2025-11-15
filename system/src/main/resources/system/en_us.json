@@ -47,5 +47,9 @@
   "set_title_message": "The top text on the home screen. We recommend keeping titles no longer than 25 characters to not overlap with other text. Titles support Placeholders for customized messages.",
   "updated_title_message": "§aYour new title has been saved!",
   "set_title_input_placeholder": "Set Server Title",
-  "save_button": "§6Save"
+  "save_button": "§6Save",
+
+  "calibration_message_one": "§b§oCalibrating... Use your scroll wheel to move the screen forward and back.",
+  "calibration_message_two": "§b§oCalibrating... Double tap sneak to save.",
+  "calibration_message_saved": "§aScreen calibration saved!"
 }

@@ -2,6 +2,7 @@ package com.mcmlr.system.products.info
 
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.api.views.View.Companion.WRAP_CONTENT
 import com.mcmlr.blocks.core.DudeDispatcher
@@ -17,10 +18,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class TutorialBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): Block(player, origin) {
     private val view = TutorialViewController(player, origin)
-    private val interactor = TutorialInteractor(origin, player, view)
+    private val interactor = TutorialInteractor(player, view)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -28,7 +29,7 @@ class TutorialBlock @Inject constructor(
 
 class TutorialViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), TutorialPresenter {
 
     private lateinit var contentContainer: ViewContainer
@@ -502,7 +503,6 @@ interface TutorialPresenter: Presenter {
 }
 
 class TutorialInteractor(
-    private val origin: Location,
     private val player: Player,
     private val presenter: TutorialPresenter,
 //    private val cursorRepository: CursorRepository,

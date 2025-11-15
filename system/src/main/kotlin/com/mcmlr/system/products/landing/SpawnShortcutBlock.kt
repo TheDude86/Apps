@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 class SpawnShortcutBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     spawnRepository: SpawnRepository,
     playerTeleportRepository: PlayerTeleportRepository,
     permissionsRepository: PermissionsRepository,
@@ -37,7 +38,7 @@ class SpawnShortcutBlock @Inject constructor(
 
 class SpawnShortcutViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
     private val spawnRepository: SpawnRepository,
     private val permissionsRepository: PermissionsRepository,
 ): ViewController(player, origin), SpawnShortcutPresenter {
@@ -61,7 +62,7 @@ class SpawnShortcutViewController(
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) R.getString(player, S.SPAWN.resource()) else S.BACK.resource()}",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) R.getString(player, S.SPAWN.resource()) else R.getString(player, S.BACK.resource())}",
             size = 6,
         )
 

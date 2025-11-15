@@ -10,6 +10,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class SelectFavoriteBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     applicationsRepository: ApplicationsRepository,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
@@ -37,7 +38,7 @@ class SelectFavoriteBlock @Inject constructor(
 
 class SelectFavoriteViewController(
     private val player: Player,
-    origin: Location
+    origin: Origin,
 ): NavigationViewController(player, origin), SelectFavoritePresenter {
 
     private lateinit var appsFeedView: ListFeedView
