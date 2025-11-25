@@ -6,7 +6,6 @@ import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.TeleportAppComponent
 import com.mcmlr.system.products.data.PermissionNode
-import com.mcmlr.system.products.settings.TeleportConfigBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

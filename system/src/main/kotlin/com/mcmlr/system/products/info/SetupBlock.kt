@@ -27,15 +27,18 @@ import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.homes.HomeConfigBlock
 import com.mcmlr.system.products.homes.HomesEnvironment
+import com.mcmlr.system.products.market.MarketConfigBlock
 import com.mcmlr.system.products.market.MarketEnvironment
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.settings.*
+import com.mcmlr.system.products.spawn.SpawnConfigBlock
 import com.mcmlr.system.products.spawn.SpawnEnvironment
+import com.mcmlr.system.products.teleport.TeleportConfigBlock
 import com.mcmlr.system.products.teleport.TeleportEnvironment
+import com.mcmlr.system.products.warps.WarpConfigBlock
 import com.mcmlr.system.products.warps.WarpsEnvironment
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

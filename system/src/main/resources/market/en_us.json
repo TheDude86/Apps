@@ -47,5 +47,12 @@
   "purchase_quantity_below_zero_error_message": "§cQuantities must be below zero!",
   "purchase_quantity_text": "%s ($%s)",
   "insufficient_funds_warning_message": "§eYou don't have enough money to purchase this much %s",
-  "insufficient_stock_warning_message": "§eThere's not enough %s in stock!"
+  "insufficient_stock_warning_message": "§eThere's not enough %s in stock!",
+
+  "config_market_title": "§l§o§nMarket Settings",
+  "config_max_orders_title": "Max Orders",
+  "config_max_orders_message": "§7The maximum number of orders a player can have at once.  Setting it to 0 means players can create unlimited orders.",
+  "config_default_max_orders": "§60 Orders",
+  "config_input_orders_placeholder": "%s Order%s",
+  "config_max_orders_error_message": "§cMax order values must be whole numbers!"
 }

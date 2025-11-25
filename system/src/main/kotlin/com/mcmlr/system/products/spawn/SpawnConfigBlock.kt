@@ -1,5 +1,6 @@
-package com.mcmlr.system.products.settings
+package com.mcmlr.system.products.spawn
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -11,10 +12,9 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.products.kits.KitRepository
-import com.mcmlr.system.products.spawn.RespawnType
-import com.mcmlr.system.products.spawn.SpawnRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -35,7 +35,10 @@ class SpawnConfigBlock @Inject constructor(
     override fun view() = view
 }
 
-class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewController(player, origin),
+class SpawnConfigViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin),
     SpawnConfigPresenter {
 
     private lateinit var contentView: ViewContainer
@@ -122,7 +125,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Spawn Settings",
+            text = R.getString(player, S.SPAWN_CONFIG_TITLE.resource()),
             size = 16,
         )
 
@@ -146,7 +149,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToTopOf(this)
                         .centerHorizontally()
                         .margins(top = 200),
-                    text = "${ChatColor.BOLD}Set spawn kit",
+                    text = R.getString(player, S.CONFIG_UPDATE_RESPAWN_ORDER_TITLE.resource()),
                     size = 14,
                 )
 
@@ -155,7 +158,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignTopToBottomOf(title)
                         .centerHorizontally(),
-                    text = "${ChatColor.GRAY}Select the order of locations to send players after they die and respawn.  Disabling a location will ignore that location when finding a respawn location and if a player does not have a location set, like a home for example, then that location will be skipped as well.",
+                    text = R.getString(player, S.CONFIG_UPDATE_RESPAWN_ORDER_MESSAGE.resource()),
                     lineWidth = 400,
                     size = 6,
                 )
@@ -177,8 +180,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToBottomOf(list)
                         .centerHorizontally()
                         .margins(top = 100),
-                    text = "${ChatColor.GOLD}Finish",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish",
+                    text = R.getString(player, S.FINISH_BUTTON.resource()),
+                    highlightedText = R.getString(player, S.FINISH_BUTTON.resource()).bolden(),
                     callback = finishedCallback,
                 )
             }
@@ -194,7 +197,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToTopOf(this)
                         .centerHorizontally()
                         .margins(top = 200),
-                    text = "${ChatColor.BOLD}Set spawn kit",
+                    text = R.getString(player, S.CONFIG_UPDATE_SPAWN_KIT_TITLE.resource()),
                     size = 14,
                 )
 
@@ -203,7 +206,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignTopToBottomOf(title)
                         .centerHorizontally(),
-                    text = "${ChatColor.GRAY}Select a kit from your saved kits.  You can go into the Kits app to create a new kit if none of the existing kits work for you.",
+                    text = R.getString(player, S.CONFIG_UPDATE_SPAWN_KIT_MESSAGE.resource()),
                     lineWidth = 400,
                     size = 6,
                 )
@@ -225,7 +228,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToBottomOf(pager)
                         .centerHorizontally()
                         .margins(top = 30),
-                    text = "Kit Title",
+                    text = R.getString(player, S.KIT_NAME_PLACEHOLDER.resource()),
                     size = 12,
                 )
 
@@ -237,8 +240,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToBottomOf(kitTitle)
                         .centerHorizontally()
                         .margins(top = 50),
-                    text = "${ChatColor.GOLD}Select Kit",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Select Kit",
+                    text = R.getString(player, S.SELECT_KIT_BUTTON.resource()),
+                    highlightedText = R.getString(player, S.SELECT_KIT_BUTTON.resource()).bolden(),
                 )
             }
         })
@@ -253,7 +256,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                         .alignTopToTopOf(this)
                         .centerHorizontally()
                         .margins(top = 200),
-                    text = "${ChatColor.BOLD}Set spawn location",
+                    text = R.getString(player, S.CONFIG_UPDATE_SPAWN_POSITION_TITLE.resource()),
                     size = 14,
                 )
 
@@ -263,7 +266,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToBottomOf(title)
                             .centerHorizontally(),
-                        text = "${ChatColor.GRAY}Once you're ready, click the \"Capture\" button and a countdown from 3 will begin.  At the end of the countdown, your location and rotation will be captured as the new spawn point and you will have the options to use that as your new server spawn, try again, or cancel.",
+                        text = R.getString(player, S.CONFIG_UPDATE_SPAWN_POSITION_MESSAGE.resource()),
                         lineWidth = 400,
                         size = 6,
                     )
@@ -274,8 +277,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .alignTopToBottomOf(directions)
                             .centerHorizontally()
                             .margins(top = 100),
-                        text = "${ChatColor.GOLD}Capture",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Capture",
+                        text = R.getString(player, S.CAPTURE_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.CAPTURE_BUTTON.resource()).bolden(),
                     )
                 } else {
 
@@ -284,7 +287,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToBottomOf(title)
                             .centerHorizontally(),
-                        text = "${ChatColor.GRAY}Your location has been captured.  Please click \"Confirm\" to set it as the server's new spawn point or \"Try Again\" to capture a new point.",
+                        text = R.getString(player, S.CONFIG_UPDATE_SPAWN_POSITION_CAPTURE_MESSAGE.resource()),
                         lineWidth = 400,
                         size = 6,
                     )
@@ -296,7 +299,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .centerHorizontally()
                             .margins(top = 50),
                         size = 8,
-                        text = "${ChatColor.BOLD}New Spawn Location\n${ChatColor.RESET}X:${"%.2f".format(newSpawn.x)} Y:${"%.2f".format(newSpawn.y)} Z:${"%.2f".format(newSpawn.z)} Yaw:${"%.2f".format(newSpawn.yaw)} Pitch:${"%.2f".format(newSpawn.pitch)}",
+                        text = R.getString(player, S.CONFIG_SPAWN_POSITION.resource(), "%.2f".format(newSpawn.x), "%.2f".format(newSpawn.y), "%.2f".format(newSpawn.z), "%.2f".format(newSpawn.yaw), "%.2f".format(newSpawn.pitch)),
                     )
 
                     confirmLocationButton = addButtonView(
@@ -305,8 +308,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .alignTopToBottomOf(location)
                             .centerHorizontally()
                             .margins(top = 100),
-                        text = "${ChatColor.GOLD}Confirm",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Confirm",
+                        text = R.getString(player, S.CONFIRM_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.CONFIRM_BUTTON.resource()).bolden(),
                     )
 
                     tryAgainButton = addButtonView(
@@ -315,8 +318,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .x(-500)
                             .alignTopToBottomOf(location)
                             .margins(top = 100),
-                        text = "${ChatColor.GOLD}Try Again",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Try Again",
+                        text = R.getString(player, S.TRY_AGAIN_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.TRY_AGAIN_BUTTON.resource()).bolden(),
                     )
 
                     cancelButton = addButtonView(
@@ -325,8 +328,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                             .x(500)
                             .alignTopToBottomOf(location)
                             .margins(top = 100),
-                        text = "${ChatColor.RED}Cancel",
-                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Cancel",
+                        text = R.getString(player, S.CANCEL_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.CANCEL_BUTTON.resource()).bolden(),
                     )
                 }
             }
@@ -349,7 +352,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToTopOf(this)
                                     .alignStartToStartOf(this),
                                 size = 6,
-                                text = "Enable Spawn",
+                                text = R.getString(player, S.CONFIG_ENABLE_SPAWN_TITLE.resource()),
                             )
 
                             val enableSpawnMessage = addTextView(
@@ -360,7 +363,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}Enable this app to use it's custom spawn logic. Spawn controls where new players spawn for the first time, what kits their given, and a custom welcome message.  Spawn also controls custom existing player join and quit messages, respawn logic and teleporting to spawn and previous locations.",
+                                text = R.getString(player, S.CONFIG_ENABLE_SPAWN_MESSAGE.resource()),
                             )
 
                             enableSpawnButton = addButtonView(
@@ -370,8 +373,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(enableSpawnTitle)
                                     .alignBottomToTopOf(enableSpawnMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}Off",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Off",
+                                text = R.getString(player, S.CONFIG_ENABLE_SPAWN_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_ENABLE_SPAWN_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val setSpawnTitle = addTextView(
@@ -381,7 +384,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(enableSpawnMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Set spawn location",
+                                text = R.getString(player, S.CONFIG_SET_SPAWN_LOCATION_TITLE.resource()),
                             )
 
                             val setSpawnMessage = addTextView(
@@ -392,7 +395,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}New players will join the server for the first time, players who teleport to spawn, and players who die and have no other respawn locations set all will be teleported to this location.",
+                                text = R.getString(player, S.CONFIG_SET_SPAWN_LOCATION_MESSAGE.resource()),
                             )
 
                             setSpawnLocationView = addButtonView(
@@ -402,8 +405,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(setSpawnTitle)
                                     .alignBottomToTopOf(setSpawnMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}No location set",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}No location set",
+                                text = R.getString(player, S.CONFIG_SET_SPAWN_LOCATION_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_SET_SPAWN_LOCATION_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val setWelcomeMessageTitle = addTextView(
@@ -413,7 +416,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(setSpawnMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Set welcome message",
+                                text = R.getString(player, S.CONFIG_SET_WELCOME_MESSAGE_TITLE.resource()),
                             )
 
                             val setWelcomeMessageMessage = addTextView(
@@ -424,7 +427,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}This message will be displayed when a new player joins the server for the first time.  This message supports Placeholder API so you can use placeholders to display the new player's name or any other info.",
+                                text = R.getString(player, S.CONFIG_SET_WELCOME_MESSAGE_MESSAGE.resource()),
                             )
 
                             setWelcomeMessageView = addTextInputView(
@@ -435,8 +438,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignBottomToTopOf(setWelcomeMessageMessage),
                                 size = 6,
                                 alignment = Alignment.LEFT,
-                                text = "${ChatColor.GOLD}Welcome %player_name% to the server!",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Welcome %player_name% to the server!",
+                                text = R.getString(player, S.CONFIG_SET_WELCOME_MESSAGE_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_SET_WELCOME_MESSAGE_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val setFirstTimeKitTitle = addTextView(
@@ -446,7 +449,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(setWelcomeMessageMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Set new player kit",
+                                text = R.getString(player, S.CONFIG_SET_KIT_TITLE.resource()),
                             )
 
                             val setFirstTimeKitMessage = addTextView(
@@ -457,7 +460,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}Players who join the server for the first time will be automatically given the selected kit.",
+                                text = R.getString(player, S.CONFIG_SET_KIT_MESSAGE.resource()),
                             )
 
                             setFirstTimeKitView = addButtonView(
@@ -467,8 +470,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(setFirstTimeKitTitle)
                                     .alignBottomToTopOf(setFirstTimeKitMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}None",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}None",
+                                text = R.getString(player, S.CONFIG_SET_KIT_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_SET_KIT_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val respawnLocationTitle = addTextView(
@@ -478,7 +481,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(setFirstTimeKitMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Respawn location order",
+                                text = R.getString(player, S.CONFIG_RESPAWN_ORDER_TITLE.resource()),
                             )
 
                             val respawnLocationMessage = addTextView(
@@ -489,7 +492,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}Set the order for which respawn locations should a player respawn at when they die.  If a player does not have a location set at the top of the respawn order, the rest of the list will be traversed until a location is found.",
+                                text = R.getString(player, S.CONFIG_RESPAWN_ORDER_MESSAGE.resource()),
                             )
 
                             setRespawnLocationOrderView = addButtonView(
@@ -499,8 +502,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(respawnLocationTitle)
                                     .alignBottomToTopOf(respawnLocationMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}Bed\nSpawn",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Bed\nSpawn",
+                                text = R.getString(player, S.CONFIG_RESPAWN_ORDER_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_RESPAWN_ORDER_DEFAULT_VALUE.resource()),
                             )
 
                             val spawnOnJoinTitle = addTextView(
@@ -510,7 +513,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(respawnLocationMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Teleport to spawn on join",
+                                text = R.getString(player, S.CONFIG_SPAWN_ON_JOIN_TITLE.resource()),
                             )
 
                             val spawnOnJoinMessage = addTextView(
@@ -521,7 +524,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}If set to true, all players will be teleported to spawn every time they join the server.",
+                                text = R.getString(player, S.CONFIG_SPAWN_ON_JOIN_MESSAGE.resource()),
                             )
 
                             setSpawnOnJoinView = addButtonView(
@@ -531,8 +534,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(spawnOnJoinTitle)
                                     .alignBottomToTopOf(spawnOnJoinMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}False",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}False",
+                                text = R.getString(player, S.CONFIG_SPAWN_ON_JOIN_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_SPAWN_ON_JOIN_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val joinServerMessageTitle = addTextView(
@@ -542,7 +545,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(spawnOnJoinMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Player joined message",
+                                text = R.getString(player, S.CONFIG_PLAYER_JOIN_TITLE.resource()),
                             )
 
                             val joinServerMessageMessage = addTextView(
@@ -553,7 +556,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}This message will be sent to all online players when a player joins the server.  This message also supports Placeholder API.",
+                                text = R.getString(player, S.CONFIG_PLAYER_JOIN_MESSAGE.resource()),
                             )
 
                             joinServerView = addTextInputView(
@@ -563,8 +566,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(joinServerMessageTitle)
                                     .alignBottomToTopOf(joinServerMessageMessage),
                                 size = 6,
-                                text = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
-                                highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.GREEN}+${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
+                                text = R.getString(player, S.CONFIG_PLAYER_JOIN_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_PLAYER_JOIN_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val quitServerMessageTitle = addTextView(
@@ -574,7 +577,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(joinServerMessageMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Player left message",
+                                text = R.getString(player, S.CONFIG_PLAYER_LEFT_TITLE.resource()),
                             )
 
                             val quitServerMessageMessage = addTextView(
@@ -585,7 +588,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}This message will be sent to all online players when a player leaves the server.  This message also supports Placeholder API.",
+                                text = R.getString(player, S.CONFIG_PLAYER_LEFT_MESSAGE.resource()),
                             )
 
                             quitServerView = addTextInputView(
@@ -595,8 +598,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(quitServerMessageTitle)
                                     .alignBottomToTopOf(quitServerMessageMessage),
                                 size = 6,
-                                text = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%",
-                                highlightedText = "${ChatColor.DARK_GRAY}[${ChatColor.RED}-${ChatColor.DARK_GRAY}]${ChatColor.GRAY}%player_name%".bolden(),
+                                text = R.getString(player, S.CONFIG_PLAYER_LEFT_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_PLAYER_LEFT_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val cooldownTitle = addTextView(
@@ -606,7 +609,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(quitServerMessageMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Teleport cooldown",
+                                text = R.getString(player, S.CONFIG_COOLDOWN_TITLE.resource()),
                             )
 
                             val cooldownMessage = addTextView(
@@ -617,7 +620,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a home before they can teleport again.",
+                                text = R.getString(player, S.CONFIG_COOLDOWN_MESSAGE.resource()),
                             )
 
                             cooldownView = addTextInputView(
@@ -627,8 +630,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(cooldownTitle)
                                     .alignBottomToTopOf(cooldownMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}0 Seconds",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                                text = R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()).bolden(),
                             )
 
                             val delayTitle = addTextView(
@@ -638,7 +641,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignStartToStartOf(cooldownMessage)
                                     .margins(top = 100),
                                 size = 6,
-                                text = "Teleport delay",
+                                text = R.getString(player, S.CONFIG_DELAY_TITLE.resource()),
                             )
 
                             val delayMessage = addTextView(
@@ -649,7 +652,7 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                 alignment = Alignment.LEFT,
                                 lineWidth = 300,
                                 size = 4,
-                                text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported.",
+                                text = R.getString(player, S.CONFIG_DELAY_MESSAGE.resource()),
                             )
 
                             delayView = addTextInputView(
@@ -659,8 +662,8 @@ class SpawnConfigViewController(player: Player, origin: Origin): NavigationViewC
                                     .alignTopToBottomOf(delayTitle)
                                     .alignBottomToTopOf(delayMessage),
                                 size = 6,
-                                text = "${ChatColor.GOLD}0 Seconds",
-                                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                                text = R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()),
+                                highlightedText = R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()).bolden(),
                             )
 
 
@@ -846,8 +849,8 @@ class SpawnConfigInteractor(
         presenter.updateSpawnOnJoinText(spawnRepository.model.spawnOnJoin.toString().titlecase())
         presenter.setJoinMessageText(spawnRepository.model.joinMessage)
         presenter.setQuitMessageText(spawnRepository.model.quitMessage)
-        presenter.setCooldownText("${spawnRepository.model.cooldown} Second${if (spawnRepository.model.cooldown != 1) "s" else ""}")
-        presenter.setDelayText("${spawnRepository.model.delay} Second${if (spawnRepository.model.cooldown != 1) "s" else ""}")
+        presenter.setCooldownText(R.getString(player, S.CONFIG_TELEPORT_INPUT.resource(), spawnRepository.model.cooldown, if (spawnRepository.model.cooldown != 1) R.getString(player, S.PLURAL.resource()) else ""))
+        presenter.setDelayText(R.getString(player, S.CONFIG_TELEPORT_INPUT.resource(), spawnRepository.model.delay, if (spawnRepository.model.delay != 1) R.getString(player, S.PLURAL.resource()) else ""))
 
         val respawnOrderList = StringBuilder()
         spawnRepository.model.respawnLocation.forEach {
@@ -894,8 +897,8 @@ class SpawnConfigInteractor(
             override fun invoke(text: String) {
                 val cooldown = text.toIntOrNull()
                 if (cooldown == null) {
-                    presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
-                    presenter.setCooldownText("0 Seconds")
+                    presenter.setMessage(R.getString(player, S.CONFIG_COOLDOWN_ERROR_MESSAGE.resource()))
+                    presenter.setCooldownText(R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()))
                     return
                 }
 
@@ -908,8 +911,8 @@ class SpawnConfigInteractor(
             override fun invoke(text: String) {
                 val delay = text.toIntOrNull()
                 if (delay == null) {
-                    presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
-                    presenter.setDelayText("0 Seconds")
+                    presenter.setMessage(R.getString(player, S.CONFIG_DELAY_ERROR_MESSAGE.resource()))
+                    presenter.setDelayText(R.getString(player, S.CONFIG_TELEPORT_DEFAULT_VALUE.resource()))
                     return
                 }
 
@@ -1009,7 +1012,7 @@ class SpawnConfigInteractor(
                 CoroutineScope(DudeDispatcher()).launch {
                     player.sendTitle("${ChatColor.GREEN}$countdown", null, 0, 10, 8)
                 }
-                kotlinx.coroutines.delay(1.seconds)
+                delay(1.seconds)
                 countdown--
             }
         }

@@ -23,5 +23,15 @@
   "cooldown_error_message": "§cYou must wait %s second%s before you can teleport",
   "passenger_message": "§3You will be teleported in %s second%s",
   "destination_message": "§3%s will be teleported to you in %s second%s",
-  "plural": "s"
+  "plural": "s",
+
+  "teleport_config_title": "§l§o§nTeleport Settings",
+  "teleport_delay_title": "Teleport Delay",
+  "config_delay_message": "§7The amount of time, in seconds, the player must wait before being teleported to another player.",
+  "config_default_wait_value": "§60 Seconds",
+  "config_cooldown_title": "Teleport Cooldown",
+  "config_cooldown_message": "§7The amount of time, in seconds, the player must wait after teleporting to another player before they can teleport again.",
+  "config_input_seconds_placeholder": "%s Second%s",
+  "config_delay_error_message": "§cTeleport delay values must be whole numbers!",
+  "config_cooldown_error_message": "§cTeleport cooldown values must be whole numbers!"
 }
