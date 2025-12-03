@@ -108,6 +108,37 @@ abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) 
         }
     }
 
+    //TODO: Replace with async method
+    fun loadModelSynced(path: String, name: String, default: T, onCompleteListener: ((T) -> Unit)? = null) {
+        model = default
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+
+        val folder = File(dataFolder, path)
+        val file = File(folder, "$name.json")
+
+        if (file.exists()) {
+            val homeInputStream: InputStream = file.inputStream()
+            val homeInputString = homeInputStream.bufferedReader().use { it.readText() }
+
+            model = Gson().fromJson(homeInputString, default::class.java)
+
+        } else {
+            if (!folder.exists()) folder.mkdirs()
+
+            val modelString = gson.toJson(default)
+            val fileWriter = FileWriter(File(folder, "$name.json"))
+            fileWriter.append(modelString)
+            fileWriter.close()
+        }
+
+        model.root = dataFolder
+        model.filePath = path
+        model.fileName = name
+        onCompleteListener?.invoke(model)
+    }
+
     fun save(callback: () -> Unit): Job? {
         callback.invoke()
         val file = model.root ?: return null

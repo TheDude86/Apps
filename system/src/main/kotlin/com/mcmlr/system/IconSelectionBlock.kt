@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 class IconSelectionBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val materialsRepository: MaterialsRepository,
 ): Block(player, origin) {
     companion object {
@@ -51,7 +52,7 @@ class IconSelectionBlock @Inject constructor(
 
 class IconSelectionBlockViewController(
     player: Player,
-    origin: Location
+    origin: Origin
 ): NavigationViewController(player, origin), IconSelectionPresenter {
 
     private lateinit var searchButton: TextInputView

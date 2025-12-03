@@ -4,6 +4,8 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.system.S
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -11,6 +13,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.Modifier
@@ -24,7 +27,7 @@ import javax.inject.Inject
 
 class ApplicationsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val applicationsRepository: ApplicationsRepository,
 ): Block(player, origin) {
     private val view = ApplicationsViewController(player, origin)
@@ -35,8 +38,8 @@ class ApplicationsBlock @Inject constructor(
 }
 
 class ApplicationsViewController(
-    player: Player,
-    origin: Location,
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), ApplicationsPresenter {
 
     private val appPositions = listOf(
@@ -59,7 +62,7 @@ class ApplicationsViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Apps",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.APPS.resource())}",
             size = 16,
         )
 
@@ -78,8 +81,8 @@ class ApplicationsViewController(
                 .x(-200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}Home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
+            text = "${ChatColor.GOLD}${R.getString(player, S.HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.HOME.resource())}",
             callback = object : Listener {
                 override fun invoke() {
                     routeBack()
@@ -93,8 +96,8 @@ class ApplicationsViewController(
                 .x(200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}${ChatColor.BOLD}Apps",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Apps",
+            text = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.APPS.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.APPS.resource())}",
         )
     }
 

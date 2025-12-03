@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.settings
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
@@ -7,12 +8,15 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.colorize
+import com.mcmlr.system.S
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.placeholder.placeholders
 import org.bukkit.ChatColor
@@ -22,7 +26,7 @@ import javax.inject.Inject
 
 class TitleBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     systemConfigRepository: SystemConfigRepository,
 ): Block(player, origin) {
     private val view = TitleViewController(player, origin)
@@ -32,7 +36,10 @@ class TitleBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class TitleViewController(player: Player, origin: Location): NavigationViewController(player, origin), TitlePresenter {
+class TitleViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin), TitlePresenter {
 
     private lateinit var serverNameView: TextInputView
     private lateinit var saveButtonView: ButtonView
@@ -47,7 +54,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
     override fun setTitleTextInputListener(listener: TextListener) = serverNameView.addTextChangedListener(listener)
 
     override fun showSavedTitleLabel() {
-        titleSavedLabel.update(text = "${ChatColor.GREEN}Your new title has been saved!")
+        titleSavedLabel.update(text = R.getString(player, S.UPDATED_TITLE_MESSAGE.resource()))
     }
 
     override fun createView() {
@@ -58,7 +65,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Set Apps Title",
+            text = R.getString(player, S.SET_TITLE_TITLE.resource()),
             size = 16,
         )
 
@@ -68,7 +75,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(title)
                 .margins(top = 300),
-            text = "The top text on the home screen. We recommend keeping titles no longer than 25 characters to not overlap with other text. Titles support Placeholders for customized messages.",
+            text = R.getString(player, S.SET_TITLE_MESSAGE.resource()),
             lineWidth = 500,
             alignment = Alignment.LEFT,
             size = 6,
@@ -81,7 +88,7 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
                 .centerHorizontally()
                 .margins(top = 100),
             size = 16,
-            text = "Set Server Title",
+            text = R.getString(player, S.SET_TITLE_INPUT_PLACEHOLDER.resource()),
         )
 
         saveButtonView = addButtonView(
@@ -90,8 +97,8 @@ class TitleViewController(player: Player, origin: Location): NavigationViewContr
                 .alignTopToBottomOf(serverNameView)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally(),
-            text = "${ChatColor.GOLD}Save",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Save",
+            text = R.getString(player, S.SAVE_BUTTON.resource()),
+            highlightedText = R.getString(player, S.SAVE_BUTTON.resource()).bolden(),
         )
 
         titleSavedLabel = addTextView(

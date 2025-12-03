@@ -1,0 +1,27 @@
+{
+  "warps_title": "§l§o§nWarps",
+  "add_new_warp": "Ajouter un nouveau warp",
+  "remove_warp": "Supprimer le warp",
+  "cancel": "Annuler",
+  "empty_warps_list": "§7§oAucun warp n’a encore\nété défini...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cVous devez attendre %s seconde%s avant de pouvoir vous téléporter",
+  "delay_message": "Vous serez téléporté dans %s seconde%s",
+  "plural": "s",
+  "add_warp_title": "§l§o§nAjouter un Nouveau Warp",
+  "warp_name_placeholder": "§7§oCliquez pour définir le nom du warp...",
+  "select_icon": "§7Sélectionner\nIcône...",
+  "save_warp": "§6Enregistrer le warp",
+  "warp_error_message": "§cErreur : Le développeur était trop paresseux pour trouver ce qui s’est passé...",
+
+  "warp_config_title": "§l§o§nParamètres du Warp",
+  "config_delay_title": "Délai de Téléportation",
+  "config_delay_message": "§7Le temps, en secondes, que le joueur doit attendre avant d’être téléporté vers un warp sélectionné.",
+  "config_default_wait_value": "§60 Secondes",
+  "config_cooldown_title": "Recharge de Téléportation",
+  "config_cooldown_message": "§7Le temps, en secondes, que le joueur doit attendre après une téléportation avant de pouvoir se téléporter de nouveau.",
+  "config_input_seconds_placeholder": "%s Seconde%s",
+  "config_delay_error_message": "§cLes valeurs de délai doivent être des nombres entiers !",
+  "config_cooldown_error_message": "§cLes valeurs de recharge doivent être des nombres entiers !"
+}

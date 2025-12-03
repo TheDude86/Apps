@@ -3,7 +3,9 @@ package com.mcmlr.system.products.info
 import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
+import com.mcmlr.system.S
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock
 import com.mcmlr.system.products.announcements.AnnouncementEditorBlock.Companion.ANNOUNCEMENT_POST_BUNDLE_KEY
 import com.mcmlr.system.products.announcements.AnnouncementModel
@@ -17,6 +19,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.SystemConfigRepository
@@ -24,21 +27,24 @@ import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.homes.HomeConfigBlock
 import com.mcmlr.system.products.homes.HomesEnvironment
+import com.mcmlr.system.products.market.MarketConfigBlock
 import com.mcmlr.system.products.market.MarketEnvironment
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.settings.*
+import com.mcmlr.system.products.spawn.SpawnConfigBlock
 import com.mcmlr.system.products.spawn.SpawnEnvironment
+import com.mcmlr.system.products.teleport.TeleportConfigBlock
 import com.mcmlr.system.products.teleport.TeleportEnvironment
+import com.mcmlr.system.products.warps.WarpConfigBlock
 import com.mcmlr.system.products.warps.WarpsEnvironment
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
 class SetupBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     tutorialBlock: TutorialBlock,
     feedBlock: FeedBlock,
     announcementEditorBlock: AnnouncementEditorBlock,
@@ -73,7 +79,7 @@ class SetupBlock @Inject constructor(
 
 class SetupViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), SetupPresenter {
 
     private lateinit var contentContainer: ViewContainer
@@ -170,7 +176,7 @@ class SetupViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Setup",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.SETUP.resource())}",
             size = 16,
         )
 
@@ -194,7 +200,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Finish",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.FINISH.resource())}",
                     size = 12,
                 )
 
@@ -204,7 +210,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "Congratulations! You're done configuring apps! You can still go back through the setup steps and make any more changes you like and once you press the Finish button, your changes will be saved. Now, this project is still in early development so there aren't any third party apps to download yet but they are on their way! So stay tuned and check for updates, we'll be sure to keep everybody updated on our progress.",
+                    text = R.getString(player, S.SETUP_FINISH_PARAGRAPH_ONE.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -216,8 +222,8 @@ class SetupViewController(
                         .x(-400)
                         .alignTopToBottomOf(paragraphOne)
                         .margins(top = 150),
-                    text = "${ChatColor.GOLD}Back",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             previousCallback.invoke()
@@ -231,8 +237,8 @@ class SetupViewController(
                         .alignTopToBottomOf(paragraphOne)
                         .x(400)
                         .margins( top = 150),
-                    text = "${ChatColor.GOLD}Finish",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Finish",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.FINISH.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.FINISH.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             finishCallback.invoke()
@@ -251,7 +257,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Create First Post",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.CREATE_FIRST_POST.resource())}",
                     size = 12,
                 )
 
@@ -261,7 +267,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "The Announcements app allows you to create announcement posts that will be shown on players home screens when the first open ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET}. We recommend you create your own post now so you can make it personal to your server and not use the generic one we set by default. Below is what the announcement feed looks like on the home screen.",
+                    text = R.getString(player, S.SETUP_ANNOUNCEMENTS_PARAGRAPH.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -283,8 +289,8 @@ class SetupViewController(
                             .alignStartToEndOf(it)
                             .alignTopToBottomOf(it)
                             .margins(start = 100, top = 50),
-                        text = "${ChatColor.GOLD}Next ➡",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 nextCallback.invoke()
@@ -298,8 +304,8 @@ class SetupViewController(
                             .alignTopToBottomOf(it)
                             .centerHorizontally()
                             .margins(top = 50),
-                        text = "${ChatColor.GOLD}Create Post",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Post",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.CREATE_POST.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CREATE_POST.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 createPostCallback.invoke()
@@ -313,8 +319,8 @@ class SetupViewController(
                             .alignEndToStartOf(it)
                             .alignTopToBottomOf(it)
                             .margins(top = 50, end = 100),
-                        text = "${ChatColor.GOLD}Back",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 previousCallback.invoke()
@@ -336,7 +342,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Customize Apps",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.CUSTOMIZE_APPS.resource())}",
                     size = 12,
                 )
 
@@ -346,7 +352,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "Some of the apps you've selected to be enabled have their own custom settings you can configure as well. You can now configure each App's settings now if you'd like or keep the default settings and make changes from the Admin settings later if you'd like.",
+                    text = R.getString(player, S.SETUP_CUSTOMIZE_APPS.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -417,8 +423,8 @@ class SetupViewController(
                             .alignStartToEndOf(it)
                             .alignTopToBottomOf(it)
                             .margins(start = 100, top = 50),
-                        text = "${ChatColor.GOLD}Next ➡",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 nextCallback.invoke()
@@ -432,8 +438,8 @@ class SetupViewController(
                             .alignEndToStartOf(it)
                             .alignTopToBottomOf(it)
                             .margins(top = 50, end = 100),
-                        text = "${ChatColor.GOLD}Back",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 previousCallback.invoke()
@@ -453,7 +459,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Choose Apps",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.CHOOSE_APPS.resource())}",
                     size = 12,
                 )
 
@@ -463,7 +469,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "There are a few apps that come with ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} out of the box. You can choose which apps you'd like to enable now and you can always enable or disable them at any time from the Admin settings. A few apps can't be disabled though, like the Admin settings and player Preferences apps.",
+                    text = R.getString(player, S.SETUP_ENABLE_APPS.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -495,7 +501,7 @@ class SetupViewController(
                                                     .alignStartToStartOf(this)
                                                     .centerVertically()
                                                     .margins(start = 50),
-                                                text = if (it.enabled) "\uD83D\uDD32" else "\uD83D\uDD33"
+                                                text = R.getString(player, (if (it.enabled) S.CHECKBOX_ENABLED else S.CHECKBOX_DISABLED).resource())
                                             )
 
                                             appFeedContainers[it.app.name()] = selected
@@ -545,8 +551,8 @@ class SetupViewController(
                             .alignStartToEndOf(it)
                             .alignTopToBottomOf(it)
                             .margins(start = 100, top = 50),
-                        text = "${ChatColor.GOLD}Next ➡",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 nextCallback.invoke()
@@ -560,8 +566,8 @@ class SetupViewController(
                             .alignEndToStartOf(it)
                             .alignTopToBottomOf(it)
                             .margins(top = 50, end = 100),
-                        text = "${ChatColor.GOLD}Back",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 previousCallback.invoke()
@@ -581,7 +587,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Server Name",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.SERVER_NAME.resource())}",
                     size = 12,
                 )
 
@@ -591,7 +597,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "First off, let's set the name of your server. This text will be displayed on the top of the player's home screen. Of course you can set this text you anything you want but since it's a small space, we recommend not going over 25 characters. This text also supports Placeholder API if you'd like a more personalized title.",
+                    text = R.getString(player, S.SETUP_SERVER_NAME_PARAGRAPH.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -604,7 +610,7 @@ class SetupViewController(
                         .centerHorizontally()
                         .margins(top = 250),
                     size = 16,
-                    text = "Set Server Title",
+                    text = R.getString(player, S.SET_SERVER_TITLE.resource()),
                 )
 
                 serverNameView?.let {
@@ -614,8 +620,8 @@ class SetupViewController(
                             .alignStartToEndOf(it)
                             .alignTopToBottomOf(it)
                             .margins(start = 100, top = 250),
-                        text = "${ChatColor.GOLD}Next ➡",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Next ➡",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.NEXT_ARROW.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 nextCallback.invoke()
@@ -629,8 +635,8 @@ class SetupViewController(
                             .alignEndToStartOf(it)
                             .alignTopToBottomOf(it)
                             .margins(top = 250, end = 100),
-                        text = "${ChatColor.GOLD}Back",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 previousCallback.invoke()
@@ -652,7 +658,7 @@ class SetupViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .alignTopToTopOf(this),
-                    text = "${ChatColor.BOLD}Getting started",
+                    text = "${ChatColor.BOLD}${R.getString(player, S.GETTING_STARTED.resource())}",
                     size = 12,
                 )
 
@@ -662,7 +668,7 @@ class SetupViewController(
                         .alignTopToBottomOf(title)
                         .alignStartToStartOf(title)
                         .margins(top = 50),
-                    text = "Where would you like to start?  We have a recommended tutorial if you haven't used ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET} before that'll help you get started. Or you can jump right into configuring everything now.",
+                    text = R.getString(player, S.GETTING_STARTED.resource()),
                     lineWidth = 500,
                     alignment = Alignment.LEFT,
                     size = 6,
@@ -674,8 +680,8 @@ class SetupViewController(
                         .alignTopToBottomOf(paragraphOne)
                         .alignStartToStartOf(paragraphOne)
                         .margins(top = 100),
-                    text = "${ChatColor.GOLD}Tutorial",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Tutorial",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.TUTORIAL.resource())}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.TUTORIAL.resource())}",
                     callback = object : Listener {
                         override fun invoke() {
                             tutorialCallback.invoke()
@@ -690,8 +696,8 @@ class SetupViewController(
                             .alignStartToStartOf(it)
                             .alignTopToBottomOf(it)
                             .margins(top = 100),
-                        text = "${ChatColor.GOLD}Setup",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Setup",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.SETUP.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.SETUP.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 nextCallback.invoke()
@@ -707,7 +713,7 @@ class SetupViewController(
                             .alignTopToBottomOf(it)
                             .alignStartToStartOf(title)
                             .margins(top = 100),
-                        text = "If you're looking for further support, you can visit our Spigot or Modrinth pages or join our Discord and chat with the devs directly, we'll be happy to hear from you with any questions or feedback you may have! Click the button below and the links will sent to you in chat.",
+                        text = R.getString(player, S.SETUP_SUPPORT_PARAGRAPH.resource()),
                         lineWidth = 500,
                         alignment = Alignment.LEFT,
                         size = 6,
@@ -719,13 +725,13 @@ class SetupViewController(
                             .alignTopToBottomOf(paragraphTwo)
                             .alignStartToStartOf(paragraphTwo)
                             .margins(top = 100),
-                        text = "${ChatColor.GOLD}Get Support Links",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Get Support Links",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.GET_SUPPORT_LINKS.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.GET_SUPPORT_LINKS.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
-                                player.sendMessage("${ChatColor.DARK_BLUE}[${ChatColor.BLUE}Discord${ChatColor.DARK_BLUE}]${ChatColor.GRAY}: https://discord.gg/tXvpdc3cZv")
-                                player.sendMessage("${ChatColor.DARK_GREEN}[${ChatColor.GREEN}Modrinth${ChatColor.DARK_GREEN}]${ChatColor.GRAY}: https://modrinth.com/plugin/apps!-beta")
-                                player.sendMessage("${ChatColor.GOLD}[${ChatColor.YELLOW}Spigot${ChatColor.GOLD}]${ChatColor.GRAY}: https://www.spigotmc.org/resources/apps-beta.126555/")
+                                player.sendMessage("${ChatColor.DARK_BLUE}[${ChatColor.BLUE}${R.getString(player, S.DISCORD.resource())}${ChatColor.DARK_BLUE}]${ChatColor.GRAY}: https://discord.gg/tXvpdc3cZv")
+                                player.sendMessage("${ChatColor.DARK_GREEN}[${ChatColor.GREEN}${R.getString(player, S.MODRINTH.resource())}${ChatColor.DARK_GREEN}]${ChatColor.GRAY}: https://modrinth.com/plugin/apps!-beta")
+                                player.sendMessage("${ChatColor.GOLD}[${ChatColor.YELLOW}${R.getString(player, S.SPIGOT.resource())}${ChatColor.GOLD}]${ChatColor.GRAY}: https://www.spigotmc.org/resources/apps-beta.126555/")
                             }
                         }
                     )

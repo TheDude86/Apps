@@ -10,6 +10,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -24,7 +25,7 @@ import javax.inject.Inject
 @AppScope
 class CheatsBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     cheatsListBlock: CheatsListBlock,
     spawnerBlock: SpawnerBlock,
     itemsBlock: ItemsBlock,
@@ -46,7 +47,7 @@ class CheatsBlock @Inject constructor(
 
 class CheatsViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), CheatsPresenter {
 
     private lateinit var cheatsListContainer: ViewContainer

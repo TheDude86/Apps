@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.spawn
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,8 +8,10 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -16,7 +19,7 @@ import javax.inject.Inject
 
 class SpawnBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     spawnRepository: SpawnRepository,
     teleportRepository: PlayerTeleportRepository,
 ): Block(player, origin) {
@@ -29,7 +32,7 @@ class SpawnBlock @Inject constructor(
 
 class SpawnViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
     private val spawnRepository: SpawnRepository,
 ): NavigationViewController(player, origin), SpawnPresenter {
 
@@ -51,7 +54,7 @@ class SpawnViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Spawn",
+            text = R.getString(player, S.SPAWN_TITLE.resource()),
             size = 16,
         )
 
@@ -62,8 +65,8 @@ class SpawnViewController(
                     .x(-400)
                     .centerVertically(),
                 size = 20,
-                text = "${ChatColor.GOLD}Spawn",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
+                text = R.getString(player, S.SPAWN_BUTTON.resource()),
+                highlightedText = R.getString(player, S.SPAWN_BUTTON.resource()).bolden(),
             )
 
             teleportBackButton = addButtonView(
@@ -72,8 +75,8 @@ class SpawnViewController(
                     .x(400)
                     .centerVertically(),
                 size = 20,
-                text = "${ChatColor.GOLD}Back",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                text = R.getString(player, S.BACK_BUTTON.resource()),
+                highlightedText = R.getString(player, S.BACK_BUTTON.resource()).bolden(),
             )
         } else {
             teleportBackButton = addButtonView(
@@ -81,8 +84,8 @@ class SpawnViewController(
                     .size(WRAP_CONTENT, WRAP_CONTENT)
                     .center(),
                 size = 20,
-                text = "${ChatColor.GOLD}Back",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                text = R.getString(player, S.BACK_BUTTON.resource()),
+                highlightedText = R.getString(player, S.BACK_BUTTON.resource()).bolden(),
             )
         }
 

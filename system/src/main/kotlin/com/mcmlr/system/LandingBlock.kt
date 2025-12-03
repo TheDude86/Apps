@@ -1,6 +1,17 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.block.*
+import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.views.ButtonView
+import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.placeholder.placeholders
 import com.mcmlr.system.products.applications.ApplicationsBlock
+import com.mcmlr.system.products.data.ApplicationsRepository
+import com.mcmlr.system.products.data.PermissionNode
+import com.mcmlr.system.products.data.PermissionsRepository
 import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.info.SetupBlock
 import com.mcmlr.system.products.info.TutorialBlock
@@ -9,27 +20,9 @@ import com.mcmlr.system.products.landing.FeedBlock
 import com.mcmlr.system.products.landing.SpawnShortcutBlock
 import com.mcmlr.system.products.market.MarketBlock
 import com.mcmlr.system.products.pong.PongBlock
-import com.mcmlr.system.products.settings.AdminBlock
+import com.mcmlr.system.products.spawn.SpawnRepository
 import com.mcmlr.system.products.teleport.TeleportBlock
 import com.mcmlr.system.products.warps.WarpsBlock
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.Context
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.views.ButtonView
-import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.blocks.api.views.TextView
-import com.mcmlr.blocks.api.views.ViewContainer
-import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.system.placeholder.placeholders
-import com.mcmlr.system.products.data.*
-import com.mcmlr.system.products.spawn.SpawnRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -38,7 +31,7 @@ import javax.inject.Inject
 
 class LandingBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     homesBlock: HomesBlock,
     warpsBlock: WarpsBlock,
     teleportBlock: TeleportBlock,
@@ -80,7 +73,7 @@ class LandingBlock @Inject constructor(
     override fun view() = view
 }
 
-class LandingViewController(private val player: Player, origin: Location, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
+class LandingViewController(private val player: Player, origin: Origin, private val systemConfigRepository: SystemConfigRepository): NavigationViewController(player, origin), LandingPresenter {
 
     private lateinit var title: TextView
     private lateinit var appsContainer: ViewContainer
@@ -155,8 +148,8 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .x(-200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Home",
+            text = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.HOME.resource())}",
         )
 
         appsButton = addButtonView(
@@ -165,8 +158,8 @@ class LandingViewController(private val player: Player, origin: Location, privat
                 .x(200)
                 .alignBottomToBottomOf(this)
                 .margins(bottom = 200),
-            text = "${ChatColor.GOLD}Apps",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Apps",
+            text = "${ChatColor.GOLD}${R.getString(player, S.APPS.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.APPS.resource())}",
         )
     }
 }
@@ -226,8 +219,6 @@ class LandingInteractor(
 
         attachChild(appsListBlock, presenter.getAppsBlockContainer())
         attachChild(feedBlock, presenter.getFeedBlockContainer())
-
-
 
         if (spawnRepository.model.enabled == true && permissionsRepository.checkPermission(player, PermissionNode.SPAWN) ||
             permissionsRepository.checkPermission(player, PermissionNode.BACK)) {

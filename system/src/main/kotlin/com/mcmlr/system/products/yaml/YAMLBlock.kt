@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.yaml
 
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -8,6 +9,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -28,14 +30,13 @@ import javax.inject.Inject
 
 class YAMLBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     resources: Resources,
     fileViewerBlock: FileViewerBlock,
 ): Block(player, origin) {
     companion object {
         val EDITABLE_FILE_TYPES = setOf("yml", "yaml")
     }
-
 
     private val view = YAMLViewController(player, origin)
     private val interactor = YAMLInteractor(player, resources, view, fileViewerBlock)
@@ -46,7 +47,7 @@ class YAMLBlock @Inject constructor(
 
 class YAMLViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), YAMLPresenter {
 
     private lateinit var appsFeed: ListFeedView
@@ -60,7 +61,7 @@ class YAMLViewController(
     override fun setSelectedFile(file: File, callback: (File) -> Unit) {
         selectedFileContainer.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
-                val icon = if (YAMLBlock.EDITABLE_FILE_TYPES.contains(file.extension)) "\uD83D\uDCDD" else "\uD83D\uDCC4"
+                val icon = if (YAMLBlock.EDITABLE_FILE_TYPES.contains(file.extension)) R.getString(player, S.EDITABLE_FILE_ICON.resource()) else R.getString(player, S.FILE_ICON.resource())
                 val fileIcon = addTextView(
                     modifier = Modifier()
                         .size(100, 100)
@@ -87,11 +88,11 @@ class YAMLViewController(
                         .alignTopToBottomOf(fileName)
                         .margins(start = 100, top = 25),
                     size = 7,
-                    text = "${ChatColor.GRAY}${file.length() / 1024}KB",
+                    text = "${ChatColor.GRAY}${file.length() / 1024}${R.getString(player, S.KB.resource())}",
                 )
 
-                val createdTime = Files.readAttributes<BasicFileAttributes>(file.toPath(), BasicFileAttributes::class.java).creationTime().toInstant().atZone(ZoneId.systemDefault())
-                val createTimeString = "${createdTime.month.name.titlecase()} ${createdTime.dayOfMonth}, ${createdTime.year} at ${createdTime.formattedLocalTime()}"
+                val createdTime = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java).creationTime().toInstant().atZone(ZoneId.systemDefault())
+                val createTimeString = "${createdTime.month.name.titlecase()} ${createdTime.dayOfMonth}, ${createdTime.year} ${R.getString(player, S.AT.resource())} ${createdTime.formattedLocalTime()}"
 
                 val fileCreated = addTextView(
                     modifier = Modifier()
@@ -100,11 +101,11 @@ class YAMLViewController(
                         .alignTopToBottomOf(fileSize)
                         .margins(start = 100, top = 35),
                     size = 7,
-                    text = "${ChatColor.GRAY}Created - ${ChatColor.RESET}$createTimeString",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.CREATED.resource())} - ${ChatColor.RESET}$createTimeString",
                 )
 
                 val modifiedTime = Instant.ofEpochMilli(file.lastModified()).atZone(ZoneId.systemDefault())
-                val modifiedString = "${modifiedTime.month.name.titlecase()} ${modifiedTime.dayOfMonth}, ${createdTime.year} at ${createdTime.formattedLocalTime()}"
+                val modifiedString = "${modifiedTime.month.name.titlecase()} ${modifiedTime.dayOfMonth}, ${createdTime.year} ${R.getString(player, S.AT.resource())} ${createdTime.formattedLocalTime()}"
 
                 val fileModified = addTextView(
                     modifier = Modifier()
@@ -113,7 +114,7 @@ class YAMLViewController(
                         .alignTopToBottomOf(fileCreated)
                         .margins(start = 100, top = 25),
                     size = 7,
-                    text = "${ChatColor.GRAY}Modified - ${ChatColor.RESET}$modifiedString",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.MODIFIED.resource())} - ${ChatColor.RESET}$modifiedString",
                 )
 
                 if (file.length() < 1000000) {
@@ -123,8 +124,8 @@ class YAMLViewController(
                             .alignTopToBottomOf(fileModified)
                             .alignBottomToBottomOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.GOLD}Open",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Open",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.OPEN.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.OPEN.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 callback.invoke(file)
@@ -145,8 +146,8 @@ class YAMLViewController(
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .alignStartToStartOf(this)
                         .centerVertically(),
-                    text = "${ChatColor.GOLD}Plugins${if (directories.isNotEmpty()) " >" else ""}",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Plugins${if (directories.isNotEmpty()) " >" else ""}",
+                    text = "${ChatColor.GOLD}${R.getString(player, S.PLUGINS.resource())}${if (directories.isNotEmpty()) " >" else ""}",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.PLUGINS.resource())}${if (directories.isNotEmpty()) " >" else ""}",
                     callback = object : Listener {
                         override fun invoke() {
                             callback.invoke(null)
@@ -194,7 +195,7 @@ class YAMLViewController(
                                         .margins(start = 50),
                                     size = 5,
                                     maxLength = 100,
-                                    text = "\uD83D\uDDC1 ${it.name}",
+                                    text = "\uD83D\uDDC1 ${it.name}", //TODO: Extract icon to string resource
                                     background = Color.fromARGB(0, 0, 0 ,0),
                                     callback = object : Listener {
                                         override fun invoke() {
@@ -212,7 +213,7 @@ class YAMLViewController(
                         modifier = Modifier().size(MATCH_PARENT, 75),
                         content = object : ContextListener<ViewContainer>() {
                             override fun ViewContainer.invoke() {
-                                val icon = if (YAMLBlock.EDITABLE_FILE_TYPES.contains(it.extension)) "\uD83D\uDCDD" else "\uD83D\uDCC4"
+                                val icon = if (YAMLBlock.EDITABLE_FILE_TYPES.contains(it.extension)) R.getString(player, S.EDITABLE_FILE_ICON.resource()) else R.getString(player, S.FILE_ICON.resource())
                                 addButtonView(
                                     modifier = Modifier()
                                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -245,7 +246,7 @@ class YAMLViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Files",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.FILES.resource())}",
             size = 16,
         )
 

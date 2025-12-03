@@ -1,10 +1,15 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
+import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
+import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.DaggerSystemEnvironmentComponent
 import com.mcmlr.system.dagger.SystemEnvironmentComponent
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -59,9 +64,14 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
         Bukkit.getServer().pluginManager.registerEvents(defaultEventHandlerFactory, plugin)
     }
 
+    fun preloadLocale(player: Player) {
+        R.loadStrings(name(), player.locale)
+    }
+
     fun launch(player: Player, deeplink: String?) {
+        R.loadStrings(name(), player.locale)
         val app = getInstance(player)
-        app.configure(this, deeplink, origin(player), inputRepository)
+        app.configure(this, deeplink, Origin(player), inputRepository)
 
         if (appMap.containsKey(app.player.uniqueId)) {
             appMap[app.player.uniqueId]?.shutdown()
@@ -69,14 +79,6 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
 
         app.create(resources)
         appMap[app.player.uniqueId] = app
-    }
-
-    private fun origin(player: Player): Location {
-        val o = player.eyeLocation.clone()
-        o.pitch = 0f //TODO: Fix pitch translation issue & remove
-
-        val direction = o.direction.normalize()
-        return o.add(direction.multiply(0.15))
     }
 
     fun register(app: Environment<App>) {

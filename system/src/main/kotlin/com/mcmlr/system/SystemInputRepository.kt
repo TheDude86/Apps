@@ -132,4 +132,6 @@ class SystemInputRepository: InputRepository {
     }
 
     override fun onlinePlayerEventStream(): Flow<PlayerOnlineEvent> = onlinePlayersEventStream
+
+    override fun isActiveUser(player: Player): Boolean = activeUsers.contains(player.uniqueId)
 }

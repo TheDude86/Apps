@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "com.mcmlr"
-    version = "1.1.3"
+    version = "1.2.9"
 }
 
 subprojects {
@@ -30,6 +30,13 @@ subprojects {
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.3.0"))
+
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 }
 
 val targetJavaVersion = 21

@@ -1,10 +1,13 @@
 package com.mcmlr.system.dagger
 
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.homes.HomesApp
 import com.mcmlr.system.products.pong.PongApp
+import com.mcmlr.system.products.preferences.PreferencesRepository
 import com.mcmlr.system.products.settings.AdminApp
 import dagger.BindsInstance
 import dagger.Component
@@ -130,14 +133,20 @@ class SystemAppModule {
     @Provides
     fun player(app: SystemApp): Player = app.player
 
+//    @AppScope
+//    @Provides
+//    fun oldrigin(player: Player): Location {
+//        val o = player.eyeLocation.clone()
+//        o.pitch = 0f
+//
+//        val direction = o.direction.normalize()
+//        return o.add(direction.multiply(BaseApp.SCREEN_DISTANCE))
+//    }
+
     @AppScope
     @Provides
-    fun origin(player: Player): Location {
-        val o = player.eyeLocation.clone()
-        o.pitch = 0f
-
-        val direction = o.direction.normalize()
-        return o.add(direction.multiply(0.15))
+    fun origin(player: Player, preferencesRepository: PreferencesRepository): Origin {
+        return Origin(player, preferencesRepository.model.screenDistance)
     }
 }
 

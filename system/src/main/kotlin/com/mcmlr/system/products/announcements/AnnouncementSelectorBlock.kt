@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.announcements
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.announcements.AnnouncementSelectorBlock.Companion.ANNOUNCEMENT_SELECT_BUNDLE_KEY
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -8,6 +9,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -23,7 +25,7 @@ import javax.inject.Inject
 
 class AnnouncementSelectorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     announcementsRepository: AnnouncementsRepository,
 ): Block(player, origin) {
     companion object {
@@ -38,8 +40,8 @@ class AnnouncementSelectorBlock @Inject constructor(
 }
 
 class AnnouncementSelectorViewController(
-    player: Player,
-    origin: Location,
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), AnnouncementSelectorPresenter {
 
     private lateinit var feed: ListFeedView
@@ -140,7 +142,7 @@ class AnnouncementSelectorViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Select Post to Edit",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.ANNOUNCEMENT_SELECTOR_TITLE.resource())}",
             size = 16,
         )
 

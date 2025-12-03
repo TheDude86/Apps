@@ -1,15 +1,13 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
-import com.mcmlr.blocks.api.log
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.ChatColor
-import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -20,15 +18,13 @@ import org.bukkit.util.Vector
 import org.joml.AxisAngle4f
 import org.joml.Vector3f
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 class RootView(
     private val player: Player,
-    private val origin: Location,
+    private val origin: Origin,
     override var offset: Int = 0,
 ): Viewable {
     companion object {
@@ -93,7 +89,7 @@ class RootView(
         when(event) {
             CursorEvent.MOVE -> updateV2(position)
             CursorEvent.CLICK -> click()
-            CursorEvent.CLEAR -> { } //Do nothing
+            CursorEvent.CLEAR, CursorEvent.CALIBRATE -> { } //Do nothing
         }
     }
 
@@ -101,7 +97,7 @@ class RootView(
         when(event) {
             CursorEvent.MOVE -> update(displays, cursor)
             CursorEvent.CLICK -> click()
-            CursorEvent.CLEAR -> { } //Do nothing
+            CursorEvent.CLEAR, CursorEvent.CALIBRATE -> { } //Do nothing
         }
     }
 
@@ -496,10 +492,10 @@ class RootView(
     }
 
     private fun getDisplayLocation(x: Int, y: Int, level: Int): Location {
-        val xVector = xVector(origin.direction.normalize())
-        val yVector = yVector(origin.direction.normalize())
-        val direction = origin.direction.normalize()
-        val location = origin.clone().subtract(direction.multiply(0.004 * level)).add(yVector.multiply(y / 8000.toDouble())).subtract(xVector.multiply(x / 8000.toDouble()))
+        val xVector = xVector(origin.location().direction.normalize())
+        val yVector = yVector(origin.location().direction.normalize())
+        val direction = origin.location().direction.normalize()
+        val location = origin.location().clone().subtract(direction.multiply(0.004 * level)).add(yVector.multiply(y / 8000.toDouble())).subtract(xVector.multiply(x / 8000.toDouble()))
         location.yaw += 180
         location.pitch *= -1
         return location

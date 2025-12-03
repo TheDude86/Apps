@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.kits
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -12,6 +13,7 @@ import com.mcmlr.blocks.api.block.NavigationPresenter
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.fromMCItem
 import com.mcmlr.system.IconSelectionBlock
@@ -23,13 +25,13 @@ import javax.inject.Inject
 
 class CreateKitBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     iconSelectionBlock: IconSelectionBlock,
     addKitContentBlock: AddKitContentBlock,
     private val kitRepository: KitRepository,
 ): Block(player, origin) {
     private val view = CreateKitViewController(player, origin)
-    private val interactor = CreateKitInteractor(view, iconSelectionBlock, addKitContentBlock, kitRepository)
+    private val interactor = CreateKitInteractor(player, view, iconSelectionBlock, addKitContentBlock, kitRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -52,7 +54,7 @@ class CreateKitBlock @Inject constructor(
 
 class CreateKitViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), CreateKitPresenter {
 
     private lateinit var iconContainer: ViewContainer
@@ -83,8 +85,8 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .alignStartToStartOf(this),
-                        text = "${ChatColor.GOLD}Update Kit",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update Kit",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.UPDATE_KIT.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.UPDATE_KIT.resource())}",
                     )
 
                     deleteKitButton = addButtonView(
@@ -92,8 +94,8 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .alignEndToEndOf(this),
-                        text = "${ChatColor.RED}Delete Kit",
-                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete Kit",
+                        text = "${ChatColor.RED}${R.getString(player, S.DELETE_KIT.resource())}",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}${R.getString(player, S.DELETE_KIT.resource())}",
                     )
                 } else {
                     createKitButton = addButtonView(
@@ -101,8 +103,8 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.GOLD}Create Kit",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Kit",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.CREATE_KIT.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CREATE_KIT.resource())}",
                     )
                 }
             }
@@ -162,7 +164,7 @@ class CreateKitViewController(
                                     .alignStartToEndOf(icon)
                                     .centerVertically()
                                     .margins(start = 10),
-                                text = "${it.amount} x ${it.material.fromMCItem()}",
+                                text = R.getString(player, S.AVAILABLE_NOW.resource(), it.amount, it.material.fromMCItem()),
                                 size = 4,
                             )
 
@@ -262,7 +264,7 @@ class CreateKitViewController(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
-                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
+                        text = R.getString(player, S.SET_KIT_ICON.resource()),
                         size = 7,
                     )
                 } else {
@@ -291,7 +293,7 @@ class CreateKitViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Create a Kit",
+            text = R.getString(player, S.CREATE_KIT_TITLE.resource()),
             size = 16,
         )
 
@@ -313,7 +315,7 @@ class CreateKitViewController(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
-                        text = "${ChatColor.GRAY}${ChatColor.BOLD}Set Kit\nIcon",
+                        text = R.getString(player, S.SET_KIT_ICON.resource()),
                         size = 7,
                     )
                 }
@@ -334,7 +336,7 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "Set Kit Name",
+                        text = R.getString(player, S.SET_KIT_NAME.resource()),
                         teleportDuration = 0,
                     )
 
@@ -344,7 +346,7 @@ class CreateKitViewController(
                             .alignStartToStartOf(this)
                             .alignTopToBottomOf(kitName)
                             .margins(top = 50, start = 50),
-                        text = "Set Kit Price",
+                        text = R.getString(player, S.SET_KIT_PRICE.resource()),
                         teleportDuration = 0,
                     )
 
@@ -354,7 +356,7 @@ class CreateKitViewController(
                             .alignTopToBottomOf(kitPrice)
                             .alignStartToStartOf(kitPrice)
                             .margins(top = 40),
-                        text = "Set Kit Cooldown",
+                        text = R.getString(player, S.SET_KIT_COOLDOWN.resource()),
                         size = 6,
                         teleportDuration = 0,
                     )
@@ -364,7 +366,7 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToBottomOf(kitCooldown)
                             .alignStartToStartOf(kitCooldown),
-                        text = "${ChatColor.GRAY}Setting the cooldown to a negative number makes the kit single use.",
+                        text = R.getString(player, S.SET_KIT_COOLDOWN_SUBTITLE.resource()),
                         teleportDuration = 0,
                         lineWidth = 400,
                         size = 3,
@@ -376,7 +378,7 @@ class CreateKitViewController(
                             .alignTopToBottomOf(cooldownSubtitle)
                             .alignStartToStartOf(cooldownSubtitle)
                             .margins(top = 40),
-                        text = "Set Kit Description",
+                        text = R.getString(player, S.SET_KIT_DESCRIPTION.resource()),
                         teleportDuration = 0,
                         size = 6,
                     )
@@ -387,7 +389,7 @@ class CreateKitViewController(
                             .alignTopToBottomOf(kitName)
                             .alignEndToEndOf(this)
                             .margins(top = 50, end = 200),
-                        text = "${ChatColor.BOLD}Kit Contents",
+                        text = R.getString(player, S.KIT_CONTENTS_TITLE.resource()),
                         size = 6,
                     )
 
@@ -404,8 +406,8 @@ class CreateKitViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToBottomOf(kitContents)
                             .alignStartToStartOf(kitContents),
-                        text = "${ChatColor.GOLD}+ Add Item",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Item",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.ADD_ITEM_BUTTON.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.ADD_ITEM_BUTTON.resource())}",
                         size = 5
                     )
 
@@ -415,8 +417,8 @@ class CreateKitViewController(
                             .alignTopToBottomOf(kitContents)
                             .alignStartToEndOf(addItemButton)
                             .margins(start = 50),
-                        text = "${ChatColor.GOLD}+ Add Command",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+ Add Command",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.ADD_COMMAND_BUTTON.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.ADD_COMMAND_BUTTON.resource())}",
                         size = 5,
                     )
                 }
@@ -486,6 +488,7 @@ interface CreateKitPresenter: NavigationPresenter {
 }
 
 class CreateKitInteractor(
+    private val player: Player,
     private val presenter: CreateKitPresenter,
     private val iconSelectionBlock: IconSelectionBlock,
     private val addKitContentBlock: AddKitContentBlock,
@@ -588,7 +591,7 @@ class CreateKitInteractor(
             override fun invoke(text: String) {
                 val price = text.toDoubleOrNull()
                 if (price == null) {
-                    presenter.setPrice("Set Kit Price")
+                    presenter.setPrice(R.getString(player, S.SET_KIT_PRICE.resource()))
                     kitRepository.builder.kitPrice = null
                     return
                 }
@@ -601,9 +604,9 @@ class CreateKitInteractor(
 
         kitRepository.builder.kitCooldown?.let {
             if (it < 0) {
-                presenter.setCooldown("Single Use")
+                presenter.setCooldown(R.getString(player, S.SINGLE_USE.resource()))
             } else {
-                presenter.setCooldown("$it Seconds")
+                presenter.setCooldown(R.getString(player, S.SECONDS_INPUT.resource(), it))
             }
         }
 
@@ -611,15 +614,15 @@ class CreateKitInteractor(
             override fun invoke(text: String) {
                 val cooldown = text.toIntOrNull()
                 if (cooldown == null) {
-                    presenter.setCooldown("Set Kit Cooldown")
+                    presenter.setCooldown(R.getString(player, S.SET_KIT_COOLDOWN.resource()))
                     kitRepository.builder.kitCooldown = null
                     return
                 }
 
                 if (cooldown < 0) {
-                    presenter.setCooldown("Single Use")
+                    presenter.setCooldown(R.getString(player, S.SINGLE_USE.resource()))
                 } else {
-                    presenter.setCooldown("$cooldown Seconds")
+                    presenter.setCooldown(R.getString(player, S.SECONDS_INPUT.resource(), cooldown))
                 }
 
                 kitRepository.builder.kitCooldown = cooldown

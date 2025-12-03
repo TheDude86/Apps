@@ -6,6 +6,7 @@ import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
 import kotlinx.coroutines.flow.Flow
@@ -15,17 +16,17 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 
 abstract class BaseApp(val player: Player): FlowDisposer(), Context {
-
     private val cursorStream: MutableSharedFlow<CursorModel> = MutableSharedFlow()
 
     protected lateinit var head: Block
-    protected lateinit var origin: Location
+    protected lateinit var origin: Origin
     protected lateinit var parentEnvironment: BaseEnvironment<BaseApp>
 
     protected var parentApp: BaseApp? = null
     protected var deeplink: String? = null
 
     lateinit var resources: Resources
+    var calibrating = false
 
     abstract fun root(): Block
 

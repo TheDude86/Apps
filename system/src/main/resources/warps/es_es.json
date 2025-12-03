@@ -1,0 +1,27 @@
+{
+  "warps_title": "§l§o§nWarps",
+  "add_new_warp": "Agregar nuevo warp",
+  "remove_warp": "Eliminar warp",
+  "cancel": "Cancelar",
+  "empty_warps_list": "§7§oAún no hay warps\nestablecidos...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cDebes esperar %s segundo%s antes de poder teletransportarte",
+  "delay_message": "Serás teletransportado en %s segundo%s",
+  "plural": "s",
+  "add_warp_title": "§l§o§nAgregar un Nuevo Warp",
+  "warp_name_placeholder": "§7§oHaz clic para establecer el nombre del warp...",
+  "select_icon": "§7Seleccionar\nÍcono...",
+  "save_warp": "§6Guardar warp",
+  "warp_error_message": "§cError: El desarrollador fue demasiado perezoso para descubrir qué salió mal...",
+
+  "warp_config_title": "§l§o§nConfiguración del Warp",
+  "config_delay_title": "Retraso de Teletransporte",
+  "config_delay_message": "§7La cantidad de tiempo, en segundos, que el jugador debe esperar antes de ser teletransportado a un warp seleccionado.",
+  "config_default_wait_value": "§60 Segundos",
+  "config_cooldown_title": "Enfriamiento de Teletransporte",
+  "config_cooldown_message": "§7La cantidad de tiempo, en segundos, que el jugador debe esperar después de teletransportarse antes de poder hacerlo de nuevo.",
+  "config_input_seconds_placeholder": "%s Segundo%s",
+  "config_delay_error_message": "§c¡Los valores de retraso deben ser números enteros!",
+  "config_cooldown_error_message": "§c¡Los valores de enfriamiento deben ser números enteros!"
+}

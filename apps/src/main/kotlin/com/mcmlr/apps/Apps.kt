@@ -5,8 +5,10 @@ import com.mcmlr.blocks.api.AppInjector
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
+import com.mcmlr.blocks.api.data.PlayerOnlineEventType
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.CommandRepository
@@ -93,6 +95,10 @@ class Apps : JavaPlugin() {
             }
         })
 
+        systemConfigRepository.model.defaultLanguage.toLocale()?.let {
+            R.defaultLocale = it
+        }
+
         AppInjector.register(AdminEnvironment())
         AppInjector.register(AnnouncementsEnvironment())
         AppInjector.register(HomesEnvironment())
@@ -114,6 +120,9 @@ class Apps : JavaPlugin() {
             .collectOn(DudeDispatcher())
             .collectLatest { event ->
                 if (event.eventType == JOINED) {
+
+                    systemEnvironment.preloadLocale(event.player)
+
                     if (event.player.isOp && !systemConfigRepository.model.setupComplete) {
                         notificationManager.sendCTAMessage(event.player, "${ChatColor.WHITE}${ChatColor.ITALIC}Hello, thank you for trying out ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC}! We've created a short setup guide to help you configure ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC} however you like.\n", "Start setup", "Click to start", "/. setup://")
                     }

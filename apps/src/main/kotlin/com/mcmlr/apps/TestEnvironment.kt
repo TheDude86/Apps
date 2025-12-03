@@ -9,6 +9,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -40,7 +41,7 @@ class TestApp(player: Player): App(player) {
 
 }
 
-class TestBlock(player: Player, origin: Location,): Block(player, origin) {
+class TestBlock(player: Player, origin: Origin,): Block(player, origin) {
     private val view = TestViewController(player, origin)
     private val interactor = TestInteractor(player, view)
 
@@ -48,7 +49,7 @@ class TestBlock(player: Player, origin: Location,): Block(player, origin) {
     override fun interactor(): Interactor = interactor
 }
 
-class TestViewController(player: Player, origin: Location): NavigationViewController(player, origin), TestPresenter {
+class TestViewController(player: Player, origin: Origin): NavigationViewController(player, origin), TestPresenter {
 
     override fun createView() {
         super.createView()

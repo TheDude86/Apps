@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 class CheatsListBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     selectedCheatRepository: SelectedCheatRepository,
 ): Block(player, origin) {
     private val view = CheatsListViewController(player, origin)
@@ -28,7 +29,7 @@ class CheatsListBlock @Inject constructor(
 
 class CheatsListViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), CheatsListPresenter {
 
     private lateinit var cheatsView: ListFeedView
@@ -94,6 +95,7 @@ class CheatsListInteractor(
     }
 }
 
+//TODO: Add to strings file
 enum class CheatType(val title: String, val cta: String, val description: String) {
     SPAWNER("spawner", "Choose Mob", "This cheat will let you select a mob and the next mob spawner you left click will be set to that mob."),
     SUICIDE("suicide", "Die X(", "This cheat allows you to kill yourself. (It's painless)"),

@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class FeedBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     announcementsRepository: AnnouncementsRepository,
 ): Block(player, origin) {
     private val view = FeedViewController(player = player, origin = origin)
@@ -45,7 +46,7 @@ class FeedBlock @Inject constructor(
 class FeedViewController(
     var enableCTA: Boolean = true,
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), FeedPresenter {
 
     private lateinit var feed: ListFeedView
@@ -168,18 +169,6 @@ class FeedInteractor(
         val feed = customFeed ?: announcementsRepository.announcements()
         presenter.setFeed(feed)
 
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onResume(newOrigin: Location?) {
-        super.onResume(newOrigin)
-    }
-
-    override fun onClose() {
-        super.onClose()
     }
 
     fun updateFeed(announcements: List<AnnouncementModel>) {

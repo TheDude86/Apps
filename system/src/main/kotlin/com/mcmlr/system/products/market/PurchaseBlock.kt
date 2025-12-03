@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -9,7 +10,9 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -20,7 +23,7 @@ import kotlin.math.max
 
 class PurchaseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     orderRepository: OrderRepository,
     marketRepository: MarketRepository,
     vaultRepository: VaultRepository,
@@ -33,7 +36,10 @@ class PurchaseBlock @Inject constructor(
     override fun view(): ViewController = view
 }
 
-class PurchaseViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class PurchaseViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin),
     PurchasePresenter {
 
     private lateinit var pageTitle: TextView
@@ -60,7 +66,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Purchase",
+            text = R.getString(player, S.PURCHASE_TITLE.resource()),
             size = 16,
         )
 
@@ -137,8 +143,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignTopToBottomOf(price)
                             .centerHorizontally()
                             .margins(top = 400),
-                        text = "${ChatColor.GRAY}Quantity",
-                        highlightedText = "${ChatColor.GRAY}${ChatColor.BOLD}Quantity",
+                        text = R.getString(player, S.QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     add = addButtonView(
@@ -148,8 +154,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignBottomToBottomOf(quantityInput)
                             .alignStartToEndOf(quantityInput)
                             .margins(start = 300),
-                        text = "${ChatColor.GOLD}+",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}+",
+                        text = R.getString(player, S.ADD_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.ADD_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     max = addButtonView(
@@ -159,8 +165,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignBottomToBottomOf(add)
                             .alignStartToEndOf(add)
                             .margins(start = 40),
-                        text = "${ChatColor.GOLD}Max",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Max",
+                        text = R.getString(player, S.MAX_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.MAX_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     subtract = addButtonView(
@@ -170,8 +176,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignBottomToBottomOf(quantityInput)
                             .alignEndToStartOf(quantityInput)
                             .margins(end = 300),
-                        text = "${ChatColor.GOLD}-",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}-",
+                        text = R.getString(player, S.LOWER_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.LOWER_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     zero = addButtonView(
@@ -181,8 +187,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignBottomToBottomOf(subtract)
                             .alignEndToStartOf(subtract)
                             .margins(end = 40),
-                        text = "${ChatColor.GOLD}Zero",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Zero",
+                        text = R.getString(player, S.ZERO_QUANTITY_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.ZERO_QUANTITY_BUTTON.resource()).bolden(),
                     )
 
                     purchase = addButtonView(
@@ -191,8 +197,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                             .alignTopToBottomOf(quantityInput)
                             .centerHorizontally()
                             .margins(top = 50),
-                        text = "${ChatColor.GOLD}Purchase",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Purchase",
+                        text = R.getString(player, S.PURCHASE_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.PURCHASE_BUTTON.resource()).bolden(),
                     )
 
                     message = addTextView(
@@ -230,7 +236,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .centerHorizontally()
                         .alignTopToBottomOf(pageTitle),
-                    text = "${ChatColor.DARK_RED}${ChatColor.BOLD}Purchase failed...",
+                    text = R.getString(player, S.PURCHASE_FAILED_TITLE.resource()),
                     size = 24,
                 )
 
@@ -240,7 +246,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .centerHorizontally()
                         .alignTopToBottomOf(titleView)
                         .margins(top = 100),
-                    text = "Something happened to the listing and is no longer available for purchase.",
+                    text = R.getString(player, S.PURCHASE_FAILED_MESSAGE.resource()),
                     alignment = Alignment.LEFT,
                 )
 
@@ -250,8 +256,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .alignTopToBottomOf(errorMessageView)
                         .centerHorizontally()
                         .margins(top = 350),
-                    text = "${ChatColor.GOLD}Continue",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    text = R.getString(player, S.CONTINUE_BUTTON.resource()),
+                    highlightedText = R.getString(player, S.CONTINUE_BUTTON.resource()).bolden(),
                     callback = onFinish,
                 )
             }
@@ -272,7 +278,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .size(WRAP_CONTENT, WRAP_CONTENT)
                         .centerHorizontally()
                         .alignTopToBottomOf(pageTitle),
-                    text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}Purchase Complete!",
+                    text = R.getString(player, S.PURCHASE_COMPLETE_TITLE.resource()),
                     size = 24,
                 )
 
@@ -300,7 +306,7 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .alignStartToEndOf(materialView)
                         .alignTopToBottomOf(materialNameView)
                         .margins(start = 150),
-                    text = "${ChatColor.GRAY}Amount: ${order.quantity}",
+                    text = R.getString(player, S.CREATED_ORDER_AMOUNT.resource(), order.quantity),
                     size = 8,
                 )
 
@@ -321,8 +327,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
                         .alignTopToBottomOf(priceView)
                         .centerHorizontally()
                         .margins(top = 150),
-                    text = "${ChatColor.GOLD}Continue",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Continue",
+                    text = R.getString(player, S.CONTINUE_BUTTON.resource()),
+                    highlightedText = R.getString(player, S.CONTINUE_BUTTON.resource()).bolden(),
                     callback = onFinish,
                 )
             }
@@ -334,8 +340,8 @@ class PurchaseViewController(player: Player, origin: Location): NavigationViewCo
         name.text = "${ChatColor.BOLD}${material.name.fromMCItem()}"
 
         sellerName.text = "${ChatColor.GRAY}${Bukkit.getOfflinePlayer(order.playerId).name ?: "Dumbass don't have a name"}"
-        quantity.text = "${order.quantity} in stock"
-        price.text = "$${"%.2f".format(order.price / 100f)} per item"
+        quantity.text = R.getString(player, S.PURCHASE_OFFER_QUANTITY.resource(), order.quantity)
+        price.text = R.getString(player, S.PURCHASE_OFFER_PRICE.resource(), "%.2f".format(order.price / 100f))
 
         val playerHead = ItemStack(Material.PLAYER_HEAD)
         val headMeta = playerHead.itemMeta as SkullMeta
@@ -426,8 +432,8 @@ class PurchaseInteractor(
             override fun invoke(text: String) {
                 val quantityInput = text.toIntOrNull()
                 if (quantityInput == null) {
-                    presenter.updateQuantityText("0")
-                    presenter.setMessage("${ChatColor.RED}Quantities must be a valid, whole number!")
+                    presenter.updateQuantityText(R.getString(player, S.DEFAULT_QUANTITY.resource()))
+                    presenter.setMessage(R.getString(player, S.INVALID_QUANTITY_ERROR_MESSAGE.resource()))
                 } else {
                     quantity = quantityInput
                     updateOrder()
@@ -467,7 +473,7 @@ class PurchaseInteractor(
             override fun invoke() {
                 if (checkValidQuantity() && checkValidBalance()) {
                     if (quantity < 1) {
-                        presenter.setMessage("${ChatColor.RED}Quantities must be above zero!")
+                        presenter.setMessage(R.getString(player, S.PURCHASE_QUANTITY_BELOW_ZERO_ERROR_MESSAGE.resource()))
                     } else {
                         val material = order?.first ?: return
                         val playerId = order.second.playerId
@@ -502,7 +508,7 @@ class PurchaseInteractor(
 
     private fun updateQuantityText() {
         val cost = (orderRepository.purchaseOrder?.second?.price ?: 0) * quantity
-        val quantityString = if (quantity == 0) "0" else "$quantity ($${"%.2f".format(cost / 100f)})"
+        val quantityString = if (quantity == 0) R.getString(player, S.DEFAULT_QUANTITY.resource()) else R.getString(player, S.PURCHASE_QUANTITY_TEXT.resource(), quantity, "%.2f".format(cost / 100f))
 
         presenter.updateQuantityText(quantityString)
 
@@ -512,7 +518,7 @@ class PurchaseInteractor(
         val cost = (orderRepository.purchaseOrder?.second?.price ?: 0) * quantity
         val playerBalance = vaultRepository.economy?.getBalance(player) ?: 0.0
         if (playerBalance < (cost / 100.0)) {
-            presenter.setMessage("${ChatColor.YELLOW}You don't have enough money to purchase this much ${orderRepository.purchaseOrder?.first?.name?.fromMCItem()}")
+            presenter.setMessage(R.getString(player, S.INSUFFICIENT_FUNDS_WARNING_MESSAGE.resource()))
         }
 
         return playerBalance >= (cost / 100.0)
@@ -521,7 +527,7 @@ class PurchaseInteractor(
     private fun checkValidQuantity(): Boolean {
         val quantity = orderRepository.purchaseOrder?.second?.quantity ?: return false
         if (this.quantity > quantity) {
-            presenter.setMessage("${ChatColor.YELLOW}There's not enough ${orderRepository.purchaseOrder?.first?.name?.fromMCItem()} in stock!")
+            presenter.setMessage(R.getString(player, S.INSUFFICIENT_STOCK_WARNING_MESSAGE.resource()))
         }
 
         return this.quantity <= quantity

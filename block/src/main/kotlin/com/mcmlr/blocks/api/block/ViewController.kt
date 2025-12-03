@@ -2,9 +2,9 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.log
+import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player
 
 open class ViewController(
     private val player: Player,
-    private val origin: Location,
+    private val origin: Origin,
     background: Color = Color.fromARGB(192, 0, 0, 0),
 ): ViewContainer(
     modifier = Modifier().size(MATCH_PARENT, MATCH_PARENT),
@@ -22,6 +22,8 @@ open class ViewController(
 
     private var isChild: Boolean = false
     private var isScrolling: Boolean = false
+
+    var calibrating: Boolean = false
 
     private lateinit var router: Router
     private lateinit var context: Context
@@ -32,11 +34,11 @@ open class ViewController(
 
     fun updateOrigin(origin: Location) {
         val direction = origin.direction.normalize()
-        val o = origin.clone().add(direction.multiply(0.15))
+        val o = origin.clone().add(direction.multiply(this.origin.distance))
 
-        this.origin.x = o.x
-        this.origin.y = o.y
-        this.origin.z = o.z
+        this.origin.location().x = o.x
+        this.origin.location().y = o.y
+        this.origin.location().z = o.z
     }
 
     fun configure(isChild: Boolean, router: Router, context: Context) {
@@ -111,6 +113,8 @@ open class ViewController(
     }
 
     override fun setScrolling(isScrolling: Boolean) {
+        if (calibrating) return
+
         if (isScrolling) {
             player.inventory.heldItemSlot = 4
         }
@@ -128,4 +132,4 @@ open class ViewController(
     protected fun hasParent() = router.hasParent()
 }
 
-class EmptyViewController(player: Player, origin: Location): ViewController(player, origin)
+class EmptyViewController(player: Player, origin: Origin): ViewController(player, origin)

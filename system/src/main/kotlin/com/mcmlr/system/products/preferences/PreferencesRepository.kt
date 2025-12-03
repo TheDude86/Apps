@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.preferences
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.Resources
@@ -7,6 +8,7 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.entity.Player
@@ -22,7 +24,11 @@ class PreferencesRepository @Inject constructor(
     private var editFavoriteIndex = 0
 
     init {
-        loadModel("Preferences/${player.uniqueId}", "preferences", PreferencesModel())
+        loadModelSynced("Preferences/${player.uniqueId}", "preferences", PreferencesModel())
+    }
+
+    fun setScreenDistance(distance: Double) = save {
+        this.model.screenDistance = distance
     }
 
     fun setFavorite(model: BaseEnvironment<BaseApp>) = save {
@@ -53,4 +59,5 @@ class PreferencesRepository @Inject constructor(
 
 data class PreferencesModel(
     val favoriteApps: MutableList<String> = mutableListOf("Preferences"),
+    var screenDistance: Double = 0.15
 ): ConfigModel()

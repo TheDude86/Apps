@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.pong
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ItemView
 import com.mcmlr.blocks.api.views.Modifier
@@ -32,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class PongBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     pongRepository: PongRepository,
 ): Block(player, origin) {
     private val view = PongViewController(player, origin)
@@ -43,8 +45,8 @@ class PongBlock @Inject constructor(
 }
 
 class PongViewController(
-    player: Player,
-    origin: Location
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), PongPresenter {
 
     private lateinit var point: TextView
@@ -69,8 +71,7 @@ class PongViewController(
     }
 
     override fun playPoint(score: PongScore, callback: Listener) {
-        val title = if (score == PongScore.PLAYER) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}GOAL..."
-        point.update(text = title)
+        point.update(text = R.getString(player, (if (score == PongScore.PLAYER) S.WIN_GOAL else S.LOSE_GOAL).resource()))
 
         CoroutineScope(Dispatchers.IO).launch {
             delay(3.seconds)
@@ -83,7 +84,7 @@ class PongViewController(
     }
 
     override fun playGameOver(winner: Boolean, callback: Listener) {
-        val title = if (winner) "${ChatColor.GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}Winner!!!" else "${ChatColor.RED}${ChatColor.BOLD}${ChatColor.ITALIC}You Lost..."
+        val title = if (winner) R.getString(player, S.WINNER.resource()) else R.getString(player, S.LOSER.resource())
         point.update(text = title)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -97,7 +98,7 @@ class PongViewController(
     }
 
     override fun setScore(score: Pair<Int, Int>) {
-        this.score.update(text = "${ChatColor.BOLD}${score.first} - ${score.second}")
+        this.score.update(text = R.getString(player, S.SCORE_TEMPLATE.resource(), score.first, score.second))
     }
 
     override fun restart() {
@@ -117,7 +118,7 @@ class PongViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.DARK_GREEN}${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Pong!",
+            text = R.getString(player, S.PONG_TITLE.resource()),
             size = 16,
         )
 
@@ -133,14 +134,14 @@ class PongViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.BOLD}0 - 0",
+                        text = R.getString(player, S.DEFAULT_SCORE.resource()),
                     )
 
                     play = addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .center(),
-                        text = "Play",
+                        text = R.getString(player, S.PLAY.resource()),
                         size = 24,
                         callback = object : Listener {
                             override fun invoke() {

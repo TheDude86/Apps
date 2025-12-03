@@ -2,6 +2,7 @@ package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -9,10 +10,12 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
@@ -22,7 +25,7 @@ import javax.inject.Inject
 
 class SelectFavoriteBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     applicationsRepository: ApplicationsRepository,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
@@ -34,8 +37,8 @@ class SelectFavoriteBlock @Inject constructor(
 }
 
 class SelectFavoriteViewController(
-    player: Player,
-    origin: Location
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), SelectFavoritePresenter {
 
     private lateinit var appsFeedView: ListFeedView
@@ -121,7 +124,7 @@ class SelectFavoriteViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Select Favorite",
+            text = R.getString(player, S.SELECT_FAVORITE_TITLE.resource()),
             size = 16,
         )
 
@@ -147,8 +150,8 @@ class SelectFavoriteViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToBottomOf(appsFeedView)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Remove",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove",
+            text = R.getString(player, S.REMOVE_BUTTON.resource()),
+            highlightedText = R.getString(player, S.REMOVE_BUTTON.resource()).bolden(),
         )
     }
 }

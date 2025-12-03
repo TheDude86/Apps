@@ -12,6 +12,7 @@ data class AppConfigModel(
     var title: String = "${ChatColor.BOLD}Welcome to ${ChatColor.GOLD}${ChatColor.BOLD}Apps!",
     var usePermissions: Boolean = true,
     var setupComplete: Boolean = false,
+    var defaultLanguage: String = "en_US",
     var enabledApps: List<String> = listOf(
         "admin",
         "announcements",

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.teleport
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,7 +8,9 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.data.*
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -17,7 +20,7 @@ import javax.inject.Inject
 
 class TeleportRequestBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     private val notificationManager: NotificationManager,
@@ -29,7 +32,10 @@ class TeleportRequestBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class TeleportRequestViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportRequestViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin),
     TeleportRequestPresenter {
 
     private lateinit var content: ViewContainer
@@ -48,7 +54,7 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Send Request",
+            text = R.getString(player, S.SEND_REQUEST_TITLE.resource()),
             size = 16,
         )
 
@@ -76,7 +82,7 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
                             .centerHorizontally()
                             .alignTopToBottomOf(head)
                             .margins(top = 300),
-                        text = "Player name"
+                        text = R.getString(player, S.PLAYER_NAME.resource()),
                     )
 
                     tpa = addButtonView(
@@ -85,8 +91,8 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
                             .position(-400, 0)
                             .alignTopToBottomOf(name)
                             .margins(top = 50),
-                        text = "${ChatColor.GOLD}Teleport\nto them",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto them",
+                        text = R.getString(player, S.TELEPORT_TO_PLAYER_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.TELEPORT_TO_PLAYER_BUTTON.resource()).bolden(),
                     )
 
                     tpahere = addButtonView(
@@ -95,8 +101,8 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
                             .position(400, 0)
                             .alignTopToBottomOf(name)
                             .margins(top = 50),
-                        text = "${ChatColor.GOLD}Teleport\nto you",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Teleport\nto you",
+                        text = R.getString(player, S.TELEPORT_TO_YOU_BUTTON.resource()),
+                        highlightedText = R.getString(player, S.TELEPORT_TO_YOU_BUTTON.resource()).bolden(),
                     )
 
                     statusMessage = addTextView(
@@ -134,9 +140,9 @@ class TeleportRequestViewController(player: Player, origin: Location): Navigatio
     override fun updateRequestStatus(status: TeleportStatus) {
         statusMessage.visible = true
         statusMessage.text = when (status) {
-            TeleportStatus.NEW -> "${ChatColor.GREEN}Teleport request sent!"
-            TeleportStatus.UPDATE -> "${ChatColor.GREEN}Teleport request updated!"
-            TeleportStatus.FAILED -> "${ChatColor.RED}You've already sent this player a request!"
+            TeleportStatus.NEW -> R.getString(player, S.SENT_REQUEST_MESSAGE.resource())
+            TeleportStatus.UPDATE -> R.getString(player, S.UPDATE_REQUEST_MESSAGE.resource())
+            TeleportStatus.FAILED -> R.getString(player, S.ERROR_REQUEST_MESSAGE.resource())
         }
 
         updateTextDisplay(statusMessage)
@@ -176,7 +182,15 @@ class TeleportRequestInteractor(
             override fun invoke() {
                 val status = teleportRepository.sendRequest(this@TeleportRequestInteractor.player, player, TeleportRequestType.GOTO)
                 presenter.updateRequestStatus(status)
-                if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${this@TeleportRequestInteractor.player.displayName} requested to teleport to you", "Open the teleport menu", "Click to respond", "/. teleport://")
+                if (status != TeleportStatus.FAILED) {
+                    notificationManager.sendCTAMessage(
+                        player,
+                        R.getString(player, S.REQUEST_PLAYER_TELEPORT_CHAT_MESSAGE.resource(), this@TeleportRequestInteractor.player.displayName),
+                        R.getString(player, S.REQUEST_TELEPORT_HOVER_MESSAGE.resource()),
+                        R.getString(player, S.REQUEST_CHAT_CTA.resource()),
+                        "/. teleport://"
+                    )
+                }
             }
         })
 
@@ -184,7 +198,15 @@ class TeleportRequestInteractor(
             override fun invoke() {
                 val status = teleportRepository.sendRequest(this@TeleportRequestInteractor.player, player, TeleportRequestType.COME)
                 presenter.updateRequestStatus(status)
-                if (status != TeleportStatus.FAILED) notificationManager.sendCTAMessage(player, "${ChatColor.GRAY}${ChatColor.ITALIC}${this@TeleportRequestInteractor.player.displayName} requested you to teleport to them", "Open the teleport menu", "Click to respond", "/. teleport://")
+                if (status != TeleportStatus.FAILED) {
+                    notificationManager.sendCTAMessage(
+                        player,
+                        R.getString(player, S.REQUEST_YOU_TELEPORT_CHAT_MESSAGE.resource(), this@TeleportRequestInteractor.player.displayName),
+                        R.getString(player, S.REQUEST_TELEPORT_HOVER_MESSAGE.resource()),
+                        R.getString(player, S.REQUEST_CHAT_CTA.resource()),
+                        "/. teleport://"
+                    )
+                }
             }
         })
     }

@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.teleport
 
 import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -8,9 +9,11 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.blocks.core.bolden
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -26,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class TeleportResponseBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     private val teleportRepository: TeleportRepository,
     private val playerTeleportRepository: PlayerTeleportRepository,
     teleportConfigRepository: TeleportConfigRepository
@@ -38,7 +41,10 @@ class TeleportResponseBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class TeleportResponseViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportResponseViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin),
     TeleportResponsePresenter {
 
     private lateinit var content: ViewContainer
@@ -57,7 +63,7 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Respond",
+            text = R.getString(player, S.TELEPORT_RESPOND_TITLE.resource()),
             size = 16,
         )
 
@@ -85,7 +91,7 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                             .centerHorizontally()
                             .alignTopToBottomOf(head)
                             .margins(top = 300),
-                        text = "Player name"
+                        text = R.getString(player, S.PLAYER_NAME.resource())
                     )
 
                     accept = addButtonView(
@@ -94,8 +100,8 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                             .position(-400, 0)
                             .alignTopToBottomOf(name)
                             .margins(top = 50),
-                        text = "${ChatColor.GREEN}Accept",
-                        highlightedText = "${ChatColor.GREEN}${ChatColor.BOLD}Accept",
+                        text = R.getString(player, S.ACCEPT.resource()),
+                        highlightedText = R.getString(player, S.ACCEPT.resource()).bolden(),
                     )
 
                     reject = addButtonView(
@@ -104,8 +110,8 @@ class TeleportResponseViewController(player: Player, origin: Location): Navigati
                             .position(400, 0)
                             .alignTopToBottomOf(name)
                             .margins(top = 50),
-                        text = "${ChatColor.RED}Reject",
-                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Reject",
+                        text = R.getString(player, S.REJECT.resource()),
+                        highlightedText = R.getString(player, S.REJECT.resource()).bolden(),
                     )
 
                     messageView = addTextView(
@@ -178,22 +184,20 @@ class TeleportResponseInteractor(
             override fun invoke() {
                 val wait = playerTeleportRepository.canTeleport(player) / 1000
                 if (wait > 0) {
-                    presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+                    presenter.setMessage(R.getString(player, S.COOLDOWN_ERROR_MESSAGE.resource(), wait, if (wait != 1L) R.getString(player, S.PLURAL.resource()) else ""))
                     return
                 }
 
                 teleportRepository.deleteRequest(player.uniqueId, request)
-                log(Log.ASSERT, "Delete request")
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    log(Log.ASSERT, "Background wait...")
                     var delay = teleportConfigRepository.model.delay
                     while (delay > 0) {
                         CoroutineScope(DudeDispatcher()).launch {
                             val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
                             val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
-                            val passengerMessage = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
-                            val destinationMessage = "${ChatColor.DARK_AQUA}${passenger.displayName} will be teleported to you in $delay second${if (delay != 1) "s" else ""}"
+                            val passengerMessage = R.getString(player, S.PASSENGER_MESSAGE.resource(), delay, if (delay != 1) R.getString(player, S.PLURAL.resource()) else "")
+                            val destinationMessage = R.getString(player, S.DESTINATION_MESSAGE.resource(), delay, if (delay != 1) R.getString(player, S.PLURAL.resource()) else "")
 
                             //TODO: Check spigot vs paper
                             passenger.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(passengerMessage))
@@ -205,7 +209,6 @@ class TeleportResponseInteractor(
                     }
 
                     CoroutineScope(DudeDispatcher()).launch {
-                        log(Log.ASSERT, "Foreground teleport Type=${request.type}")
                         if (request.type == TeleportRequestType.GOTO) {
                             request.sender.teleport(player)
                         } else {

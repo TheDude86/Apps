@@ -4,6 +4,7 @@ import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.placeholder.placeholders
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 class ProfileBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): Block(player, origin) {
     private val view = ProfileViewController(player, origin)
     private val interactor = ProfileInteractor(view)
@@ -25,7 +26,7 @@ class ProfileBlock @Inject constructor(
 
 class ProfileViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): ViewController(player, origin), ProfilePresenter {
 
     private lateinit var avatarContainer: ViewContainer

@@ -20,7 +20,7 @@ class AnnouncementsEnvironment(): Environment<AnnouncementsApp>() {
 
     override fun icon(): String = "http://textures.minecraft.net/texture/d6b0ce673b3f28c4610cea7ce042c850e34cc988cb0d7c803979f50dd0f15731"
 
-    override fun permission(): String? = PermissionNode.ADMIN.node
+    override fun permission(): String = PermissionNode.ADMIN.node
 
     override fun summary(): String = "Messages that server staff can write for all players to see on their home screen."
 }

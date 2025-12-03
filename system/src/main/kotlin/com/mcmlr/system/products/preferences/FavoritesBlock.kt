@@ -2,12 +2,14 @@ package com.mcmlr.system.products.preferences
 
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -18,7 +20,7 @@ import javax.inject.Inject
 
 class FavoritesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     selectFavoriteBlock: SelectFavoriteBlock,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
@@ -30,8 +32,8 @@ class FavoritesBlock @Inject constructor(
 }
 
 class FavoritesViewController(
-    player: Player,
-    origin: Location,
+    private val player: Player,
+    origin: Origin,
 ): ViewController(player, origin), FavoritesPresenter {
 
     private lateinit var favoriteSlots: List<ViewContainer>
@@ -77,7 +79,7 @@ class FavoritesViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(this)
                 .alignTopToTopOf(this),
-            text = "${ChatColor.BOLD}Favorite Apps"
+            text = R.getString(player, S.FAVORITE_APPS_TITLE.resource()),
         )
 
         val favoriteAppsSubtitle = addTextView(
@@ -87,7 +89,7 @@ class FavoritesViewController(
                 .alignStartToStartOf(favoriteAppsTitle)
                 .margins(top = 40),
             alignment = Alignment.LEFT,
-            text = "${ChatColor.GRAY}${ChatColor.ITALIC}Select up to 5 Apps to be your favorites." //TODO: Fix text line measurements
+            text = R.getString(player, S.FAVORITE_APPS_SUBTITLE.resource()) //TODO: Fix text line measurements
         )
 
         val slotSize = 150

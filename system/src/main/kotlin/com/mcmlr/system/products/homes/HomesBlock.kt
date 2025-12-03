@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.homes
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -28,7 +30,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class HomesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     addHomeBlock: AddHomeBlock,
     homesRepository: HomesRepository,
     homesConfigRepository: HomesConfigRepository,
@@ -41,8 +43,8 @@ class HomesBlock @Inject constructor(
 }
 
 class HomesViewController(
-    player: Player,
-    origin: Location
+    private val player: Player,
+    origin: Origin
 ): NavigationViewController(player, origin), HomesPresenter {
 
     private lateinit var container: FeedView
@@ -59,7 +61,7 @@ class HomesViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Homes",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.HOMES.resource())}",
             size = 16,
         )
 
@@ -77,8 +79,8 @@ class HomesViewController(
                 .position(-600, 0)
                 .alignTopToBottomOf(container)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Add new home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Add new home"
+            text = "${ChatColor.GOLD}${R.getString(player, S.ADD_NEW_HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.ADD_NEW_HOME.resource())}"
         )
 
         removeHomeButton = addButtonView(
@@ -87,8 +89,8 @@ class HomesViewController(
                 .position(600, 0)
                 .alignTopToBottomOf(container)
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}Remove home",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove home"
+            text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_HOME.resource())}",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
         )
 
         messageView = addTextView(
@@ -113,11 +115,11 @@ class HomesViewController(
 
     override fun setHomes(homes: List<HomeModel>, deleteMode: Boolean, listener: HomeActionListener) {
         if (deleteMode) {
-            removeHomeButton.text = "${ChatColor.GOLD}Cancel"
-            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Cancel"
+            removeHomeButton.text = "${ChatColor.GOLD}${R.getString(player, S.CANCEL.resource())}"
+            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CANCEL.resource())}"
         } else {
-            removeHomeButton.text = "${ChatColor.GOLD}Remove home"
-            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Remove home"
+            removeHomeButton.text = "${ChatColor.GOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
+            removeHomeButton.highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.REMOVE_HOME.resource())}"
         }
 
         container.updateView(object : ContextListener<ViewContainer>() {
@@ -129,7 +131,7 @@ class HomesViewController(
                             .alignTopToTopOf(this)
                             .centerHorizontally()
                             .margins(top = 10),
-                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}You don't have any\nhomes yet...",
+                        text = "${ChatColor.GRAY}${ChatColor.ITALIC}${R.getString(player, S.EMPTY_HOMES_MESSAGE.resource())}",
                         size = 8,
                     )
 
@@ -145,14 +147,12 @@ class HomesViewController(
                             .centerHorizontally()
                             .margins(top = 10)
                     } else {
-                        homeView?.let {
-                            Modifier()
-                                .size(WRAP_CONTENT, WRAP_CONTENT)
-                                .alignTopToBottomOf(it)
-                                .centerHorizontally()
-                                .margins(top = 25)
-                        }
-                    } ?: return@forEach
+                        Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignTopToBottomOf(homeView)
+                            .centerHorizontally()
+                            .margins(top = 25)
+                    }
 
 
                     homeView = addButtonView(
@@ -169,9 +169,9 @@ class HomesViewController(
                     addItemView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignEndToStartOf(homeView!!)
-                            .alignTopToTopOf(homeView!!)
-                            .alignBottomToBottomOf(homeView!!)
+                            .alignEndToStartOf(homeView)
+                            .alignTopToTopOf(homeView)
+                            .alignBottomToBottomOf(homeView)
                             .margins(end = 64),
                         item = home.icon,
                     )
@@ -179,9 +179,9 @@ class HomesViewController(
                     addButtonView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .alignStartToEndOf(homeView!!)
-                            .alignTopToTopOf(homeView!!)
-                            .alignBottomToBottomOf(homeView!!)
+                            .alignStartToEndOf(homeView)
+                            .alignTopToTopOf(homeView)
+                            .alignBottomToBottomOf(homeView)
                             .margins(start = 64),
                         text = if (deleteMode) "${ChatColor.RED}\uD83D\uDDD1" else "✎",
                         highlightedText = if (deleteMode) "${ChatColor.RED}${ChatColor.BOLD}\uD83D\uDDD1" else "${ChatColor.BOLD}✎",
@@ -227,7 +227,7 @@ class HomesInteractor(
                 val model = homesRepository.latest(player) ?: return
                 val maxHomes = homesConfigRepository.model.maxHomes
                 if (model.homes.size >= maxHomes) {
-                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of homes set, please delete a home before adding a new one")
+                    presenter.setMessage("${ChatColor.RED}${R.getString(player, S.MAX_HOMES_ERROR.resource())}")
                     return
                 }
 
@@ -270,7 +270,15 @@ class HomesInteractor(
     override fun teleport(home: HomeModel) {
         val wait = homesRepository.canTeleport(player) / 1000
         if (wait > 0) {
-            presenter.setMessage("${ChatColor.RED}You must wait $wait second${if (wait != 1L) "s" else ""} before you can teleport")
+
+            val string = R.getString(
+                player,
+                S.TELEPORT_WAIT_MESSAGE.resource(),
+                wait,
+                if (wait != 1L) R.getString(player, S.PLURAL.resource()) else ""
+            )
+            val message = "${ChatColor.RED}$string"
+            presenter.setMessage(message)
             return
         }
 
@@ -279,7 +287,14 @@ class HomesInteractor(
             var delay = homesConfigRepository.model.delay
             while (delay > 0) {
                 CoroutineScope(DudeDispatcher()).launch {
-                    val message = "${ChatColor.DARK_AQUA}You will be teleported in $delay second${if (delay != 1) "s" else ""}"
+
+                    val string = R.getString(
+                        player,
+                        S.TELEPORT_DELAY_MESSAGE.resource(),
+                        delay,
+                        if (delay != 1) R.getString(player, S.PLURAL.resource()) else ""
+                    )
+                    val message = "${ChatColor.DARK_AQUA}$string"
                     //TODO: Check spigot vs paper
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(message))
                 }

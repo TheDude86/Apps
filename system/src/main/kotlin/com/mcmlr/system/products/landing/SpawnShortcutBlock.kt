@@ -1,11 +1,14 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.system.S
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -21,7 +24,7 @@ import javax.inject.Inject
 
 class SpawnShortcutBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     spawnRepository: SpawnRepository,
     playerTeleportRepository: PlayerTeleportRepository,
     permissionsRepository: PermissionsRepository,
@@ -35,7 +38,7 @@ class SpawnShortcutBlock @Inject constructor(
 
 class SpawnShortcutViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
     private val spawnRepository: SpawnRepository,
     private val permissionsRepository: PermissionsRepository,
 ): ViewController(player, origin), SpawnShortcutPresenter {
@@ -59,7 +62,7 @@ class SpawnShortcutViewController(
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) "Spawn" else "Back"}",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${if (spawnRepository.model.enabled) R.getString(player, S.SPAWN.resource()) else R.getString(player, S.BACK.resource())}",
             size = 6,
         )
 
@@ -69,7 +72,7 @@ class SpawnShortcutViewController(
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(this)
                 .margins(top = 50, start = 50),
-            text = "${ChatColor.GRAY}${ChatColor.BOLD}Teleports",
+            text = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.TELEPORTS.resource())}",
             size = 5,
         )
 
@@ -89,8 +92,8 @@ class SpawnShortcutViewController(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
                                 .alignStartToStartOf(this),
-                            text = "${ChatColor.GOLD}Spawn",
-                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Spawn",
+                            text = "${ChatColor.GOLD}${R.getString(player, S.SPAWN.resource())}",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.SPAWN.resource())}",
                             size = 8,
                         )
                     }
@@ -100,8 +103,8 @@ class SpawnShortcutViewController(
                             modifier = Modifier()
                                 .size(WRAP_CONTENT, WRAP_CONTENT)
                                 .alignStartToStartOf(this),
-                            text = "${ChatColor.GOLD}Back",
-                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Back",
+                            text = "${ChatColor.GOLD}${R.getString(player, S.BACK.resource())}",
+                            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.BACK.resource())}",
                             size = 8,
                         )
                     }

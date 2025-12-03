@@ -10,6 +10,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.colorize
 import com.mcmlr.blocks.core.underline
@@ -23,7 +24,7 @@ import kotlin.math.min
 
 class TextEditorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
 ): Block(player, origin) {
     companion object {
         const val TEXT_BUNDLE_KEY = "text"
@@ -42,8 +43,8 @@ class TextEditorBlock @Inject constructor(
 }
 
 class TextEditorBlockViewController(
-    player: Player,
-    origin: Location
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), TextEditorPresenter {
 
     private lateinit var messageContainer: ListFeedView

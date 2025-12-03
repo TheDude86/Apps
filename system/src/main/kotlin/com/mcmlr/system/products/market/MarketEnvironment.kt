@@ -1,14 +1,11 @@
 package com.mcmlr.system.products.market
 
-import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.ConfigurableApp
 import com.mcmlr.blocks.api.app.ConfigurableEnvironment
-import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.MarketAppComponent
 import com.mcmlr.system.products.data.PermissionNode
-import com.mcmlr.system.products.settings.MarketConfigBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

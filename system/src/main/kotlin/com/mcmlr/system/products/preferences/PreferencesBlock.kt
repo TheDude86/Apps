@@ -1,11 +1,13 @@
 package com.mcmlr.system.products.preferences
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.ChatColor
@@ -16,7 +18,7 @@ import javax.inject.Inject
 
 class PreferencesBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     favoritesBlock: FavoritesBlock,
 ): Block(player, origin) {
     private val view = PreferencesViewController(player, origin)
@@ -27,8 +29,8 @@ class PreferencesBlock @Inject constructor(
 }
 
 class PreferencesViewController(
-    player: Player,
-    origin: Location,
+    private val player: Player,
+    origin: Origin,
 ): NavigationViewController(player, origin), PreferencesPresenter {
 
     private lateinit var favoritesBlock: ViewContainer
@@ -44,7 +46,7 @@ class PreferencesViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Preferences",
+            text = R.getString(player, S.PREFERENCES_TITLE.resource()),
             size = 16,
         )
 

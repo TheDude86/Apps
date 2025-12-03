@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.market
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,7 +8,9 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -17,7 +20,7 @@ import javax.inject.Inject
 
 class MyOffersBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     offerCreatorBlock: OfferCreatorBlock,
     offerEditorBlock: OfferEditorBlock,
     marketRepository: MarketRepository,
@@ -31,7 +34,10 @@ class MyOffersBlock @Inject constructor(
     override fun interactor(): Interactor = interactor
 }
 
-class MyOffersViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class MyOffersViewController(
+    private val player: Player,
+    origin: Origin
+): NavigationViewController(player, origin),
     MyOffersPresenter {
     private lateinit var myOffersButton: ButtonView
     private lateinit var feedView: FeedView
@@ -46,7 +52,7 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}My Offers",
+            text = R.getString(player, S.MY_OFFERS_TITLE.resource()),
             size = 16,
         )
 
@@ -65,8 +71,8 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
                 .alignTopToBottomOf(feedView)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.GOLD}New Offer",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}New Offer",
+            text = R.getString(player, S.NEW_OFFER_BUTTON.resource()),
+            highlightedText = R.getString(player, S.NEW_OFFER_BUTTON.resource()).bolden(),
         )
 
         messageView = addTextView(
@@ -107,14 +113,15 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
                             }
                         },
                         content = object : ContextListener<ViewContainer>() {
-                            override fun ViewContainer.invoke() {                    val icon = addItemView(
-                                modifier = Modifier()
-                                    .size(40, 40)
-                                    .alignStartToStartOf(this)
-                                    .centerVertically()
-                                    .margins(start = 100),
-                                item = model.first,
-                            )
+                            override fun ViewContainer.invoke() {
+                                val icon = addItemView(
+                                    modifier = Modifier()
+                                        .size(40, 40)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 100),
+                                    item = model.first,
+                                )
 
                                 val itemName = addTextView(
                                     modifier = Modifier()
@@ -122,7 +129,8 @@ class MyOffersViewController(player: Player, origin: Location): NavigationViewCo
                                         .alignStartToEndOf(icon)
                                         .alignTopToTopOf(icon)
                                         .margins(start = 150, top = -20),
-                                    text = "${model.second.quantity} of ${model.first.name.fromMCItem()}",
+//                                    text = "${model.second.quantity} of ${model.first.name.fromMCItem()}",
+                                    text = R.getString(player, S.OFFER_ROW.resource(), model.second.quantity, model.first.name.fromMCItem()),
                                     size = 6,
                                     alignment = Alignment.LEFT,
                                 )
@@ -207,7 +215,7 @@ class MyOffersInteractor(
                 if (marketConfigRepository.model.maxOrders < 1 || myOrders.size < marketConfigRepository.model.maxOrders) {
                     routeTo(offerCreatorBlock)
                 } else {
-                    presenter.setMessage("${ChatColor.RED}You already have the maximum number of orders created, please delete an order before adding a new one")
+                    presenter.setMessage(R.getString(player, S.MAX_OPEN_OFFERS_ERROR_MESSAGE.resource()))
                 }
             }
         })

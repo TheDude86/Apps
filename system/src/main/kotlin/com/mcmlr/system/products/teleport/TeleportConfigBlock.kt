@@ -1,39 +1,42 @@
-package com.mcmlr.system.products.settings
+package com.mcmlr.system.products.teleport
 
-import com.mcmlr.blocks.api.Resources
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
-import com.mcmlr.system.products.teleport.TeleportConfigRepository
+import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 import kotlin.math.max
 
 class TeleportConfigBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     teleportConfigRepository: TeleportConfigRepository,
 ) : Block(player, origin) {
     private val view: TeleportConfigViewController = TeleportConfigViewController(player, origin)
-    private val interactor: TeleportConfigInteractor = TeleportConfigInteractor(view, teleportConfigRepository)
+    private val interactor: TeleportConfigInteractor = TeleportConfigInteractor(player, view, teleportConfigRepository)
 
     override fun interactor(): Interactor = interactor
 
     override fun view() = view
 }
 
-class TeleportConfigViewController(player: Player, origin: Location): NavigationViewController(player, origin),
+class TeleportConfigViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin),
     TeleportConfigPresenter {
 
     private lateinit var delayView: TextInputView
@@ -53,7 +56,7 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Teleport Settings",
+            text = R.getString(player, S.TELEPORT_CONFIG_FILE.resource()),
             size = 16,
         )
 
@@ -73,7 +76,7 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                             .alignTopToTopOf(this)
                             .alignStartToStartOf(this),
                         size = 6,
-                        text = "Teleport Delay",
+                        text = R.getString(player, S.CONFIG_DELAY_TITLE.resource()),
                     )
 
                     val teleportDelayMessage = addTextView(
@@ -84,7 +87,7 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                         alignment = Alignment.LEFT,
                         lineWidth = 300,
                         size = 4,
-                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait before being teleported to a selected warp.",
+                        text = R.getString(player, S.CONFIG_DELAY_MESSAGE.resource()),
                     )
 
                     delayView = addTextInputView(
@@ -94,8 +97,8 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                             .alignTopToBottomOf(teleportDelayTitle)
                             .alignBottomToTopOf(teleportDelayMessage),
                         size = 6,
-                        text = "${ChatColor.GOLD}0 Seconds",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                        text = R.getString(player, S.CONFIG_DEFAULT_WAIT_VALUE.resource()),
+                        highlightedText = R.getString(player, S.CONFIG_DEFAULT_WAIT_VALUE.resource()).bolden(),
                     )
 
                     val teleportCooldownTitle = addTextView(
@@ -105,7 +108,7 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                             .alignStartToStartOf(this)
                             .margins(top = 100),
                         size = 6,
-                        text = "Teleport Cooldown",
+                        text = R.getString(player, S.CONFIG_COOLDOWN_TITLE.resource()),
                     )
 
                     val teleportCooldownMessage = addTextView(
@@ -116,7 +119,7 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                         alignment = Alignment.LEFT,
                         lineWidth = 300,
                         size = 4,
-                        text = "${ChatColor.GRAY}The amount of time, in seconds, the player must wait after teleporting to a warp before they can teleport again.",
+                        text = R.getString(player, S.CONFIG_COOLDOWN_MESSAGE.resource()),
                     )
 
                     cooldownView = addTextInputView(
@@ -126,8 +129,8 @@ class TeleportConfigViewController(player: Player, origin: Location): Navigation
                             .alignTopToBottomOf(teleportCooldownTitle)
                             .alignBottomToTopOf(teleportCooldownMessage),
                         size = 6,
-                        text = "${ChatColor.GOLD}0 Seconds",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}0 Seconds",
+                        text = R.getString(player, S.CONFIG_DEFAULT_WAIT_VALUE.resource()),
+                        highlightedText = R.getString(player, S.CONFIG_DEFAULT_WAIT_VALUE.resource()),
                     )
 
                     messageView = addTextView(
@@ -169,6 +172,7 @@ interface TeleportConfigPresenter: Presenter {
 }
 
 class TeleportConfigInteractor(
+    private val player: Player,
     private val presenter: TeleportConfigPresenter,
     private val teleportConfigRepository: TeleportConfigRepository,
 ): Interactor(presenter) {
@@ -178,22 +182,22 @@ class TeleportConfigInteractor(
         val teleportDelay = teleportConfigRepository.delay()
         val cooldown = teleportConfigRepository.cooldown()
 
-        presenter.updateDelayText("$teleportDelay Second${if (teleportDelay != 1) "s" else ""}")
-        presenter.updateCooldownText("$cooldown Second${if (cooldown != 1) "s" else ""}")
+        presenter.updateDelayText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), teleportDelay, if (teleportDelay != 1) R.getString(player, S.PLURAL.resource()) else ""))
+        presenter.updateCooldownText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), cooldown, if (cooldown != 1) R.getString(player, S.PLURAL.resource()) else ""))
 
         presenter.setDelayListener(object : TextListener {
             override fun invoke(text: String) {
                 val delay = text.toIntOrNull()
                 if (delay == null) {
                     val defaultDelay = teleportConfigRepository.delay()
-                    presenter.setMessage("${ChatColor.RED}Teleport delay values must be whole numbers!")
-                    presenter.updateDelayText("$defaultDelay Second${if (defaultDelay != 1) "s" else ""}")
+                    presenter.setMessage(R.getString(player, S.CONFIG_DELAY_ERROR_MESSAGE.resource()))
+                    presenter.updateDelayText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), defaultDelay, if (defaultDelay != 1) R.getString(player, S.PLURAL.resource()) else ""))
                     return
                 }
 
                 val delaySeconds = max(0, delay)
                 teleportConfigRepository.updateTeleportDelay(delaySeconds)
-                presenter.updateDelayText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
+                presenter.updateDelayText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), delaySeconds, if (delaySeconds != 1) R.getString(player, S.PLURAL.resource()) else ""))
 
                 presenter.setMessage("")
             }
@@ -204,14 +208,14 @@ class TeleportConfigInteractor(
                 val delay = text.toIntOrNull()
                 if (delay == null) {
                     val defaultCooldown = teleportConfigRepository.cooldown()
-                    presenter.setMessage("${ChatColor.RED}Teleport cooldown values must be whole numbers!")
-                    presenter.updateCooldownText("$defaultCooldown Second${if (defaultCooldown != 1) "s" else ""}")
+                    presenter.setMessage(R.getString(player, S.CONFIG_COOLDOWN_ERROR_MESSAGE.resource()))
+                    presenter.updateCooldownText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), defaultCooldown, if (defaultCooldown != 1) R.getString(player, S.PLURAL.resource()) else ""))
                     return
                 }
 
                 val delaySeconds = max(0, delay)
                 teleportConfigRepository.updateTeleportCooldown(delaySeconds)
-                presenter.updateCooldownText("$delaySeconds Second${if (delaySeconds != 1) "s" else ""}")
+                presenter.updateCooldownText(R.getString(player, S.CONFIG_INPUT_SECONDS_PLACEHOLDER.resource(), delaySeconds, if (delaySeconds != 1) R.getString(player, S.PLURAL.resource()) else ""))
 
                 presenter.setMessage("")
             }

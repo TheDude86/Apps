@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.support
 
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,11 +8,13 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.system.products.yaml.S
 import com.mcmlr.system.products.yaml.YAMLBlock
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -21,7 +24,7 @@ import javax.inject.Inject
 
 class FileViewerBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     fileEditorBlock: FileEditorBlock,
 ): Block(player, origin) {
     private val view = FileViewerViewController(player, origin)
@@ -37,8 +40,11 @@ class FileViewerBlock @Inject constructor(
     }
 }
 
-class FileViewerViewController(player: Player, origin: Location): NavigationViewController(player, origin), FileViewerPresenter {
-    var title = "File"
+class FileViewerViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin), FileViewerPresenter {
+    var title = R.getString(player, S.FILE.resource())
     var editable = true
 
     private lateinit var fileView: ListFeedView
@@ -96,8 +102,8 @@ class FileViewerViewController(player: Player, origin: Location): NavigationView
                     .alignStartToStartOf(fileView)
                     .alignBottomToTopOf(fileView)
                     .margins(bottom = 50),
-                text = "${ChatColor.GOLD}Edit",
-                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Edit",
+                text = "${ChatColor.GOLD}${R.getString(player, S.EDIT.resource())}",
+                highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.EDIT.resource())}",
             )
         }
     }
@@ -121,10 +127,10 @@ class FileViewerInteractor(
         val file = editingFile
 
         if (file == null) {
-            player.sendMessage("${ChatColor.RED}Error: No file has been selected!")
+            player.sendMessage("${ChatColor.RED}${R.getString(player, S.ERROR_NO_FILE_SELECTED.resource())}")
             return
         } else if (!file.exists()) {
-            player.sendMessage("${ChatColor.RED}Error: file ${ChatColor.BOLD}${file.name} ${ChatColor.RED}doesn't exist!")
+            player.sendMessage("${ChatColor.RED}${R.getString(player, S.ERROR_FILE.resource())} ${ChatColor.BOLD}${file.name} ${ChatColor.RED}${R.getString(player, S.DOESNT_EXIST.resource())}")
             return
         }
 

@@ -4,12 +4,15 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.system.S
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -22,7 +25,7 @@ import javax.inject.Inject
 
 class AppsListBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     preferencesRepository: PreferencesRepository,
 ): Block(player, origin) {
     private val view = AppsListViewController(player, origin)
@@ -33,8 +36,8 @@ class AppsListBlock @Inject constructor(
 }
 
 class AppsListViewController(
-    player: Player,
-    origin: Location,
+    private val player: Player,
+    origin: Origin,
 ): ViewController(player, origin), AppsListPresenter {
 
     private lateinit var listView: ListView
@@ -91,7 +94,7 @@ class AppsListViewController(
                 .alignTopToTopOf(this)
                 .centerHorizontally()
                 .margins(top = 50),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}Apps",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${R.getString(player, S.APPS.resource())}",
             size = 6,
         )
 
@@ -101,7 +104,7 @@ class AppsListViewController(
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(this)
                 .margins(top = 50, start = 50),
-            text = "${ChatColor.GRAY}${ChatColor.BOLD}Favorites",
+            text = "${ChatColor.GRAY}${ChatColor.BOLD}${R.getString(player, S.FAVORITES.resource())}",
             size = 5,
         )
 

@@ -1,6 +1,7 @@
 package com.mcmlr.system.products.announcements
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -12,6 +13,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.colorize
@@ -28,7 +30,7 @@ import javax.inject.Inject
 
 class AnnouncementEditorBlock @Inject constructor(
     player: Player,
-    origin: Location,
+    origin: Origin,
     announcementsRepository: AnnouncementsRepository,
     textEditorBlock: TextEditorBlock,
 ): Block(player, origin) {
@@ -55,7 +57,7 @@ class AnnouncementEditorBlock @Inject constructor(
 
 class AnnouncementEditorViewController(
     private val player: Player,
-    origin: Location,
+    origin: Origin,
 ): NavigationViewController(player, origin), AnnouncementEditorPresenter {
 
     private lateinit var editorFeed: FeedView
@@ -139,7 +141,7 @@ class AnnouncementEditorViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}Create Post",
+            text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.CREATE_POST.resource())}",
             size = 16,
         )
 
@@ -167,8 +169,8 @@ class AnnouncementEditorViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.GOLD}Create Post",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Post",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.CREATE_POST.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CREATE_POST.resource())}",
                         background = Color.fromARGB(0, 0, 0, 0)
                     )
 
@@ -198,8 +200,8 @@ class AnnouncementEditorViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .x(-400)
                             .alignTopToTopOf(this),
-                        text = "${ChatColor.GOLD}Update Post",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Update Post",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.UPDATE_POST.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.UPDATE_POST.resource())}",
                     )
 
                     deletePostView = addButtonView(
@@ -207,8 +209,8 @@ class AnnouncementEditorViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .x(400)
                             .alignTopToTopOf(this),
-                        text = "${ChatColor.RED}Delete Post",
-                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}Delete Post",
+                        text = "${ChatColor.RED}${R.getString(player, S.DELETE_POST.resource())}",
+                        highlightedText = "${ChatColor.RED}${ChatColor.BOLD}${R.getString(player, S.DELETE_POST.resource())}",
                         callback = object : Listener {
                             override fun invoke() {
                                 deletePostCallback.invoke()
@@ -231,8 +233,8 @@ class AnnouncementEditorViewController(
                             .size(WRAP_CONTENT, WRAP_CONTENT)
                             .alignTopToTopOf(this)
                             .centerHorizontally(),
-                        text = "${ChatColor.GOLD}Create Post",
-                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Create Post",
+                        text = "${ChatColor.GOLD}${R.getString(player, S.CREATE_POST.resource())}",
+                        highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${R.getString(player, S.CREATE_POST.resource())}",
                     )
 
                     errorMessageView = addTextView(
@@ -259,7 +261,7 @@ class AnnouncementEditorViewController(
                         .alignStartToStartOf(this)
                         .margins(start = 100),
                     size = 6,
-                    text = "Post Title",
+                    text = R.getString(player, S.POST_TITLE.resource()),
                 )
 
                 val postTitleMessage = addTextView(
@@ -270,10 +272,10 @@ class AnnouncementEditorViewController(
                     alignment = Alignment.LEFT,
                     lineWidth = 300,
                     size = 4,
-                    text = "${ChatColor.GRAY}The title of your post. This support's color codes and Placeholder API.",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.POST_TITLE_MESSAGE.resource())}",
                 )
 
-                val titleText = (model.title ?: "Set post's title").placeholders(player).colorize()
+                val titleText = (model.title ?: R.getString(player, S.SET_POSTS_TITLE.resource())).placeholders(player).colorize()
                 titleView = addTextInputView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -298,7 +300,7 @@ class AnnouncementEditorViewController(
                         .alignStartToStartOf(postTitleMessage)
                         .margins(top = 100),
                     size = 6,
-                    text = "Post Message",
+                    text = R.getString(player, S.POST_MESSAGE.resource()),
                 )
 
                 val postMessageMessage = addTextView(
@@ -309,10 +311,10 @@ class AnnouncementEditorViewController(
                     alignment = Alignment.LEFT,
                     lineWidth = 300,
                     size = 4,
-                    text = "${ChatColor.GRAY}The message of your post. This will open a custom editor so you can write messages longer than Minecraft's chat limit.",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.POST_MESSAGE_MESSAGE.resource())}",
                 )
 
-                val messageText = (model.message?.toMCFormattedText() ?: "${ChatColor.GOLD}Set post's message").placeholders(player).colorize()
+                val messageText = (model.message?.toMCFormattedText() ?: "${ChatColor.GOLD}${R.getString(player, S.SET_POSTS_MESSAGE.resource())}").placeholders(player).colorize()
                 messageView = addButtonView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -337,7 +339,7 @@ class AnnouncementEditorViewController(
                         .alignStartToStartOf(postMessageMessage)
                         .margins(top = 100),
                     size = 6,
-                    text = "Add a CTA",
+                    text = R.getString(player, S.ADD_A_CTA.resource()),
                 )
 
                 val enableCTAMessage = addTextView(
@@ -348,9 +350,10 @@ class AnnouncementEditorViewController(
                     alignment = Alignment.LEFT,
                     lineWidth = 300,
                     size = 4,
-                    text = "${ChatColor.GRAY}Add a \"Call to Action\" button to your post. This button will appear in the bottom right of your post and will run the command you set in this editor when clicked. You can also customize the CTA's message.",
+                    text = "${ChatColor.GRAY}${R.getString(player, S.ENABLE_CTA_MESSAGE.resource())}",
                 )
 
+                val enableCTAText = if (ctaEnabled) R.getString(player, S.ON.resource()) else R.getString(player, S.OFF.resource())
                 enableCTAView = addButtonView(
                     modifier = Modifier()
                         .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -358,8 +361,8 @@ class AnnouncementEditorViewController(
                         .alignTopToBottomOf(enableCTATitle)
                         .alignBottomToTopOf(enableCTAMessage),
                     size = 6,
-                    text = "${ChatColor.GOLD}${if (ctaEnabled) "On" else "Off"}",
-                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}${if (ctaEnabled) "On" else "Off"}",
+                    text = "${ChatColor.GOLD}$enableCTAText",
+                    highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}$enableCTAText",
                     callback = object : Listener {
                         override fun invoke() {
                             enabledCTACallback.invoke()
@@ -375,7 +378,7 @@ class AnnouncementEditorViewController(
                             .alignStartToStartOf(enableCTAMessage)
                             .margins(top = 100),
                         size = 6,
-                        text = "CTA Text",
+                        text = R.getString(player, S.CTA_TEXT.resource()),
                     )
 
                     val ctaTextMessage = addTextView(
@@ -386,10 +389,10 @@ class AnnouncementEditorViewController(
                         alignment = Alignment.LEFT,
                         lineWidth = 300,
                         size = 4,
-                        text = "${ChatColor.GRAY}Set the CTA's text. This support's color codes and Placeholder API.",
+                        text = "${ChatColor.GRAY}${R.getString(player, S.CTA_TEXT_MESSAGE.resource())}",
                     )
 
-                    val ctaText = (model.ctaText ?: "Set post's CTA text").placeholders(player).colorize()
+                    val ctaText = (model.ctaText ?: R.getString(player, S.SET_POST_CTA_TEXT.resource())).placeholders(player).colorize()
                     ctaTextView = addTextInputView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -414,7 +417,7 @@ class AnnouncementEditorViewController(
                             .alignStartToStartOf(ctaTextMessage)
                             .margins(top = 100),
                         size = 6,
-                        text = "CTA Command",
+                        text = R.getString(player, S.CTA_ACTION_TITLE.resource()),
                     )
 
                     val ctaActionMessage = addTextView(
@@ -425,10 +428,10 @@ class AnnouncementEditorViewController(
                         alignment = Alignment.LEFT,
                         lineWidth = 300,
                         size = 4,
-                        text = "${ChatColor.GRAY}Add a command that will run when a player clicks the CTA. This support's Placeholder API",
+                        text = "${ChatColor.GRAY}${R.getString(player, S.CTA_ACTION_MESSAGE.resource())}",
                     )
 
-                    val ctaActionText = model.cta ?: "Set post's CTA command"
+                    val ctaActionText = model.cta ?: R.getString(player, S.CTA_ACTION_TEXT.resource())
                     ctaActionView = addTextInputView(
                         modifier = Modifier()
                             .size(WRAP_CONTENT, WRAP_CONTENT)
@@ -449,7 +452,7 @@ class AnnouncementEditorViewController(
                             .alignStartToStartOf(ctaActionMessage)
                             .margins(top = 100),
                         size = 6,
-                        text = "CTA Command Runner",
+                        text = R.getString(player, S.CTA_ACTION_TYPE_TITLE.resource()),
                     )
 
                     val ctaActionTypeMessage = addTextView(
@@ -460,7 +463,7 @@ class AnnouncementEditorViewController(
                         alignment = Alignment.LEFT,
                         lineWidth = 310,
                         size = 4,
-                        text = "${ChatColor.GRAY}Choose who will run the CTA command when pressed. You can choose between the player who clicked on the CTA or the server. Choosing the server will let you run a command even if the player doesn't have permission to do so.",
+                        text = "${ChatColor.GRAY}${R.getString(player, S.CTA_ACTION_TYPE_MESSAGE.resource())}",
                     )
 
                     val ctaActionTypeText = model.ctaType.name.titlecase()
@@ -528,10 +531,10 @@ class AnnouncementEditorInteractor(
         presenter.setCreatePostListener(object : Listener {
             override fun invoke() {
                 val errorMessage = when {
-                    builder.title == null -> "You need to set a title first!"
-                    builder.message == null -> "You need to set a message first!"
-                    ctaEnabled && builder.ctaText == null -> "You need to set the CTA text first or disable the CTA!"
-                    ctaEnabled && builder.cta == null -> "You need to set the CTA action first or disable the CTA!"
+                    builder.title == null -> R.getString(player, S.MISSING_TITLE_ERROR_MESSAGE.resource())
+                    builder.message == null -> R.getString(player, S.MISSING_MESSAGE_ERROR_MESSAGE.resource())
+                    ctaEnabled && builder.ctaText == null -> R.getString(player, S.MISSING_CTA_TEXT_ERROR_MESSAGE.resource())
+                    ctaEnabled && builder.cta == null -> R.getString(player, S.MISSING_CTA_ACTION_ERROR_MESSAGE.resource())
                     else -> null
                 }
 
