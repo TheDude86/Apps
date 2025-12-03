@@ -33,9 +33,6 @@ import javax.inject.Singleton
 @Singleton
 class EventHandlerFactory @Inject constructor(
     private val commandRepository: CommandRepository,
-    private val cursorRepository: CursorRepository,
-    private val playerChatRepository: PlayerChatRepository,
-    private val playerEventRepository: PlayerEventRepository,
     private val inputRepository: InputRepository,
 ): Listener, CommandExecutor {
     private val sneakMap: MutableMap<UUID, Long> = mutableMapOf()

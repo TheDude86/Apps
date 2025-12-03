@@ -64,6 +64,10 @@ class SystemEnvironment(private val plugin: JavaPlugin): BaseEnvironment<SystemA
         Bukkit.getServer().pluginManager.registerEvents(defaultEventHandlerFactory, plugin)
     }
 
+    fun preloadLocale(player: Player) {
+        R.loadStrings(name(), player.locale)
+    }
+
     fun launch(player: Player, deeplink: String?) {
         R.loadStrings(name(), player.locale)
         val app = getInstance(player)

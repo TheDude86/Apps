@@ -3,9 +3,7 @@ package com.mcmlr.blocks.api.app
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.FlowDisposer
 import kotlinx.coroutines.flow.flow
 import org.bukkit.Bukkit
@@ -62,6 +60,7 @@ object R {
     val appsStringMaps = mutableMapOf<String, MutableMap<String, JsonObject>>()
 
     private val localeMap = mapOf(
+        //English
         "en_us" to "en_us",
         "en_pt" to "en_us",
         "en_au" to "en_us",
@@ -71,13 +70,32 @@ object R {
         "en_ud" to "en_us",
         "enp" to "en_us",
         "enws" to "en_us",
+        //French
+        "fr_fr" to "fr_fr",
+        "fr_ca" to "fr_fr",
+        //Spanish
+        "es_es" to "es_es",
+        "es_ar" to "es_es",
+        "es_cl" to "es_es",
+        "es_ec" to "es_es",
+        "es_mx" to "es_es",
+        "es_uy" to "es_es",
+        "es_ve" to "es_es",
     )
+
+    fun containsLocale(locale: String): Boolean = appsStringMaps.values.firstOrNull()?.containsKey(locale) == true
+
+    fun addLanguage(locale: String, languageData: JsonObject) {
+        appsStringMaps.keys.forEach {
+            val app = appsStringMaps[it] ?: return@forEach
+            app[locale] = languageData.getAsJsonObject(it)
+        }
+    }
 
     fun loadStringsAsync(app: String, locale: String) = flow {
         val appName = app.lowercase()
         val appStringsResource = appsStringMaps[appName]
         if (appStringsResource == null || appStringsResource[locale] == null) {
-            log(Log.ASSERT, "$appName${File.separatorChar}$locale.json")
             val lines = this@R::class.java.getResourceAsStream("$appName${File.separatorChar}$locale.json")?.reader()
 
             if (appStringsResource == null) {

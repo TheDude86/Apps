@@ -7,7 +7,7 @@
   "delete": "\uD83D\uDDD1",
   "edit": "✎",
   "cooldown_error_message": "§cYou must wait %s second%s before you can teleport",
-  "delay_message": "You will be teleported in %s second%s}",
+  "delay_message": "You will be teleported in %s second%s",
   "plural": "s",
   "add_warp_title": "§l§o§nAdd A New Warp",
   "warp_name_placeholder": "§7§oClick to set warp name...",
