@@ -1,0 +1,19 @@
+{
+  "at": "om",
+  "created": "Aangemaakt",
+  "kb": "KB",
+  "file_icon": "\uD83D\uDCC4",
+  "editable_file_icon": "\uD83D\uDCDD",
+  "modified": "Aangepast",
+  "open": "Open",
+  "plugins": "Plugins",
+  "files": "Bestanden",
+  "file": "Bestand",
+  "edit": "Bewerk",
+  "error_no_file_selected": "Fout: Er is geen bestand geselecteerd!",
+  "error_file": "Fout: bestand",
+  "doesnt_exist": "bestaat niet!",
+  "save": "Opslaan",
+  "value_saved": "Waarde opgeslagen!",
+  "list": "Lijst"
+}

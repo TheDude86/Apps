@@ -47,6 +47,7 @@ class SubcomponentModule
         CheatsAppComponent::class,
         PongAppComponent::class,
         YAMLAppComponent::class,
+        MineTunesAppComponent::class,
     ]
 )
 class HomeSubcomponentModule
@@ -123,6 +124,8 @@ interface SystemAppComponent {
     fun pongSubcomponent(): PongAppComponent.Builder
 
     fun yamlSubcomponent(): YAMLAppComponent.Builder
+
+    fun mineTunesSubcomponent(): MineTunesAppComponent.Builder
 
     fun inject(app: SystemApp)
 }
