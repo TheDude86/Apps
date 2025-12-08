@@ -21,7 +21,7 @@
   "config_default_wait_value": "§60 Sekunden",
   "config_cooldown_title": "Teleport-Abklingzeit",
   "config_cooldown_message": "§7Die Zeit in Sekunden, die der Spieler nach dem Teleportieren warten muss, bevor er erneut teleportieren kann.",
-  "config_input_seconds_placeholder": "%s Sekunde%n",
+  "config_input_seconds_placeholder": "%s Sekunden",
   "config_delay_error_message": "§cTeleport-Verzögerungswerte müssen ganze Zahlen sein!",
   "config_cooldown_error_message": "§cTeleport-Abklingwerte müssen ganze Zahlen sein!"
 }

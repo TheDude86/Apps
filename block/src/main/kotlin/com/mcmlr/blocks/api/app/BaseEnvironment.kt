@@ -175,7 +175,7 @@ object R {
         val json = appStringsResource[player.locale] ?: return "#ERROR"
         var string = json.get(resource.id.lowercase())?.asString ?: return "#ERROR"
 
-        args?.forEach {
+        args.forEach {
             string = string.replaceFirst("%s", it.toString())
         }
 

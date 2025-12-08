@@ -1,0 +1,27 @@
+{
+  "warps_title": "§l§o§nWarpz",
+  "add_new_warp": "Nieuwe warp toevoegen",
+  "remove_warp": "Warp verwijderen",
+  "cancel": "Annuleren",
+  "empty_warps_list": "§7§oEr zijn nog geen warps\ningesteld...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cJe moet %s seconde%s wachten voordat je kunt teleporteren",
+  "delay_message": "Je wordt over %s seconde%s geteleporteerd",
+  "plural": "n",
+  "add_warp_title": "§l§o§nNieuwe Warp Toevoegen",
+  "warp_name_placeholder": "§7§oKlik om de warp-naam in te stellen...",
+  "select_icon": "§7Selecteer\nIcoon...",
+  "save_warp": "§6Warp Opslaan",
+  "warp_error_message": "§cFout: De ontwikkelaar was te lui om uit te zoeken wat er mis ging...",
+
+  "warp_config_title": "§l§o§nWarp Instellingen",
+  "config_delay_title": "Teleport Vertraging",
+  "config_delay_message": "§7De hoeveelheid tijd, in seconden, die de speler moet wachten voordat hij naar een geselecteerde warp wordt geteleporteerd.",
+  "config_default_wait_value": "§60 Seconden",
+  "config_cooldown_title": "Teleport Wachttijd",
+  "config_cooldown_message": "§7De hoeveelheid tijd, in seconden, die de speler moet wachten na teleportatie naar een warp voordat hij opnieuw kan teleporteren.",
+  "config_input_seconds_placeholder": "%s Seconde%s",
+  "config_delay_error_message": "§cTeleport vertraging waarden moeten hele getallen zijn!",
+  "config_cooldown_error_message": "§cTeleport wachttijd waarden moeten hele getallen zijn!"
+}
