@@ -20,7 +20,7 @@ class HomesEnvironment(): ConfigurableEnvironment<HomesApp>() {
 
     override fun icon(): String = "http://textures.minecraft.net/texture/ff812112dd187e7c8ddb5c3b8e854e82f19197414a8cdb542021f1a491897e53"
 
-    override fun permission(): String? = PermissionNode.HOME.node
+    override fun permission(): String = PermissionNode.HOME.node
 
     override fun summary(): String = "This app allows players to save home locations on the server and teleport to those locations."
 }

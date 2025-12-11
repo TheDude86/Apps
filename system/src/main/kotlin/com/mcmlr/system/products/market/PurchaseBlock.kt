@@ -1,5 +1,7 @@
 package com.mcmlr.system.products.market
 
+import com.google.gson.JsonParser
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
@@ -11,6 +13,7 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
@@ -57,6 +60,7 @@ class PurchaseViewController(
     private lateinit var zero: ButtonView
     private lateinit var purchase: ButtonView
     private lateinit var message: TextView
+    private lateinit var metaContainer: ListFeedView
 
     override fun createView() {
         super.createView()
@@ -115,6 +119,16 @@ class PurchaseViewController(
                         text = "",
                         size = 5,
                     )
+
+
+                    metaContainer = addListFeedView(
+                        modifier = Modifier()
+                            .size(200, FILL_ALIGNMENT)
+                            .alignStartToStartOf(sellerHead)
+                            .alignTopToBottomOf(sellerName)
+                            .margins(top = 30)
+                    )
+
 
                     quantity = addTextView(
                         modifier = Modifier()
@@ -345,11 +359,13 @@ class PurchaseViewController(
 
         val playerHead = ItemStack(Material.PLAYER_HEAD)
         val headMeta = playerHead.itemMeta as SkullMeta
-        headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(order.playerId))
+        headMeta.owningPlayer = Bukkit.getOfflinePlayer(order.playerId)
         playerHead.itemMeta = headMeta
 
         sellerHead.item = playerHead
 
+        val metaJson = JsonParser.parseString(order.meta).asJsonObject
+        
 
         updateItemDisplay(head)
         updateItemDisplay(sellerHead)
