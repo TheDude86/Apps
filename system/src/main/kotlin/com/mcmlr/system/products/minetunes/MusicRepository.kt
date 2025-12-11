@@ -13,9 +13,19 @@ class MusicRepository @Inject constructor(
     private val resources: Resources,
 ) {
 
-    fun loadSong(): Song? {
-        val homes = File(resources.dataFolder(), "Mine Tunes/Songs/africa.nbs")
+    fun loadSong(song: String): Song? {
+        val homes = File(resources.dataFolder(), "Mine Tunes/Songs/$song")
         return NBSDecoder.parse(homes.inputStream())
+    }
+
+    fun loadSong(): Song? {
+        val homes = File(resources.dataFolder(), "Mine Tunes/Songs/bib.nbs")
+        return NBSDecoder.parse(homes.inputStream())
+    }
+
+    fun songList(): List<String> {
+        val songDirectory = File(resources.dataFolder(), "Mine Tunes/Songs")
+        return songDirectory.list().toList()
     }
 
 }

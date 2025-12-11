@@ -24,9 +24,10 @@ class MineTunesBlock @Inject constructor(
     origin: Origin,
     resources: Resources,
     musicRepository: MusicRepository,
+    songUploadBlock: SongUploadBlock,
 ): Block(player, origin) {
     private val view = MineTunesViewController(player, origin)
-    private val interactor = MineTunesInteractor(player, resources, view, musicRepository)
+    private val interactor = MineTunesInteractor(player, resources, view, musicRepository, songUploadBlock)
 
     override fun interactor(): Interactor = interactor
 
@@ -40,9 +41,14 @@ class MineTunesViewController(
 
     private lateinit var feedContainer: ViewContainer
     private lateinit var play: ButtonView
+    private lateinit var admin: ButtonView
 
     override fun setPlayListener(listener: Listener) {
         play.addListener(listener)
+    }
+
+    override fun setAdminListener(listener: Listener) {
+        admin.addListener(listener)
     }
 
     override fun createView() {
@@ -107,11 +113,23 @@ class MineTunesViewController(
             text = R.getString(player, S.MUSIC_BUTTON.resource()),
             highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
         )
+
+        admin = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignBottomToBottomOf(this)
+                .x(1000)
+                .margins(bottom = 300),
+            text = "${ChatColor.GOLD}Admin",
+            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Admin",
+        )
     }
 }
 
 interface MineTunesPresenter: Presenter {
     fun setPlayListener(listener: Listener)
+
+    fun setAdminListener(listener: Listener)
 }
 
 class MineTunesInteractor(
@@ -119,12 +137,19 @@ class MineTunesInteractor(
     private val resources: Resources,
     private val presenter: MineTunesPresenter,
     private val musicRepository: MusicRepository,
+    private val songUploadBlock: SongUploadBlock,
 ): Interactor(presenter) {
 
     val musicPlayer = MusicPlayer()
 
     override fun onCreate() {
         super.onCreate()
+
+        presenter.setAdminListener(object : Listener {
+            override fun invoke() {
+                routeTo(songUploadBlock)
+            }
+        })
 
         presenter.setPlayListener(object : Listener {
             override fun invoke() {
