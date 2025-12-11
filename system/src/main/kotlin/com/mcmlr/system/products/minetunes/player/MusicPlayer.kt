@@ -23,8 +23,6 @@ class MusicPlayer() {
         activeSong = CoroutineScope(Dispatchers.IO).launch {
             var tick = 0
 
-            log(Log.ERROR, "Song ${song.title}, by ${song.artist} converted by ${song.nbsArtist}, ${song.length / song.speed}")
-
             while (true) {
                 val start = Date().time
 
@@ -33,15 +31,7 @@ class MusicPlayer() {
                         val note = it.notesMap[tick] ?: return@forEach
                         val volume = it.volume
                         val pitch = NoteUtils.pitch(note.key, note.pitch)
-
-                        if (NoteUtils.isCustomInstrument(note.instrument)) {
-                            val customInstrument = song.customInstruments[(note.instrument - 16).toInt()]
-                            customInstrument.sound?.let { sound ->
-                                player.playSound(player.eyeLocation, sound, volume.toFloat(), pitch)
-                            }
-                        } else {
-                            player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume.toFloat(), pitch)
-                        }
+                        player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume.toFloat(), pitch)
                     }
                 }
 
