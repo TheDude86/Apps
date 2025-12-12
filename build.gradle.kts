@@ -29,12 +29,13 @@ subprojects {
 }
 
 repositories {
+    maven { url "https://repo.artillex-studios.com/releases" }
     mavenCentral()
 }
 
 dependencies {
     implementation(platform("com.squareup.okhttp3:okhttp-bom:5.3.0"))
-
+    compileOnly "com.artillexstudios:AxPlayerWarps:1.11.2" // Check for latest version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
 }
