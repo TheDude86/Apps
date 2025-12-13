@@ -3,7 +3,7 @@
   "add_new_warp": "Ajouter un nouveau warp",
   "remove_warp": "Supprimer le warp",
   "cancel": "Annuler",
-  "empty_warps_list": "§7§oAucun warp n’a encore\nété défini...",
+  "empty_warps_list": "§7§oAucun warp n’a encore été défini...",
   "delete": "\uD83D\uDDD1",
   "edit": "✎",
   "cooldown_error_message": "§cVous devez attendre %s seconde%s avant de pouvoir vous téléporter",
@@ -11,7 +11,7 @@
   "plural": "s",
   "add_warp_title": "§l§o§nAjouter un Nouveau Warp",
   "warp_name_placeholder": "§7§oCliquez pour définir le nom du warp...",
-  "select_icon": "§7Sélectionner\nIcône...",
+  "select_icon": "§7Sélectionner l'Icône...",
   "save_warp": "§6Enregistrer le warp",
   "warp_error_message": "§cErreur : Le développeur était trop paresseux pour trouver ce qui s’est passé...",
 
