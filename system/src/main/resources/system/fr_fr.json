@@ -6,7 +6,7 @@
   "back": "Retour",
   "teleports": "Téléportations",
   "finish": "Terminer",
-  "setup_finish_paragraph_one": "Félicitations ! Vous avez terminé la configuration des applications ! Vous pouvez toujours revenir aux étapes de configuration et effectuer tous les changements que vous souhaitez, et une fois que vous appuyez sur le bouton Terminer, vos modifications seront enregistrées. Ce projet est encore en développement précoce, donc il n’existe pas encore d’applications tierces à télécharger, mais elles arrivent bientôt ! Restez à l’affût et vérifiez les mises à jour ; nous veillerons à tenir tout le monde informé de nos progrès.",
+  "setup_finish_paragraph_one": "Félicitations ! Vous avez terminé la configuration des applications ! Vous pouvez toujours revenir aux étapes de configuration et effectuer tous les changements que vous souhaitez, et une fois que vous appuyez sur le bouton Terminer, vos modifications seront enregistrées. Ce projet est encore en développement précoce, donc il n’existe pas encore d’applications tierces à télécharger, mais elles arrivent bientôt ! Restez à l’affût et vérifiez les mises à jour,  nous veillerons à tenir tout le monde informé de nos progrès.",
   "create_first_post": "Créer la Première Publication",
   "setup_announcements_paragraph": "L'application Annonces vous permet de créer des messages qui s'afficheront sur l'écran d'accueil des joueurs lorsqu'ils ouvriront pour la première fois ${ChatColor.GOLD}${ChatColor.BOLD}Apps${ChatColor.RESET}. Nous vous recommandons de créer votre propre publication maintenant afin de la personnaliser pour votre serveur plutôt que d'utiliser celle générique définie par défaut. Ci-dessous se trouve un aperçu de ce à quoi ressemble le flux d'annonces sur l'écran d'accueil.",
   "next_arrow": "Suivant ➡",
@@ -38,15 +38,15 @@
   "permissions_button": "§6Permissions",
   "enabled_apps_button": "§6Applications Activées",
   "configure_apps_button": "§6Configurer les Applications",
-  "default_language_button": "§6Définir la Langue Par Défaut",
+  "default_language_button": "§6Définir la langue par défaut",
 
   "configure_apps_title": "§l§o§nConfigurer les Applications",
 
-  "enabled_apps_title": "§l§o§nApplications Activées",
-  "set_title_title": "§l§o§nDéfinir le Titre des Apps",
+  "enabled_apps_title": "§l§o§nApplications activées",
+  "set_title_title": "§l§o§nDéfinir le titre des Applications",
   "set_title_message": "Le texte affiché en haut de l’écran d’accueil. Nous recommandons de ne pas dépasser 25 caractères pour éviter qu’il ne chevauche d’autres éléments. Les titres supportent les Placeholders pour des messages personnalisés.",
   "updated_title_message": "§aVotre nouveau titre a été enregistré !",
-  "set_title_input_placeholder": "Définir le Titre du Serveur",
+  "set_title_input_placeholder": "Définir le titre du serveur",
   "save_button": "§6Enregistrer",
 
   "calibration_message_one": "§b§oCalibrage... Utilisez la molette de votre souris pour déplacer l’écran en avant ou en arrière.",
