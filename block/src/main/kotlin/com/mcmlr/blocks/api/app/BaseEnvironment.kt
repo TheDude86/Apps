@@ -81,8 +81,10 @@ object R {
         "es_mx" to "es_es",
         "es_uy" to "es_es",
         "es_ve" to "es_es",
-        //
+        //Dutch
         "nl_nl" to "nl_nl",
+        //Polish
+        "pl_pl" to "pl_pl",
     )
 
     fun containsLocale(locale: String): Boolean = appsStringMaps.values.firstOrNull()?.containsKey(locale) == true
