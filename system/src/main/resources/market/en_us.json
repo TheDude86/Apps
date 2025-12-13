@@ -48,6 +48,12 @@
   "purchase_quantity_text": "%s ($%s)",
   "insufficient_funds_warning_message": "§eYou don't have enough money to purchase this much %s",
   "insufficient_stock_warning_message": "§eThere's not enough %s in stock!",
+  "purchase_trim_template": "Trim: %s (%s)",
+  "purchase_color_template": "Color: %s",
+  "purchase_book_title_template": "%s by %s",
+  "purchase_damage_template": "Damage: %s",
+  "purchase_durability_template": "Durability: %s",
+  "purchase_amplifier_template": "Amplifier: %s",
 
   "config_market_title": "§l§o§nMarket Settings",
   "config_max_orders_title": "Max Orders",
