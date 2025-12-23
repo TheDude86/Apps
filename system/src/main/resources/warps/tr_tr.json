@@ -1,0 +1,27 @@
+{
+  "warps_title": "§l§o§nWarp Noktaları",
+  "add_new_warp": "Yeni warp noktası ekle",
+  "remove_warp": "Warp noktasını kaldır",
+  "cancel": "İptal",
+  "empty_warps_list": "§7§oHenüz ayarlanmış\nwarp noktası yok...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cTeleport olmadan önce %s saniye%s beklemelisin",
+  "delay_message": "%s saniye%s içinde teleport olacaksın",
+  "plural": "ler",
+  "add_warp_title": "§l§o§nYeni Bir Warp Noktası Ekle",
+  "warp_name_placeholder": "§7§oWarp adı ayarlamak için tıklayın...",
+  "select_icon": "§7Simge\nSeç...",
+  "save_warp": "§6Warp'ı kaydet",
+  "warp_error_message": "§cHata: Geliştirici neyin yanlış gittiğini anlamak için çok tembeldi...",
+
+  "warp_config_title": "§l§o§nWarp Ayarları",
+  "config_delay_title": "Teleport Gecikmesi",
+  "config_delay_message": "§7Oyuncunun seçilen bir warp noktasına teleport olmadan önce beklemesi gereken süre (saniye cinsinden).",
+  "config_default_wait_value": "§60 Saniye",
+  "config_cooldown_title": "Teleport Bekleme Süresi",
+  "config_cooldown_message": "§7Oyuncunun bir warp noktasına teleport olduktan sonra tekrar teleport olmadan önce beklemesi gereken süre (saniye cinsinden).",
+  "config_input_seconds_placeholder": "%s Saniye",
+  "config_delay_error_message": "§cTeleport gecikme değerleri tam sayı olmalıdır!",
+  "config_cooldown_error_message": "§cTeleport bekleme süresi değerleri tam sayı olmalıdır!"
+}

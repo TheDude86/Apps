@@ -2,5 +2,27 @@
   "mine_tunes_title": "§l§o§nMine Tunes",
   "home_button": "§6Home",
   "music_button": "§6Music",
-  "search_button": "§6Search"
+  "search_button": "§6Search",
+
+  "search_title": "§l§o§nSearch",
+  "search_placeholder": "§7\uD83D\uDD0D Search Songs, Artists, Albums...",
+  "search_songs_button": "§6Songs",
+  "search_artists_button": "§6Artists",
+
+  "player_title": "§l§o§nPlayer",
+  "play_button": "▶",
+  "pause_button": "⏸",
+  "next_track_button": "⏭",
+  "last_track_button": "⏮",
+  "loop_button": "\uD83D\uDD01",
+  "shuffle_button": "\uD83D\uDD00",
+
+  "library_title": "§l§o§nMy Library",
+
+  "artist_title": "§l§o§nArtist",
+  "artist_stats_placeholder": "%s Songs • %s Albums",
+  "artist_plays_placeholder": "§7%s Plays",
+  "artist_see_all_songs_button": "§6Show all songs",
+  "artist_popular_songs_title": "§l§nPopular Songs",
+  "artist_albums_title": "§l§nAlbums"
 }

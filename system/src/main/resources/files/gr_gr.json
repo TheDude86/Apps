@@ -1,0 +1,19 @@
+{
+"at": "στις",
+"created": "Δημιουργήθηκε",
+"kb": "KB",
+"file_icon": "\uD83D\uDCC4",
+"editable_file_icon": "\uD83D\uDCDD",
+"modified": "Τροποποιήθηκε",
+"open": "Άνοιξε",
+"plugins": "Πρόσθετα",
+"files": "Αρχεία",
+"file": "Αρχείο",
+"edit": "Επεξεργασία",
+"error_no_file_selected": "Σφάλμα: Δεν έχει επιλεχτεί αρχείο!",
+"error_file": "Σφάλμα: Το αρχείο",
+"doesnt_exist": "δεν υπάρχει!",
+"save": "Αποθήκευση",
+"value_saved": "Η τιμή αποθηκεύτηκε!",
+"list": "Λίστα"
+}

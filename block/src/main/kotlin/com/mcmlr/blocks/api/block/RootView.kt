@@ -7,6 +7,7 @@ import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.bolden
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
@@ -189,7 +190,7 @@ class RootView(
 
     private fun updateButton(buttonView: ButtonView, highlighted: Boolean) {
         if (highlighted) {
-            (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.highlightedText ?: "${ChatColor.BOLD}${buttonView.text}"
+            (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.highlightedText ?: buttonView.text.bolden()
             buttonView.highlighted = true
         } else {
             (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.text

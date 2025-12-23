@@ -1,0 +1,19 @@
+{
+  "at": "at",
+  "created": "Oluşturuldu",
+  "kb": "KB",
+  "file_icon": "\uD83D\uDCC4",
+  "editable_file_icon": "\uD83D\uDCDD",
+  "modified": "Değiştirildi",
+  "open": "Aç",
+  "plugins": "Eklentiler",
+  "files": "Dosyalar",
+  "file": "Dosya",
+  "edit": "Düzenle",
+  "error_no_file_selected": "Hata: Hiçbir dosya seçilmedi!",
+  "error_file": "Hata: dosya",
+  "doesnt_exist": "mevcut değil!",
+  "save": "Kaydet",
+  "value_saved": "Değer kaydedildi!",
+  "list": "Liste"
+}

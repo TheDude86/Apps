@@ -25,9 +25,11 @@ class MineTunesBlock @Inject constructor(
     resources: Resources,
     musicRepository: MusicRepository,
     songUploadBlock: SongUploadBlock,
+    searchBlock: SearchBlock,
+    musicBlock: MusicBlock,
 ): Block(player, origin) {
     private val view = MineTunesViewController(player, origin)
-    private val interactor = MineTunesInteractor(player, resources, view, musicRepository, songUploadBlock)
+    private val interactor = MineTunesInteractor(player, resources, view, musicRepository, songUploadBlock, searchBlock, musicBlock)
 
     override fun interactor(): Interactor = interactor
 
@@ -40,15 +42,11 @@ class MineTunesViewController(
 ): NavigationViewController(player, origin), MineTunesPresenter {
 
     private lateinit var feedContainer: ViewContainer
-    private lateinit var play: ButtonView
-    private lateinit var admin: ButtonView
 
-    override fun setPlayListener(listener: Listener) {
-        play.addListener(listener)
-    }
+    private lateinit var searchButton: ButtonView
 
-    override fun setAdminListener(listener: Listener) {
-        admin.addListener(listener)
+    override fun setSearchListener(listener: Listener) {
+        searchButton.addListener(listener)
     }
 
     override fun createView() {
@@ -73,28 +71,21 @@ class MineTunesViewController(
                 .margins(top = 150, bottom = 450),
             content = object : ContextListener<ViewContainer>() {
                 override fun ViewContainer.invoke() {
-                    play = addButtonView(
-                        modifier = Modifier()
-                            .size(WRAP_CONTENT, WRAP_CONTENT)
-                            .center(),
-                        text = "${ChatColor.GOLD}Play",
-                        highlightedText = "${ChatColor.GOLD}Play".bolden(),
-                    )
+
                 }
             }
         )
 
-        addButtonView(
+        addTextView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignBottomToBottomOf(this)
                 .x(-500)
                 .margins(bottom = 300),
-            text = R.getString(player, S.HOME_BUTTON.resource()),
-            highlightedText = R.getString(player, S.HOME_BUTTON.resource()).bolden(),
+            text = R.getString(player, S.HOME_BUTTON.resource()).bolden(),
         )
 
-        addButtonView(
+        searchButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignBottomToBottomOf(this)
@@ -113,23 +104,11 @@ class MineTunesViewController(
             text = R.getString(player, S.MUSIC_BUTTON.resource()),
             highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
         )
-
-        admin = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .x(1000)
-                .margins(bottom = 300),
-            text = "${ChatColor.GOLD}Admin",
-            highlightedText = "${ChatColor.GOLD}${ChatColor.BOLD}Admin",
-        )
     }
 }
 
 interface MineTunesPresenter: Presenter {
-    fun setPlayListener(listener: Listener)
-
-    fun setAdminListener(listener: Listener)
+    fun setSearchListener(listener: Listener)
 }
 
 class MineTunesInteractor(
@@ -138,23 +117,22 @@ class MineTunesInteractor(
     private val presenter: MineTunesPresenter,
     private val musicRepository: MusicRepository,
     private val songUploadBlock: SongUploadBlock,
+    private val searchBlock: SearchBlock,
+    private val musicBlock: MusicBlock,
 ): Interactor(presenter) {
-
-    val musicPlayer = MusicPlayer()
 
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setAdminListener(object : Listener {
-            override fun invoke() {
-                routeTo(songUploadBlock)
-            }
-        })
+//        presenter.setAdminListener(object : Listener {
+//            override fun invoke() {
+//                routeTo(songUploadBlock)
+//            }
+//        })
 
-        presenter.setPlayListener(object : Listener {
+        presenter.setSearchListener(object : Listener {
             override fun invoke() {
-                val song = musicRepository.loadSong() ?: return
-                musicPlayer.playSong(song, player)
+                routeTo(searchBlock)
             }
         })
     }

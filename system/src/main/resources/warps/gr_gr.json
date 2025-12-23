@@ -1,0 +1,28 @@
+{
+"warps_title": "§l§o§nWarps",
+"add_new_warp": "Προσθήκη νέου warp",
+"remove_warp": "Αφαίρεση warp",
+"cancel": "Ακύρωση",
+"empty_warps_list": "§7§oΔεν έχουν οριστεί\nακόμα warps...",
+"delete": "\uD83D\uDDD1",
+"edit": "✎",
+"cooldown_error_message": "§cΠρέπει να περιμένετε %s δευτερόλεπτ%s πριν μπορέσετε να τηλεμεταφερθείτε",
+"delay_message": "Θα τηλεμεταφερθείτε σε %s δευτερόλεπτ%s",
+"plural": "",
+"add_warp_title": "§l§o§nΠροσθήκη Νέου Warp",
+"warp_name_placeholder": "§7§oΚάντε κλικ για ορισμό ονόματος warp...",
+"select_icon": "§7Επιλογή\nΕικονιδίου...",
+"save_warp": "§6Αποθήκευση warp",
+"warp_error_message": "§cΣφάλμα: Ο προγραμματιστής ήταν πολύ τεμπέλης για να καταλάβει τι πήγε στραβά...",
+
+"warp_config_title": "§l§o§nΡυθμίσεις Warp",
+"config_delay_title": "Καθυστέρηση Τηλεμεταφοράς",
+"config_delay_message": "§7Ο χρόνος (σε δευτερόλεπτα) που πρέπει να περιμένει ένας παίκτης πριν τηλεμεταφερθεί σε ένα επιλεγμένο warp.",
+"config_default_wait_value": "§60 Δευτερόλεπτα",
+"config_cooldown_title": "Αναμονή Τηλεμεταφοράς",
+"config_cooldown_message": "§7Ο χρόνος (σε δευτερόλεπτα) που πρέπει να περιμένει ένας παίκτης μετά από μια τηλεμεταφορά σε warp, πριν μπορέσει να τηλεμεταφερθεί ξανά.",
+"config_input_seconds_placeholder": "%s Δευτερόλεπτ%s",
+"config_delay_error_message": "§cΟι τιμές καθυστέρησης τηλεμεταφοράς πρέπει να είναι ακέραιοι αριθμοί!",
+"config_cooldown_error_message": "§cΟι τιμές αναμονής τηλεμεταφοράς πρέπει να είναι ακέραιοι αριθμοί!"
+}
+
