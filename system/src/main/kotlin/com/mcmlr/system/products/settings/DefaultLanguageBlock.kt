@@ -13,14 +13,12 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ButtonView
-import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.S
 import com.mcmlr.system.SystemConfigRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.Locale
 import javax.inject.Inject
@@ -181,6 +179,7 @@ class DefaultLanguageInteractor(
         presenter.setSelectedLanguageListener { locale ->
             showSelectedLanguage(locale.toString())
             systemConfigRepository.updateDefaultLanguage(locale)
+            R.updateDefaultLocale(locale)
         }
 
         showSelectedLanguage(systemConfigRepository.model.defaultLanguage)

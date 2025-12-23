@@ -1,12 +1,6 @@
 package com.mcmlr.system.products.minetunes
 
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.ContextListener
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
@@ -20,9 +14,10 @@ class SongUploadBlock @Inject constructor(
     player: Player,
     origin: Origin,
     musicRepository: MusicRepository,
+    musicPlayer: MusicPlayer,
 ): Block(player, origin) {
     private val view = SongUploadViewController(player, origin)
-    private val interactor = SongUploadInteractor(player, view, musicRepository)
+    private val interactor = SongUploadInteractor(player, view, musicRepository, musicPlayer)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -110,9 +105,8 @@ class SongUploadInteractor(
     private val player: Player,
     private val presenter: SongUploadPresenter,
     private val musicRepository: MusicRepository,
+    private val musicPlayer: MusicPlayer,
 ): Interactor(presenter) {
-
-    val musicPlayer = MusicPlayer()
 
     override fun onCreate() {
         super.onCreate()

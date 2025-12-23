@@ -17,6 +17,13 @@ class SystemConfigRepository @Inject constructor(
             Locale.US,
             Locale.UK,
             Locale.CANADA,
+            Locale("de", "de"),
+            Locale("fr", "fr"),
+            Locale("es", "es"),
+            Locale("nl", "nl"),
+            Locale("pl", "pl"),
+            Locale("tr", "tr"),
+            Locale("el", "gr"),
         )
     }
 

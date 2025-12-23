@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.homes.HomesApp
+import com.mcmlr.system.products.minetunes.DownloadService
 import com.mcmlr.system.products.pong.PongApp
 import com.mcmlr.system.products.preferences.PreferencesRepository
 import com.mcmlr.system.products.settings.AdminApp
@@ -16,6 +17,8 @@ import dagger.Provides
 import dagger.Subcomponent
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -136,20 +139,21 @@ class SystemAppModule {
     @Provides
     fun player(app: SystemApp): Player = app.player
 
-//    @AppScope
-//    @Provides
-//    fun oldrigin(player: Player): Location {
-//        val o = player.eyeLocation.clone()
-//        o.pitch = 0f
-//
-//        val direction = o.direction.normalize()
-//        return o.add(direction.multiply(BaseApp.SCREEN_DISTANCE))
-//    }
-
     @AppScope
     @Provides
     fun origin(player: Player, preferencesRepository: PreferencesRepository): Origin {
         return Origin(player, preferencesRepository.model.screenDistance)
+    }
+
+    @AppScope
+    @Provides
+    fun minetunesDownloadService(): DownloadService {
+        val retrofit: Retrofit = Retrofit.Builder()
+            .baseUrl("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(DownloadService::class.java)
     }
 }
 

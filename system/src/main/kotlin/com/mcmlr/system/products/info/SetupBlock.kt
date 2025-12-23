@@ -59,6 +59,7 @@ class SetupBlock @Inject constructor(
 ): Block(player, origin) {
     private val view = SetupViewController(player, origin)
     private val interactor = SetupInteractor(
+        player,
         view,
         tutorialBlock,
         feedBlock,
@@ -761,6 +762,7 @@ interface SetupPresenter: Presenter {
 }
 
 class SetupInteractor(
+    private val player: Player,
     private val presenter: SetupPresenter,
     private val tutorialBlock: TutorialBlock,
     private val feedBlock: FeedBlock,
@@ -790,6 +792,15 @@ class SetupInteractor(
 
     override fun onCreate() {
         super.onCreate()
+
+        //TODO: Find a real fix to this
+        R.loadStrings("Tutorial", player.locale)
+        R.loadStrings("Announcements", player.locale)
+        R.loadStrings("Homes", player.locale)
+        R.loadStrings("Warps", player.locale)
+        R.loadStrings("Teleport", player.locale)
+        R.loadStrings("Market", player.locale)
+        R.loadStrings("Spawn", player.locale)
 
         feedBlock.enableCTA(false)
         if (enabledAppsList.isEmpty()) {
