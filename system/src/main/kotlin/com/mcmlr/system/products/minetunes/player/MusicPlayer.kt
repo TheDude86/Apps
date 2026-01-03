@@ -1,28 +1,17 @@
 package com.mcmlr.system.products.minetunes.player
 
-import com.mcmlr.blocks.api.Log
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
-import com.mcmlr.blocks.core.collectOn
-import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.products.minetunes.MusicRepository
 import com.mcmlr.system.products.minetunes.nbs.data.Song
 import com.mcmlr.system.products.minetunes.util.NoteUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import org.bukkit.entity.Player
-import java.util.Date
-import javax.inject.Inject
+import java.util.*
 
-@AppScope
-class MusicPlayer @Inject constructor(
+class MusicPlayer(
     private val player: Player,
     private val musicRepository: MusicRepository,
 ) {
@@ -35,23 +24,74 @@ class MusicPlayer @Inject constructor(
     private var activeSong: Song? = null
     private var songProgressStream = MutableStateFlow<Short>(0)
     private var playlist = Playlist()
+    private var songList: List<Track> = listOf()
+    var isShuffled = false
+    var isLooped = true
     var tick: Short = 0
     var songIndex = 0
 
-    fun updatePlaylist(playlist: Playlist) {
+    fun getActiveSongStream(): Flow<Short>? = if (activeJob == null) null else songProgressStream
+
+    fun loop() {
+        isLooped = !isLooped
+    }
+
+    fun shuffle() {
+        isShuffled = !isShuffled
+
+        if (isShuffled) {
+            songList = songList.shuffled()
+        } else {
+            songList = playlist.songs
+        }
+    }
+
+    fun startPlaylist(): Flow<Short> {
         stopSong()
+        songIndex = 0
+        return play()
+    }
+
+    fun startSong(index: Int = 0): Flow<Short> {
+        stopSong()
+        songIndex = index
+        return play()
+    }
+
+    fun updatePlaylist(playlist: Playlist) {
         this.playlist = playlist
+        songList = playlist.songs
+        isShuffled = false
+        isLooped = true
+        tick = 0
+        songIndex = 0
+    }
+
+    fun getCurrentSong(): Song? = activeSong
+
+    fun getCurrentTrack(): Track = songList[songIndex]
+
+    fun goToNextSong() {
+        stopSong()
+        songIndex = (songIndex + 1) % songList.size
+        play()
+    }
+
+    fun goToLastSong() {
+        stopSong()
+        songIndex = (songIndex + 1) % songList.size
+        play()
     }
 
     fun play(): Flow<Short> {
+        stopSong()
         if (activeSong == null) {
-            songProgressStream = MutableStateFlow(0)
-            val currentTrack = playlist.songs[songIndex]
+            val currentTrack = songList[songIndex]
 
             musicRepository.downloadTrack(currentTrack)
                 .collectFirst(DudeDispatcher()) {
                     val song = it ?: return@collectFirst
-                    playSong(song, player)
+                    playSong(song)
                     setNextSongListener()
                 }
         } else {
@@ -72,7 +112,10 @@ class MusicPlayer @Inject constructor(
                 tick = 0
                 songIndex++
                 activeSong = null
-                if (songIndex == playlist.songs.size) songIndex = 0
+                if (songIndex == songList.size) {
+                    songIndex = 0
+                    if (!isLooped) return@invokeOnCompletion
+                }
 
                 play()
             }
@@ -84,17 +127,10 @@ class MusicPlayer @Inject constructor(
 
 
 
-    fun playSong(song: Song, player: Player): Flow<Short> {
-        songProgressStream = MutableStateFlow(0)
+    fun playSong(song: Song) {
         activeJob?.cancel()
         activeSong = song
         resumeSong()
-
-        return songProgressStream
-    }
-
-    fun pauseSong() {
-        activeJob?.cancel(SONG_PAUSED)
     }
 
     fun stopSong() {

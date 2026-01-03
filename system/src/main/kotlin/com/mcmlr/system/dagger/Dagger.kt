@@ -80,6 +80,17 @@ class SystemEnvironmentModule {
     @EnvironmentScope
     @Provides
     fun resources(environment: SystemEnvironment): Resources = environment.resources
+
+    @EnvironmentScope
+    @Provides
+    fun minetunesDownloadService(): DownloadService {
+        val retrofit: Retrofit = Retrofit.Builder()
+            .baseUrl("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(DownloadService::class.java)
+    }
 }
 
 
@@ -143,17 +154,6 @@ class SystemAppModule {
     @Provides
     fun origin(player: Player, preferencesRepository: PreferencesRepository): Origin {
         return Origin(player, preferencesRepository.model.screenDistance)
-    }
-
-    @AppScope
-    @Provides
-    fun minetunesDownloadService(): DownloadService {
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        return retrofit.create(DownloadService::class.java)
     }
 }
 

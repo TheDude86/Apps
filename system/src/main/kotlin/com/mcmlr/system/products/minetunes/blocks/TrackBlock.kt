@@ -1,6 +1,5 @@
-package com.mcmlr.system.products.minetunes
+package com.mcmlr.system.products.minetunes.blocks
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
@@ -10,7 +9,6 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ItemView
 import com.mcmlr.blocks.api.views.Modifier
@@ -22,23 +20,19 @@ import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.blocks.core.minuteTimeFormat
-import com.mcmlr.system.products.minetunes.nbs.data.Song
-import com.mcmlr.system.products.minetunes.player.MusicPlayer
+import com.mcmlr.system.products.minetunes.DownloadService
+import com.mcmlr.system.products.minetunes.MusicPlayerRepository
+import com.mcmlr.system.products.minetunes.MusicRepository
+import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.observeOn
-import kotlinx.coroutines.launch
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Material
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
-import java.io.InputStream
 import javax.inject.Inject
 
 class TrackBlock @Inject constructor(
@@ -46,10 +40,10 @@ class TrackBlock @Inject constructor(
     origin: Origin,
     resources: Resources,
     musicRepository: MusicRepository,
-    musicPlayer: MusicPlayer,
+    musicPlayerRepository: MusicPlayerRepository,
 ): Block(player, origin) {
     private val view = TrackViewController(player, origin)
-    private val interactor = TrackInteractor(player, resources, view, musicRepository, musicPlayer)
+    private val interactor = TrackInteractor(player, resources, view, musicRepository, musicPlayerRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -104,7 +98,6 @@ class TrackViewController(
 
         val progress = (time / speed) / songLength.toFloat()
         val position = progress * 1800
-//        log(Log.ERROR, "progress=$progress position=$position toInt=${position.toInt()}")
 
         progressIndicator.update(
             modifier = Modifier()
@@ -296,8 +289,14 @@ class TrackInteractor(
     private val resources: Resources,
     private val presenter: TrackPresenter,
     private val musicRepository: MusicRepository,
-    private val musicPlayer: MusicPlayer,
+    private val musicPlayerRepository: MusicPlayerRepository,
 ): Interactor(presenter) {
+    companion object {
+        private const val MUSIC_PLAYER_DISPOSER = "music player"
+    }
+
+    private val musicPlayer = musicPlayerRepository.getMusicPlayer(player)
+
     val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F/")
         .addConverterFactory(GsonConverterFactory.create())
@@ -317,52 +316,70 @@ class TrackInteractor(
 
         val track = track ?: return
         presenter.setTrack(track)
+        musicPlayer.updatePlaylist(Playlist(songs = mutableListOf(track)))
 
         presenter.addPlayListener(object : Listener {
             override fun invoke() {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val response = service.download("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F${track.downloadUrl}")
 
-                    var input: InputStream? = null
-                    try {
-                        input = response.body()?.byteStream() ?: return@launch
-
-                        val fileName = "${track.artist.replace("/", "%!")} - ${track.song}.nbs"
-                        val fos = File(resources.dataFolder(), "${File.separator}Mine Tunes${File.separator}Songs${File.separator}$fileName")
-                        fos.outputStream().use { output ->
-                            val buffer = ByteArray(4 * 1024)
-                            var read: Int
-                            while (input.read(buffer).also { read = it } != -1) {
-                                output.write(buffer, 0, read)
-                            }
-                            output.flush()
+                isPlaying = !isPlaying
+                if (isPlaying) {
+                    musicPlayer.startPlaylist()
+                        .collectOn(DudeDispatcher())
+                        .collectLatest {
+                            val song = musicPlayer.getCurrentSong() ?: return@collectLatest
+                            presenter.setProgress(it, song.length, song.speed)
                         }
-
-                        val song = musicRepository.loadSong(fileName) ?: return@launch
-
-                        CoroutineScope(DudeDispatcher()).launch {
-                            isPlaying = !isPlaying
-
-                            if (isPlaying) {
-                                musicPlayer.playSong(song, player)
-                                    .collectOn(DudeDispatcher())
-                                    .collectLatest {
-                                        presenter.setProgress(it, song.length, song.speed)
-                                    }
-                                    .disposeOn(disposer = this@TrackInteractor)
-                            } else {
-                                musicPlayer.pauseSong()
-                            }
-
-                            presenter.setPlayingState(isPlaying)
-                        }
-
-                    } catch (e: Throwable) {
-                        println("Error: $e")
-                    } finally {
-                        input?.close()
-                    }
+                        .disposeOn(collection = MUSIC_PLAYER_DISPOSER, disposer = this@TrackInteractor)
+                } else {
+                    musicPlayer.pause()
+                    clear(MUSIC_PLAYER_DISPOSER)
                 }
+
+                presenter.setPlayingState(isPlaying)
+
+//                CoroutineScope(Dispatchers.IO).launch {
+//                    val response = service.download("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F${track.downloadUrl}")
+//
+//                    var input: InputStream? = null
+//                    try {
+//                        input = response.body()?.byteStream() ?: return@launch
+//
+//                        val fileName = "${track.artist.replace("/", "%!")} - ${track.song}.nbs"
+//                        val fos = File(resources.dataFolder(), "${File.separator}Mine Tunes${File.separator}Songs${File.separator}$fileName")
+//                        fos.outputStream().use { output ->
+//                            val buffer = ByteArray(4 * 1024)
+//                            var read: Int
+//                            while (input.read(buffer).also { read = it } != -1) {
+//                                output.write(buffer, 0, read)
+//                            }
+//                            output.flush()
+//                        }
+//
+//                        val song = musicRepository.loadSong(fileName) ?: return@launch
+//
+//                        CoroutineScope(DudeDispatcher()).launch {
+//                            isPlaying = !isPlaying
+//
+//                            if (isPlaying) {
+//                                musicPlayer.playSong(song, player)
+//                                    .collectOn(DudeDispatcher())
+//                                    .collectLatest {
+//                                        presenter.setProgress(it, song.length, song.speed)
+//                                    }
+//                                    .disposeOn(disposer = this@TrackInteractor)
+//                            } else {
+//                                musicPlayer.pauseSong()
+//                            }
+//
+//                            presenter.setPlayingState(isPlaying)
+//                        }
+//
+//                    } catch (e: Throwable) {
+//                        println("Error: $e")
+//                    } finally {
+//                        input?.close()
+//                    }
+//                }
             }
         })
     }

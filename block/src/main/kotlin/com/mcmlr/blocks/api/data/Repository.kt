@@ -87,10 +87,10 @@ abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) 
             val file = File(folder, "$name.json")
 
             if (file.exists()) {
-                val homeInputStream: InputStream = file.inputStream()
-                val homeInputString = homeInputStream.bufferedReader().use { it.readText() }
+                val modelInputStream: InputStream = file.inputStream()
+                val modelInputString = modelInputStream.bufferedReader().use { it.readText() }
 
-                model = Gson().fromJson(homeInputString, default::class.java)
+                model = Gson().fromJson(modelInputString, default::class.java)
 
             } else {
                 if (!folder.exists()) folder.mkdirs()

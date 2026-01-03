@@ -1,0 +1,629 @@
+package com.mcmlr.system.products.minetunes.blocks
+
+import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.app.RouteToCallback
+import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.block.Interactor
+import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.block.NavigationViewController
+import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
+import com.mcmlr.blocks.api.views.ButtonView
+import com.mcmlr.blocks.api.views.ListFeedView
+import com.mcmlr.blocks.api.views.Modifier
+import com.mcmlr.blocks.api.views.TextView
+import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.collectFirst
+import com.mcmlr.blocks.core.collectLatest
+import com.mcmlr.blocks.core.collectOn
+import com.mcmlr.blocks.core.disposeOn
+import com.mcmlr.blocks.core.minuteTimeFormat
+import com.mcmlr.system.ConfirmationBlock
+import com.mcmlr.system.ConfirmationBlock.Companion.CONFIRMATION_BUNDLE_KEY
+import com.mcmlr.system.ConfirmationModel
+import com.mcmlr.system.ConfirmationResponse
+import com.mcmlr.system.OptionRowModel
+import com.mcmlr.system.OptionsBlock
+import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
+import com.mcmlr.system.OptionsModel
+import com.mcmlr.system.products.minetunes.LibraryRepository
+import com.mcmlr.system.products.minetunes.MusicPlayerRepository
+import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.SearchFactory
+import com.mcmlr.system.products.minetunes.SearchState
+import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.PLAYLIST_PICKER_BUNDLE_KEY
+import com.mcmlr.system.products.minetunes.player.Playlist
+import com.mcmlr.system.products.minetunes.player.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.ChatColor
+import org.bukkit.Color
+import org.bukkit.entity.Player
+import javax.inject.Inject
+
+class PlaylistBlock @Inject constructor(
+    player: Player,
+    origin: Origin,
+    optionsBlock: OptionsBlock,
+    playlistPickerBlock: PlaylistPickerBlock,
+    createPlaylistBlock: CreatePlaylistBlock,
+    confirmationBlock: ConfirmationBlock,
+    musicPlayerBlock: MusicPlayerBlock,
+    musicPlayerRepository: MusicPlayerRepository,
+    libraryRepository: LibraryRepository,
+): Block(player, origin) {
+    private val view = PlaylistViewController(player, origin)
+    private val interactor = PlaylistInteractor(
+        player,
+        view,
+        optionsBlock,
+        playlistPickerBlock,
+        createPlaylistBlock,
+        confirmationBlock,
+        musicPlayerBlock,
+        musicPlayerRepository,
+        libraryRepository
+    )
+
+    override fun view(): ViewController = view
+    override fun interactor(): Interactor = interactor
+
+    fun setPlaylist(playlist: Playlist) {
+        interactor.setPlaylist(playlist)
+    }
+}
+
+class PlaylistViewController(
+    private val player: Player,
+    origin: Origin,
+): NavigationViewController(player, origin), PlaylistPresenter {
+
+    private lateinit var title: TextView
+    private lateinit var addButton: ButtonView
+    private lateinit var optionsButton: ButtonView
+    private lateinit var musicPlayerContainer: ViewContainer
+
+//    private lateinit var songName: TextView
+//    private lateinit var artist: TextView
+//    private lateinit var songProgress: TextView
+//    private lateinit var playButton: ButtonView
+//    private lateinit var lastTrackButton: ButtonView
+//    private lateinit var shuffleButton: ButtonView
+//    private lateinit var nextTrackButton: ButtonView
+//    private lateinit var loopButton: ButtonView
+    
+    private lateinit var contentFeed: ListFeedView
+
+    private lateinit var optionsCallback: (Track) -> Unit
+    private lateinit var resultCallback: (Int) -> Unit
+
+    override fun getMusicPlayerContainer(): ViewContainer = musicPlayerContainer
+
+    override fun setOptionsCallback(callback: (Track) -> Unit) {
+        optionsCallback = callback
+    }
+
+    override fun setResultsCallback(callback: (Int) -> Unit) {
+        resultCallback = callback
+    }
+
+    override fun setIsLooped(isLooped: Boolean) {
+        val loopedString = R.getString(player, S.LOOP_BUTTON.resource())
+        val loopedText = if (isLooped) "${ChatColor.GOLD}$loopedString" else loopedString
+//        loopButton.update(text = loopedText)
+    }
+
+    override fun setIsShuffled(isShuffled: Boolean) {
+        val shuffleString = R.getString(player, S.SHUFFLE_BUTTON.resource())
+        val shuffleText = if (isShuffled) "${ChatColor.GOLD}$shuffleString" else shuffleString
+//        shuffleButton.update(text = shuffleText)
+    }
+
+    override fun setProgress(songProgress: String) {
+//        this.songProgress.update(text = "${ChatColor.GRAY}$songProgress")
+    }
+
+    override fun setPlayingState(isPlaying: Boolean) {
+        val icon = if (isPlaying) S.PAUSE_BUTTON else S.PLAY_BUTTON
+//        playButton.update(text = R.getString(player, icon.resource()))
+    }
+
+    override fun setPlayingTrack(track: Track) {
+//        songName.update(text = track.song.bolden())
+//        artist.update(text = "${ChatColor.GRAY}${track.artist}")
+    }
+
+    override fun setOptionsListener(listener: Listener) {
+        optionsButton.addListener(listener)
+    }
+
+    override fun setAddListener(listener: Listener) {
+        addButton.addListener(listener)
+    }
+
+    override fun setPlayListener(listener: Listener) {
+//        playButton.addListener(listener)
+    }
+
+    override fun setLoopListener(listener: Listener) {
+//        loopButton.addListener(listener)
+    }
+
+    override fun setShuffleListener(listener: Listener) {
+//        shuffleButton.addListener(listener)
+    }
+
+    override fun setNextTrackListener(listener: Listener) {
+//        nextTrackButton.addListener(listener)
+    }
+
+    override fun setLastTrackListener(listener: Listener) {
+//        lastTrackButton.addListener(listener)
+    }
+
+    override fun setPlaylistTitle(title: String) {
+        this.title.update(text = "${ChatColor.BOLD}${ChatColor.UNDERLINE}${ChatColor.ITALIC}$title")
+    }
+
+    override fun setPlaylist(playlist: Playlist) {
+        contentFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                playlist.songs.forEachIndexed { index, track ->
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 75),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                resultCallback.invoke(index)
+                            }
+                        },
+
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                val title = addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .alignTopToTopOf(this)
+                                        .margins(start = 50, top = 30),
+                                    size = 6,
+                                    maxLength = 600,
+                                    text = track.song.bolden(),
+                                )
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(title)
+                                        .alignTopToBottomOf(title)
+                                        .margins(top = 30),
+                                    size = 4,
+                                    maxLength = 600,
+                                    text = "${ChatColor.GRAY}${track.length.minuteTimeFormat()}"
+                                )
+
+                                addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignEndToEndOf(this)
+                                        .centerVertically()
+                                        .margins(end = 50),
+                                    text = R.getString(player, S.OPTIONS_BUTTON.resource()),
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            optionsCallback.invoke(track)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        })
+
+    }
+
+    override fun createView() {
+        super.createView()
+        title = addTextView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(this)
+                .alignStartToEndOf(backButton!!)
+                .margins(top = 250, start = 400),
+            text = R.getString(player, S.PLAYLIST_TITLE.resource()),
+            size = 16,
+        )
+
+        contentFeed = addListFeedView(
+            modifier = Modifier()
+                .size(1000, FILL_ALIGNMENT)
+                .alignTopToBottomOf(title)
+                .alignBottomToBottomOf(this)
+                .centerHorizontally()
+                .margins(top = 300, bottom = 600)
+        )
+
+        optionsButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignBottomToTopOf(contentFeed)
+                .alignEndToEndOf(contentFeed)
+                .margins(bottom = 50),
+            size = 16,
+            text = R.getString(player, S.OPTIONS_BUTTON.resource())
+        )
+
+        addButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignBottomToTopOf(contentFeed)
+                .alignEndToStartOf(optionsButton)
+                .margins(bottom = 50, end = 50),
+            size = 16,
+            text = R.getString(player, S.ADD_BUTTON.resource())
+        )
+
+        musicPlayerContainer = addViewContainer(
+            modifier = Modifier()
+                .size(FILL_ALIGNMENT, FILL_ALIGNMENT)
+                .alignTopToBottomOf(contentFeed)
+                .alignStartToStartOf(contentFeed)
+                .alignEndToEndOf(contentFeed)
+                .alignBottomToBottomOf(this),
+            background = Color.fromARGB(0, 0, 0, 0)
+        )
+
+//        playButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignTopToBottomOf(contentFeed)
+//                .alignBottomToBottomOf(this)
+//                .centerHorizontally(),
+//            size = 24,
+//            text = R.getString(player, S.PLAY_BUTTON.resource())
+//        )
+//
+//        lastTrackButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignEndToStartOf(playButton)
+//                .alignTopToTopOf(playButton)
+//                .alignBottomToBottomOf(playButton)
+//                .margins(end = 150),
+//            size = 18,
+//            text = R.getString(player, S.LAST_TRACK_BUTTON.resource())
+//        )
+//
+//        nextTrackButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignStartToEndOf(playButton)
+//                .alignTopToTopOf(playButton)
+//                .alignBottomToBottomOf(playButton)
+//                .margins(start = 150),
+//            size = 18,
+//            text = R.getString(player, S.NEXT_TRACK_BUTTON.resource())
+//        )
+//
+//        shuffleButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignStartToStartOf(contentFeed)
+//                .alignTopToTopOf(playButton)
+//                .alignBottomToBottomOf(playButton),
+//            size = 18,
+//            text = R.getString(player, S.SHUFFLE_BUTTON.resource())
+//        )
+//
+//        loopButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignEndToEndOf(contentFeed)
+//                .alignTopToTopOf(playButton)
+//                .alignBottomToBottomOf(playButton),
+//            size = 18,
+//            text = R.getString(player, S.LOOP_BUTTON.resource())
+//        )
+//
+//        artist = addTextView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignBottomToTopOf(playButton)
+//                .alignStartToStartOf(shuffleButton),
+//            size = 6,
+//            text = ""
+//        )
+//
+//        songName = addTextView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignBottomToTopOf(artist)
+//                .alignStartToStartOf(artist),
+//            size = 8,
+//            text = ""
+//        )
+//
+//        songProgress = addTextView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignBottomToTopOf(playButton)
+//                .alignEndToEndOf(loopButton),
+//            size = 6,
+//            text = ""
+//        )
+    }
+
+}
+
+interface PlaylistPresenter: Presenter {
+    fun setPlaylistTitle(title: String)
+
+    fun setPlaylist(playlist: Playlist)
+    fun setOptionsCallback(callback: (Track) -> Unit)
+    fun setResultsCallback(callback: (Int) -> Unit)
+    fun setPlayingState(isPlaying: Boolean)
+    fun setPlayingTrack(track: Track)
+    fun setProgress(songProgress: String)
+    fun setIsShuffled(isShuffled: Boolean)
+    fun setIsLooped(isLooped: Boolean)
+
+    fun setPlayListener(listener: Listener)
+    fun setShuffleListener(listener: Listener)
+    fun setLoopListener(listener: Listener)
+    fun setNextTrackListener(listener: Listener)
+    fun setLastTrackListener(listener: Listener)
+
+    fun setAddListener(listener: Listener)
+    fun setOptionsListener(listener: Listener)
+
+    fun getMusicPlayerContainer(): ViewContainer
+}
+
+class PlaylistInteractor(
+    private val player: Player,
+    private val presenter: PlaylistPresenter,
+    private val optionsBlock: OptionsBlock,
+    private val playlistPickerBlock: PlaylistPickerBlock,
+    private val createPlaylistBlock: CreatePlaylistBlock,
+    private val confirmationBlock: ConfirmationBlock,
+    private val musicPlayerBlock: MusicPlayerBlock,
+    private val musicPlayerRepository: MusicPlayerRepository,
+    private val libraryRepository: LibraryRepository,
+): Interactor(presenter) {
+    companion object {
+        private const val MUSIC_PLAYER_COLLECTION = "music player"
+    }
+
+    private val musicPlayer = musicPlayerRepository.getMusicPlayer(player)
+    private var playlist: Playlist? = null
+    private var isPlaying = false
+    private var isRouting = false
+
+    fun setPlaylist(playlist: Playlist) {
+        this.playlist = playlist
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        val playlist = playlist ?: return
+
+        presenter.setPlaylist(playlist)
+        presenter.setPlaylistTitle(playlist.name ?: "Untitled Playlist")
+        presenter.setIsShuffled(musicPlayer.isShuffled)
+        presenter.setIsLooped(musicPlayer.isLooped)
+
+        musicPlayer.updatePlaylist(playlist)
+
+        attachChild(musicPlayerBlock, presenter.getMusicPlayerContainer())
+
+        presenter.setOptionsCallback { track ->
+            val optionsList = mutableListOf<OptionRowModel>()
+
+            if (!libraryRepository.isFavorite(track)) {
+                optionsList.add(OptionRowModel("Favorite song"))
+            }
+
+            optionsList.add(OptionRowModel("Add to playlist"))
+//            optionsList.add(OptionRowModel("Go to artist"))
+
+//            if (track.album != "EP") {
+//                optionsList.add(OptionRowModel("Go to album"))
+//            }
+
+            if (playlist.uuid != null) {
+                optionsList.add(OptionRowModel("Remove from playlist"))
+            }
+
+            val optionsModel = OptionsModel(
+                "Song Options",
+                optionsList,
+            )
+
+            optionsBlock.setOptions(optionsModel)
+
+            isRouting = true
+            routeTo(optionsBlock, object : RouteToCallback {
+                override fun invoke(bundle: Bundle) {
+                    val option = bundle.getData<String>(OPTION_BUNDLE_KEY)
+                    when (option) {
+                        "Favorite song" -> {
+                            libraryRepository.addToFavorites(track)?.invokeOnCompletion {
+                                CoroutineScope(DudeDispatcher()).launch {
+                                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
+                                }
+                            }
+                        }
+
+                        "Add to playlist" -> {
+                            routeTo(playlistPickerBlock, object : RouteToCallback {
+                                override fun invoke(bundle: Bundle) {
+                                    val playlist = bundle.getData<Playlist>(PLAYLIST_PICKER_BUNDLE_KEY) ?: return
+                                    val uuid = playlist.uuid ?: return
+                                    if (libraryRepository.addToPlaylist(track, uuid)) {
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to ${playlist.name?.bolden()}${ChatColor.GREEN}!"))
+                                    } else {
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.RED}${ChatColor.ITALIC}Song is already in ${playlist.name?.bolden()}${ChatColor.RED}!"))
+                                    }
+                                }
+                            })
+                        }
+
+                        "Go to artist" -> {
+                            SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                .collectFirst(DudeDispatcher()) {
+                                    CoroutineScope(DudeDispatcher()).launch {
+                                        val artistSongs = it.filter { it.artist == track.artist }
+//                                        artistBlock.setArtist(track.artist, artistSongs)
+//                                        routeTo(artistBlock)
+                                    }
+                                }
+                        }
+
+                        "Go to album" -> {
+                            SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                .collectFirst(DudeDispatcher()) {
+                                    CoroutineScope(DudeDispatcher()).launch {
+                                        val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
+
+//                                        playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
+//                                        routeTo(playlistBlock)
+                                    }
+                                }
+                        }
+
+                        "Remove from playlist" -> {
+                            val uuid = playlist.uuid ?: return
+                            if (libraryRepository.removeFromPlaylist(track, uuid)) {
+                                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song removed from ${playlist.name?.bolden()}${ChatColor.GREEN}!"))
+                                presenter.setPlaylist(playlist)
+                            } else {
+                                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.RED}${ChatColor.ITALIC}Something went wrong..."))
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        presenter.setResultsCallback {
+            isPlaying = true
+            presenter.setPlayingState(true)
+
+            setSongProgressSubscriber(musicPlayer.startSong(it))
+        }
+
+
+
+        presenter.setShuffleListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.shuffle()
+                presenter.setIsShuffled(musicPlayer.isShuffled)
+            }
+        })
+
+        presenter.setLoopListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.loop()
+                presenter.setIsLooped(musicPlayer.isLooped)
+            }
+        })
+
+
+        presenter.setPlayListener(object : Listener {
+            override fun invoke() {
+                isPlaying = !isPlaying
+                presenter.setPlayingState(isPlaying)
+                if (isPlaying) {
+                    setSongProgressSubscriber(musicPlayer.play())
+                } else {
+                    musicPlayer.pause()
+                }
+            }
+        })
+
+        presenter.setNextTrackListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.goToNextSong()
+            }
+        })
+
+        presenter.setLastTrackListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.goToLastSong()
+            }
+        })
+
+        presenter.setOptionsListener(object : Listener {
+            override fun invoke() {
+                val options = OptionsModel(
+                    "Playlist Options",
+                    listOf(
+                        OptionRowModel("Edit Playlist"),
+                        OptionRowModel("Delete Playlist"),
+                    ),
+                )
+
+                optionsBlock.setOptions(options)
+                routeTo(optionsBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val option = bundle.getData<String>(OPTION_BUNDLE_KEY)
+
+                        when (option) {
+                            "Edit Playlist" -> {
+                                createPlaylistBlock.setEditingPlaylist(playlist)
+                                routeTo(createPlaylistBlock)
+                            }
+
+                            "Delete Playlist" -> {
+                                val confirmationModel = ConfirmationModel("Are you sure you want to delete this playlist?")
+                                confirmationBlock.setConfirmationModel(confirmationModel)
+                                routeTo(confirmationBlock, object : RouteToCallback {
+                                    override fun invoke(bundle: Bundle) {
+                                        val response = bundle.getData<ConfirmationResponse>(CONFIRMATION_BUNDLE_KEY) ?: return
+                                        if (response == ConfirmationResponse.ACCEPT) {
+                                            val uuid = playlist.uuid ?: return
+                                            libraryRepository.deletePlaylist(uuid)?.invokeOnCompletion {
+                                                CoroutineScope(DudeDispatcher()).launch {
+                                                    routeBack()
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    private fun setSongProgressSubscriber(flow: Flow<Short>) {
+        flow.collectOn(DudeDispatcher())
+            .collectLatest {
+                if (it == 0.toShort()) {
+                    val track = musicPlayer.getCurrentTrack()
+                    presenter.setPlayingTrack(track)
+                }
+
+                val song = musicPlayer.getCurrentSong() ?: return@collectLatest
+                val songLength = song.length / song.speed
+                val progress = it / song.speed
+                presenter.setProgress("${progress.toInt().toShort().minuteTimeFormat()}/${songLength.toInt().toShort().minuteTimeFormat()}")
+            }.disposeOn(collection = MUSIC_PLAYER_COLLECTION, disposer = this@PlaylistInteractor)
+    }
+}

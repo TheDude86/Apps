@@ -1,9 +1,8 @@
-package com.mcmlr.system.products.minetunes
+package com.mcmlr.system.products.minetunes.blocks
 
-import com.google.gson.Gson
-import com.google.gson.JsonParser
-import com.google.gson.annotations.SerializedName
+import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -20,24 +19,41 @@ import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.collectFirst
+import com.mcmlr.blocks.core.delay
+import com.mcmlr.system.OptionRowModel
+import com.mcmlr.system.OptionsBlock
+import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
+import com.mcmlr.system.OptionsModel
+import com.mcmlr.system.products.minetunes.LibraryRepository
+import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.SearchFactory
+import com.mcmlr.system.products.minetunes.SearchState
+import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.PLAYLIST_PICKER_BUNDLE_KEY
+import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 class SearchBlock @Inject constructor(
     player: Player,
     origin: Origin,
     trackBlock: TrackBlock,
     artistBlock: ArtistBlock,
+    optionsBlock: OptionsBlock,
+    playlistPickerBlock: PlaylistPickerBlock,
+    playlistBlock: PlaylistBlock,
+    libraryRepository: LibraryRepository,
 ): Block(player, origin) {
     private val view = SearchViewController(player, origin)
-    private val interactor = SearchInteractor(view, trackBlock, artistBlock)
+    private val interactor = SearchInteractor(player, view, trackBlock, artistBlock, optionsBlock, playlistPickerBlock, playlistBlock, libraryRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -62,6 +78,8 @@ class SearchViewController(
     }
 
     override fun setSearchState(isSongSearch: Boolean) {
+        resultsFeed.updateView()
+
         if (isSongSearch) {
             songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()).bolden())
             artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()))
@@ -69,8 +87,6 @@ class SearchViewController(
             songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()))
             artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()).bolden())
         }
-
-        resultsFeed.updateView()
     }
 
     override fun setArtistsSearchResults(results: List<String>, resultCallback: (String) -> Unit) {
@@ -107,7 +123,7 @@ class SearchViewController(
         })
     }
 
-    override fun setSongsSearchResults(results: List<Track>, resultCallback: (Track) -> Unit) {
+    override fun setSongsSearchResults(results: List<Track>, optionsCallback: (Track) -> Unit, resultCallback: (Track) -> Unit) {
         resultsFeed.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 results.forEach { track ->
@@ -130,19 +146,32 @@ class SearchViewController(
                                         .alignTopToTopOf(this)
                                         .margins(start = 50, top = 30),
                                     size = 6,
-                                    maxLength = 600,
+                                    maxLength = 1200,
                                     text = track.song.bolden(),
                                 )
 
-                                val artist = addTextView(
+                                addTextView(
                                     modifier = Modifier()
                                         .size(WRAP_CONTENT, WRAP_CONTENT)
                                         .alignStartToStartOf(title)
-                                        .alignTopToBottomOf(title)
-                                        .margins(top = 30),
+                                        .alignTopToBottomOf(title),
                                     size = 4,
-                                    maxLength = 600,
+                                    maxLength = 1200,
                                     text = "${ChatColor.GRAY}${track.artist}"
+                                )
+
+                                addButtonView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignEndToEndOf(this)
+                                        .centerVertically()
+                                        .margins(end = 50),
+                                    text = R.getString(player, S.OPTIONS_BUTTON.resource()),
+                                    callback = object : Listener {
+                                        override fun invoke() {
+                                            optionsCallback.invoke(track)
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -242,7 +271,7 @@ class SearchViewController(
 interface SearchPresenter: Presenter {
     fun addSearchListener(listener: TextListener)
 
-    fun setSongsSearchResults(results: List<Track>, resultCallback: (Track) -> Unit)
+    fun setSongsSearchResults(results: List<Track>, optionsCallback: (Track) -> Unit, resultCallback: (Track) -> Unit)
 
     fun setArtistsSearchResults(results: List<String>, resultCallback: (String) -> Unit)
 
@@ -254,16 +283,35 @@ interface SearchPresenter: Presenter {
 }
 
 class SearchInteractor(
+    private val player: Player,
     private val presenter: SearchPresenter,
     private val trackBlock: TrackBlock,
     private val artistBlock: ArtistBlock,
+    private val optionsBlock: OptionsBlock,
+    private val playlistPickerBlock: PlaylistPickerBlock,
+    private val playlistBlock: PlaylistBlock,
+    private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
 
     private val client = OkHttpClient()
     private var searchState = SearchState.SONG
+    private var results: List<Track> = listOf()
+    private var isRouting = false
 
     override fun onCreate() {
         super.onCreate()
+
+        if (isRouting) {
+            isRouting = false
+            return
+        }
+
+        //TODO: Fix not updating synchronously
+        delay(duration = 50.milliseconds, callback = object : Listener {
+            override fun invoke() {
+                setResults()
+            }
+        })
 
         presenter.setSearchState(true)
 
@@ -283,50 +331,110 @@ class SearchInteractor(
 
         presenter.addSearchListener(object : TextListener {
             override fun invoke(text: String) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val url = if (searchState == SearchState.SONG) "https://searchsong-l5cijtvgrq-uc.a.run.app" else "https://searchartist-l5cijtvgrq-uc.a.run.app"
-
-                    val request = Request.Builder().url("$url/?search=$text").build()
-                    val response = client.newCall(request).execute()
-                    val body = response.body?.string() ?: return@launch
-                    val data = JsonParser.parseString(body).asJsonObject
-
-                    val results = data.get("results").asJsonObject.keySet().map {
-                        val result = data.get("results").asJsonObject.get(it).asJsonObject
-                        Gson().fromJson(result, Track::class.java)
-                    }
-
-                    if (searchState == SearchState.SONG) {
-                        CoroutineScope(DudeDispatcher()).launch {
-                            presenter.setSongsSearchResults(results) {
-                                trackBlock.setTrack(it)
-                                routeTo(trackBlock)
-                            }
-                        }
-                    } else {
-                        val artistSet = hashSetOf<String>()
-                        results.forEach { artistSet.add(it.artist) }
+                SearchFactory.search(text, searchState)
+                    .collectFirst(DudeDispatcher()) {
+                        results = it
 
                         CoroutineScope(DudeDispatcher()).launch {
-                            presenter.setArtistsSearchResults(artistSet.toList()) { artist ->
-                                val artistSongs = results.filter { it.artist == artist }
-                                artistBlock.setArtist(artist, artistSongs)
-                                routeTo(artistBlock)
-                            }
+                            setResults()
                         }
                     }
-
-
-                    response.close()
-
-                }
             }
         })
     }
-}
 
-private enum class SearchState {
-    SONG,
-    ARTIST,
-}
+    private fun setResults() {
+        if (results.isEmpty()) return
+        if (searchState == SearchState.SONG) {
+            presenter.setSongsSearchResults(results, { track ->
+                val optionsList = mutableListOf<OptionRowModel>()
 
+                if (!libraryRepository.isFavorite(track)) {
+                    optionsList.add(OptionRowModel("Favorite song"))
+                }
+
+                optionsList.add(OptionRowModel("Add to playlist"))
+                optionsList.add(OptionRowModel("Go to artist"))
+
+                if (track.album != "EP") {
+                    optionsList.add(OptionRowModel("Go to album"))
+                }
+
+                val optionsModel = OptionsModel(
+                    "Song Options",
+                    optionsList,
+                )
+
+                optionsBlock.setOptions(optionsModel)
+
+                isRouting = true
+                routeTo(optionsBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val option = bundle.getData<String>(OPTION_BUNDLE_KEY)
+                        when (option) {
+                            "Favorite song" -> {
+                                libraryRepository.addToFavorites(track)?.invokeOnCompletion {
+                                    CoroutineScope(DudeDispatcher()).launch {
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
+                                    }
+                                }
+                            }
+
+                            "Add to playlist" -> {
+                                routeTo(playlistPickerBlock, object : RouteToCallback {
+                                    override fun invoke(bundle: Bundle) {
+                                        val playlist = bundle.getData<Playlist>(PLAYLIST_PICKER_BUNDLE_KEY) ?: return
+                                        val uuid = playlist.uuid ?: return
+                                        if (libraryRepository.addToPlaylist(track, uuid)) {
+                                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to ${playlist.name?.bolden()}${ChatColor.GREEN}!"))
+                                        } else {
+                                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.RED}${ChatColor.ITALIC}Song is already in ${playlist.name?.bolden()}${ChatColor.RED}!"))
+                                        }
+                                    }
+                                })
+                            }
+
+                            "Go to artist" -> {
+                                SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                    .collectFirst(DudeDispatcher()) {
+                                        CoroutineScope(DudeDispatcher()).launch {
+                                            val artistSongs = it.filter { it.artist == track.artist }
+                                            artistBlock.setArtist(track.artist, artistSongs)
+                                            routeTo(artistBlock)
+                                        }
+                                    }
+                            }
+
+                            "Go to album" -> {
+                                SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                    .collectFirst(DudeDispatcher()) {
+                                        CoroutineScope(DudeDispatcher()).launch {
+                                            val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
+
+                                            playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
+                                            routeTo(playlistBlock)
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                })
+
+            }) {
+                trackBlock.setTrack(it)
+                routeTo(trackBlock)
+            }
+        } else {
+            val artistSet = hashSetOf<String>()
+            results.forEach { artistSet.add(it.artist) }
+
+            CoroutineScope(DudeDispatcher()).launch {
+                presenter.setArtistsSearchResults(artistSet.toList()) { artist ->
+                    val artistSongs = results.filter { it.artist == artist }
+                    artistBlock.setArtist(artist, artistSongs)
+                    routeTo(artistBlock)
+                }
+            }
+        }
+    }
+}

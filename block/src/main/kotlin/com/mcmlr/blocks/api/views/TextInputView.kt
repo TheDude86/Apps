@@ -3,6 +3,7 @@ package com.mcmlr.blocks.api.views
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.font.reduceToLength
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -51,6 +52,53 @@ class TextInputView(
         })
     }
 
+    fun update(
+        modifier: Modifier?,
+        text: String?,
+        highlightedText: String?,
+        size: Int?,
+        alignment: Alignment?,
+        maxLength: Int?,
+        lineWidth: Int?,
+        background: Color?,
+        visible: Boolean?,
+        teleportDuration: Int?,
+        height: Int?,
+    ) {
+        update(
+            modifier,
+            text,
+            size,
+            alignment,
+            maxLength,
+            lineWidth,
+            background,
+            visible,
+            teleportDuration,
+            height,
+        )
+
+        if (highlightedText != null) {
+            this.highlightedText = highlightedText
+        }
+    }
+
+    override fun update(
+        modifier: Modifier?,
+        text: String?,
+        size: Int?,
+        alignment: Alignment?,
+        maxLength: Int?,
+        lineWidth: Int?,
+        background: Color?,
+        visible: Boolean?,
+        teleportDuration: Int?,
+        height: Int?,
+    ) {
+        super.update(modifier, text, size, alignment, maxLength, lineWidth, background, visible, teleportDuration, height)
+        highlightedText = text?.bolden()
+    }
+
     override fun updateFocus(view: Viewable) {
         if (view == this) {
             waitingInput = true
@@ -93,9 +141,4 @@ class TextInputView(
         updateDisplay()
         dependants.forEach { it.updatePosition() }
     }
-
-//    private fun updateDisplay() {
-//        val display = (dudeDisplay as? TextDudeDisplay) ?: return
-//        display.text = text
-//    }
 }
