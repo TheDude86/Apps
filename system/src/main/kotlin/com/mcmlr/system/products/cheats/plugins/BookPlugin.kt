@@ -18,9 +18,6 @@ class BookPlugin(
     override fun execute(data: CheatType) {
         val item = player.inventory.getItem(player.inventory.heldItemSlot) ?: return
 
-        log(Log.ERROR, "Book Meta=${(item.itemMeta as? BookMeta)?.asComponentString} || Book Meta=${(item.itemMeta as? WritableBookMeta)?.asComponentString}")
-
-
         val meta = item.itemMeta as? WritableBookMeta ?: return
 
         val newBook = ItemStack(Material.WRITABLE_BOOK)

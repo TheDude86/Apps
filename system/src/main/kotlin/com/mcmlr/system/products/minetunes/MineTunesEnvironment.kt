@@ -6,6 +6,7 @@ import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.dagger.MineTunesAppComponent
 import com.mcmlr.system.products.data.PermissionNode
+import com.mcmlr.system.products.minetunes.blocks.MineTunesBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

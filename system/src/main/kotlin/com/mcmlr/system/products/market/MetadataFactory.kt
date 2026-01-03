@@ -102,8 +102,6 @@ object MetadataFactory {
     }
 
     private fun addPotionMeta(meta: PotionMeta, metaList: MutableList<String>) {
-        log(Log.ERROR, "Potion=${meta.basePotionType}")
-
         metaList.add(meta.basePotionType.toString().fromMCItem())
     }
 }

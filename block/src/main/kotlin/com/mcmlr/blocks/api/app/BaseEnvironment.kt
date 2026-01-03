@@ -19,6 +19,26 @@ import java.net.URL
 import java.util.*
 
 abstract class BaseEnvironment<out T: BaseApp>: FlowDisposer() {
+    companion object {
+        fun getAppIcon(icon: String): ItemStack {
+            val item = ItemStack(Material.PLAYER_HEAD)
+            val meta = item.itemMeta as SkullMeta
+            meta.ownerProfile = getProfile(icon)
+
+            item.itemMeta = meta
+            return item
+        }
+
+        private fun getProfile(url: String): PlayerProfile {
+            val profile = Bukkit.createPlayerProfile(UUID.randomUUID())
+            val textures = profile.textures
+            textures.skin = URL(url)
+            profile.setTextures(textures)
+
+            return profile
+        }
+    }
+
     lateinit var resources: Resources
 
     fun configure(resources: Resources) {

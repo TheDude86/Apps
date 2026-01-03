@@ -309,7 +309,7 @@ class TeleportInteractor(
         val players = teleportRepository.getOnlinePlayers(player.uniqueId).map {
             val head = ItemStack(Material.PLAYER_HEAD)
             val headMeta = head.itemMeta as SkullMeta
-            headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(it.uniqueId))
+            headMeta.owningPlayer = Bukkit.getOfflinePlayer(it.uniqueId)
             head.itemMeta = headMeta
             Pair(it, head)
         }
