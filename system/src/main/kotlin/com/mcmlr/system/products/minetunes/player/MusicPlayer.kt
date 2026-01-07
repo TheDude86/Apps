@@ -2,35 +2,49 @@ package com.mcmlr.system.products.minetunes.player
 
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
+import com.mcmlr.blocks.core.emitBackground
 import com.mcmlr.system.products.minetunes.MusicRepository
 import com.mcmlr.system.products.minetunes.nbs.data.Song
 import com.mcmlr.system.products.minetunes.util.NoteUtils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
 class MusicPlayer(
-    private val player: Player,
+    private val playerId: UUID,
     private val musicRepository: MusicRepository,
 ) {
     companion object {
         const val SONG_COMPLETED = "complete"
         const val SONG_PAUSED = "pause"
+        const val PLAYER_LEFT = "left"
     }
 
     private var activeJob: Job? = null
-    private var activeSong: Song? = null
     private var songProgressStream = MutableStateFlow<Short>(0)
-    private var playlist = Playlist()
+    private var eventStream = MutableSharedFlow<MusicPlayerAction>()
     private var songList: List<Track> = listOf()
+    var playlist = Playlist()
+    var activeSong: Song? = null
     var isShuffled = false
     var isLooped = true
     var tick: Short = 0
     var songIndex = 0
 
-    fun getActiveSongStream(): Flow<Short>? = if (activeJob == null) null else songProgressStream
+    //TODO: Come up with better way to track if is playing, jobs cancel async and can lead to race conditions
+    fun isPlaying(): Boolean {
+        return activeJob?.isActive == true
+    }
+
+    fun getActiveSongStream(): Flow<Short>? = if (activeJob == null || activeJob?.isActive != true) null else songProgressStream
+
+    fun getSongProgressStream(): Flow<Short> = songProgressStream
+
+    fun getActionStream(): Flow<MusicPlayerAction> = eventStream
 
     fun loop() {
         isLooped = !isLooped
@@ -48,14 +62,23 @@ class MusicPlayer(
 
     fun startPlaylist(): Flow<Short> {
         stopSong()
+        eventStream.emitBackground(MusicPlayerAction.PLAY)
         songIndex = 0
         return play()
     }
 
     fun startSong(index: Int = 0): Flow<Short> {
         stopSong()
+        eventStream.emitBackground(MusicPlayerAction.PLAY)
         songIndex = index
         return play()
+    }
+
+    fun setDefaultPlaylist(playlist: Playlist) {
+        if (this.playlist.songs.isNotEmpty()) return
+
+        this.playlist = playlist
+        songList = playlist.songs
     }
 
     fun updatePlaylist(playlist: Playlist) {
@@ -73,25 +96,28 @@ class MusicPlayer(
 
     fun goToNextSong() {
         stopSong()
+        eventStream.emitBackground(MusicPlayerAction.NEXT)
         songIndex = (songIndex + 1) % songList.size
         play()
     }
 
     fun goToLastSong() {
         stopSong()
-        songIndex = (songIndex + 1) % songList.size
+        eventStream.emitBackground(MusicPlayerAction.LAST)
+        songIndex = (songIndex - 1) % songList.size
         play()
     }
 
+
+
     fun play(): Flow<Short> {
-        stopSong()
         if (activeSong == null) {
             val currentTrack = songList[songIndex]
 
             musicRepository.downloadTrack(currentTrack)
                 .collectFirst(DudeDispatcher()) {
                     val song = it ?: return@collectFirst
-                    playSong(song)
+                    updateSong(song)
                     setNextSongListener()
                 }
         } else {
@@ -103,6 +129,7 @@ class MusicPlayer(
     }
 
     fun pause() {
+        eventStream.emitBackground(MusicPlayerAction.STOP)
         activeJob?.cancel(SONG_PAUSED)
     }
 
@@ -125,9 +152,12 @@ class MusicPlayer(
 
 
 
+    fun playSong(): Flow<Short> {
+        eventStream.emitBackground(MusicPlayerAction.PLAY)
+        return play()
+    }
 
-
-    fun playSong(song: Song) {
+    fun updateSong(song: Song) {
         activeJob?.cancel()
         activeSong = song
         resumeSong()
@@ -150,7 +180,14 @@ class MusicPlayer(
                         val note = it.notesMap[tick.toInt()] ?: return@forEach
                         val volume = it.volume
                         val pitch = NoteUtils.pitch(note.key, note.pitch)
-                        player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume.toFloat(), pitch)
+                        val player = Bukkit.getPlayer(playerId)
+
+                        if (player != null) {
+                            player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume.toFloat(), pitch)
+                        } else {
+                            activeJob?.cancel(PLAYER_LEFT)
+                        }
+
                     }
                 }
 
@@ -165,5 +202,11 @@ class MusicPlayer(
             }
         }
     }
+}
 
+enum class MusicPlayerAction {
+    PLAY,
+    STOP,
+    NEXT,
+    LAST,
 }

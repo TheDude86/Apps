@@ -548,7 +548,7 @@ class ArtistInteractor(
             override fun invoke() {
                 isPlaying = !isPlaying
                 if (isPlaying) {
-                    setSongProgressSubscriber(musicPlayer.play())
+                    setSongProgressSubscriber(musicPlayer.playSong())
                 } else {
                     musicPlayer.pause()
                 }

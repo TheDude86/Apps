@@ -236,12 +236,21 @@ class SearchViewController(
             highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
         )
 
+        resultsFeed = addListFeedView(
+            modifier = Modifier()
+                .size(1000, FILL_ALIGNMENT)
+                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(searchButton)
+                .centerHorizontally()
+                .margins(top = 150, bottom = 50)
+        )
+
         songsButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToBottomOf(searchBar)
-                .x(-200)
-                .margins(top = 50),
+                .alignBottomToTopOf(resultsFeed)
+                .x(-200),
             size = 5,
             text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()),
         )
@@ -250,19 +259,10 @@ class SearchViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToBottomOf(searchBar)
-                .x(200)
-                .margins(top = 50),
+                .alignBottomToTopOf(resultsFeed)
+                .x(200),
             size = 5,
             text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()),
-        )
-
-        resultsFeed = addListFeedView(
-            modifier = Modifier()
-                .size(1000, FILL_ALIGNMENT)
-                .alignTopToBottomOf(songsButton)
-                .alignBottomToTopOf(searchButton)
-                .centerHorizontally()
-                .margins(top = 50, bottom = 50)
         )
     }
 

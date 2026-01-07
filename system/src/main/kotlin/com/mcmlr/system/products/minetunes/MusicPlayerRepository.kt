@@ -17,7 +17,7 @@ class MusicPlayerRepository @Inject constructor(
             return it
         }
 
-        val newPlayer = MusicPlayer(player, musicRepository)
+        val newPlayer = MusicPlayer(player.uniqueId, musicRepository)
         musicPlayerMap[player.uniqueId] = newPlayer
         return newPlayer
     }

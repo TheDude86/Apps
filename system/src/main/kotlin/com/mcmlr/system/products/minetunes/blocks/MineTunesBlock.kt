@@ -13,7 +13,6 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
-import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.S
 import org.bukkit.entity.Player
 import javax.inject.Inject
@@ -23,8 +22,6 @@ class MineTunesBlock @Inject constructor(
     origin: Origin,
     searchBlock: SearchBlock,
     musicBlock: MusicBlock,
-
-//    libraryRepository: LibraryRepository,
 ): Block(player, origin) {
     private val view = MineTunesViewController(player, origin)
     private val interactor = MineTunesInteractor(view, searchBlock, musicBlock)
@@ -39,7 +36,7 @@ class MineTunesViewController(
     origin: Origin,
 ): NavigationViewController(player, origin), MineTunesPresenter {
 
-    private lateinit var feedContainer: ViewContainer
+    private lateinit var contentContainer: ViewContainer
 
     private lateinit var searchButton: ButtonView
     private lateinit var libraryButton: ButtonView
@@ -63,20 +60,6 @@ class MineTunesViewController(
                 .margins(top = 250, start = 400),
             text = R.getString(player, S.MINE_TUNES_TITLE.resource()),
             size = 16,
-        )
-
-        feedContainer = addViewContainer(
-            modifier = Modifier()
-                .size(800, FILL_ALIGNMENT)
-                .alignTopToBottomOf(title)
-                .alignBottomToBottomOf(this)
-                .centerHorizontally()
-                .margins(top = 150, bottom = 450),
-            content = object : ContextListener<ViewContainer>() {
-                override fun ViewContainer.invoke() {
-
-                }
-            }
         )
 
         addTextView(
@@ -106,6 +89,20 @@ class MineTunesViewController(
                 .margins(bottom = 300),
             text = R.getString(player, S.MUSIC_BUTTON.resource()),
             highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
+        )
+
+        contentContainer = addViewContainer(
+            modifier = Modifier()
+                .size(1000, FILL_ALIGNMENT)
+                .alignTopToBottomOf(title)
+                .alignBottomToTopOf(searchButton)
+                .centerHorizontally()
+                .margins(top = 75, bottom = 50),
+            content = object : ContextListener<ViewContainer>() {
+                override fun ViewContainer.invoke() {
+
+                }
+            }
         )
     }
 }
