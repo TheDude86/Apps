@@ -34,15 +34,16 @@ import com.mcmlr.system.OptionsBlock
 import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
 import com.mcmlr.system.OptionsModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
+import com.mcmlr.system.products.minetunes.LibraryRepository.Companion.FAVORITES_UUID
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.SearchFactory
 import com.mcmlr.system.products.minetunes.SearchState
 import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.PLAYLIST_PICKER_BUNDLE_KEY
+import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
@@ -59,6 +60,7 @@ class PlaylistBlock @Inject constructor(
     createPlaylistBlock: CreatePlaylistBlock,
     confirmationBlock: ConfirmationBlock,
     musicPlayerBlock: MusicPlayerBlock,
+    orderPlaylistBlock: OrderPlaylistBlock,
     musicPlayerRepository: MusicPlayerRepository,
     libraryRepository: LibraryRepository,
 ): Block(player, origin) {
@@ -71,6 +73,7 @@ class PlaylistBlock @Inject constructor(
         createPlaylistBlock,
         confirmationBlock,
         musicPlayerBlock,
+        orderPlaylistBlock,
         musicPlayerRepository,
         libraryRepository
     )
@@ -91,16 +94,8 @@ class PlaylistViewController(
     private lateinit var title: TextView
     private lateinit var addButton: ButtonView
     private lateinit var optionsButton: ButtonView
+    private lateinit var playButton: ButtonView
     private lateinit var musicPlayerContainer: ViewContainer
-
-//    private lateinit var songName: TextView
-//    private lateinit var artist: TextView
-//    private lateinit var songProgress: TextView
-//    private lateinit var playButton: ButtonView
-//    private lateinit var lastTrackButton: ButtonView
-//    private lateinit var shuffleButton: ButtonView
-//    private lateinit var nextTrackButton: ButtonView
-//    private lateinit var loopButton: ButtonView
     
     private lateinit var contentFeed: ListFeedView
 
@@ -117,58 +112,25 @@ class PlaylistViewController(
         resultCallback = callback
     }
 
-    override fun setIsLooped(isLooped: Boolean) {
-        val loopedString = R.getString(player, S.LOOP_BUTTON.resource())
-        val loopedText = if (isLooped) "${ChatColor.GOLD}$loopedString" else loopedString
-//        loopButton.update(text = loopedText)
-    }
-
-    override fun setIsShuffled(isShuffled: Boolean) {
-        val shuffleString = R.getString(player, S.SHUFFLE_BUTTON.resource())
-        val shuffleText = if (isShuffled) "${ChatColor.GOLD}$shuffleString" else shuffleString
-//        shuffleButton.update(text = shuffleText)
-    }
-
-    override fun setProgress(songProgress: String) {
-//        this.songProgress.update(text = "${ChatColor.GRAY}$songProgress")
-    }
-
-    override fun setPlayingState(isPlaying: Boolean) {
-        val icon = if (isPlaying) S.PAUSE_BUTTON else S.PLAY_BUTTON
-//        playButton.update(text = R.getString(player, icon.resource()))
-    }
-
-    override fun setPlayingTrack(track: Track) {
-//        songName.update(text = track.song.bolden())
-//        artist.update(text = "${ChatColor.GRAY}${track.artist}")
+    override fun setPlayListener(listener: Listener) {
+        playButton.addListener(listener)
     }
 
     override fun setOptionsListener(listener: Listener) {
         optionsButton.addListener(listener)
     }
 
+    override fun setBackListener(listener: Listener) {
+        backButton?.addListener(listener)
+    }
+
     override fun setAddListener(listener: Listener) {
-        addButton.addListener(listener)
+//        addButton.addListener(listener)
     }
 
-    override fun setPlayListener(listener: Listener) {
-//        playButton.addListener(listener)
-    }
-
-    override fun setLoopListener(listener: Listener) {
-//        loopButton.addListener(listener)
-    }
-
-    override fun setShuffleListener(listener: Listener) {
-//        shuffleButton.addListener(listener)
-    }
-
-    override fun setNextTrackListener(listener: Listener) {
-//        nextTrackButton.addListener(listener)
-    }
-
-    override fun setLastTrackListener(listener: Listener) {
-//        lastTrackButton.addListener(listener)
+    override fun setPlayingState(isPlaying: Boolean) {
+        val icon = if (isPlaying) S.PAUSE_BUTTON else S.PLAY_BUTTON
+        playButton.update(text = R.getString(player, icon.resource()))
     }
 
     override fun setPlaylistTitle(title: String) {
@@ -266,14 +228,24 @@ class PlaylistViewController(
             text = R.getString(player, S.OPTIONS_BUTTON.resource())
         )
 
-        addButton = addButtonView(
+//        addButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignBottomToTopOf(contentFeed)
+//                .alignEndToStartOf(optionsButton)
+//                .margins(bottom = 50, end = 50),
+//            size = 16,
+//            text = R.getString(player, S.ADD_BUTTON.resource())
+//        )
+
+        playButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignBottomToTopOf(contentFeed)
-                .alignEndToStartOf(optionsButton)
-                .margins(bottom = 50, end = 50),
+                .alignStartToStartOf(contentFeed)
+                .margins(bottom = 50),
             size = 16,
-            text = R.getString(player, S.ADD_BUTTON.resource())
+            text = R.getString(player, S.PLAY_BUTTON.resource())
         )
 
         musicPlayerContainer = addViewContainer(
@@ -285,109 +257,22 @@ class PlaylistViewController(
                 .alignBottomToBottomOf(this),
             background = Color.fromARGB(0, 0, 0, 0)
         )
-
-//        playButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignTopToBottomOf(contentFeed)
-//                .alignBottomToBottomOf(this)
-//                .centerHorizontally(),
-//            size = 24,
-//            text = R.getString(player, S.PLAY_BUTTON.resource())
-//        )
-//
-//        lastTrackButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignEndToStartOf(playButton)
-//                .alignTopToTopOf(playButton)
-//                .alignBottomToBottomOf(playButton)
-//                .margins(end = 150),
-//            size = 18,
-//            text = R.getString(player, S.LAST_TRACK_BUTTON.resource())
-//        )
-//
-//        nextTrackButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignStartToEndOf(playButton)
-//                .alignTopToTopOf(playButton)
-//                .alignBottomToBottomOf(playButton)
-//                .margins(start = 150),
-//            size = 18,
-//            text = R.getString(player, S.NEXT_TRACK_BUTTON.resource())
-//        )
-//
-//        shuffleButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignStartToStartOf(contentFeed)
-//                .alignTopToTopOf(playButton)
-//                .alignBottomToBottomOf(playButton),
-//            size = 18,
-//            text = R.getString(player, S.SHUFFLE_BUTTON.resource())
-//        )
-//
-//        loopButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignEndToEndOf(contentFeed)
-//                .alignTopToTopOf(playButton)
-//                .alignBottomToBottomOf(playButton),
-//            size = 18,
-//            text = R.getString(player, S.LOOP_BUTTON.resource())
-//        )
-//
-//        artist = addTextView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignBottomToTopOf(playButton)
-//                .alignStartToStartOf(shuffleButton),
-//            size = 6,
-//            text = ""
-//        )
-//
-//        songName = addTextView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignBottomToTopOf(artist)
-//                .alignStartToStartOf(artist),
-//            size = 8,
-//            text = ""
-//        )
-//
-//        songProgress = addTextView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignBottomToTopOf(playButton)
-//                .alignEndToEndOf(loopButton),
-//            size = 6,
-//            text = ""
-//        )
     }
 
 }
 
 interface PlaylistPresenter: Presenter {
     fun setPlaylistTitle(title: String)
-
     fun setPlaylist(playlist: Playlist)
+    fun setPlayingState(isPlaying: Boolean)
+
     fun setOptionsCallback(callback: (Track) -> Unit)
     fun setResultsCallback(callback: (Int) -> Unit)
-    fun setPlayingState(isPlaying: Boolean)
-    fun setPlayingTrack(track: Track)
-    fun setProgress(songProgress: String)
-    fun setIsShuffled(isShuffled: Boolean)
-    fun setIsLooped(isLooped: Boolean)
-
-    fun setPlayListener(listener: Listener)
-    fun setShuffleListener(listener: Listener)
-    fun setLoopListener(listener: Listener)
-    fun setNextTrackListener(listener: Listener)
-    fun setLastTrackListener(listener: Listener)
 
     fun setAddListener(listener: Listener)
     fun setOptionsListener(listener: Listener)
+    fun setPlayListener(listener: Listener)
+    fun setBackListener(listener: Listener)
 
     fun getMusicPlayerContainer(): ViewContainer
 }
@@ -400,17 +285,15 @@ class PlaylistInteractor(
     private val createPlaylistBlock: CreatePlaylistBlock,
     private val confirmationBlock: ConfirmationBlock,
     private val musicPlayerBlock: MusicPlayerBlock,
+    private val orderPlaylistBlock: OrderPlaylistBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
     private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
-    companion object {
-        private const val MUSIC_PLAYER_COLLECTION = "music player"
-    }
 
     private val musicPlayer = musicPlayerRepository.getMusicPlayer(player)
     private var playlist: Playlist? = null
-    private var isPlaying = false
     private var isRouting = false
+    private var playlistUpdated = false
 
     fun setPlaylist(playlist: Playlist) {
         this.playlist = playlist
@@ -423,12 +306,36 @@ class PlaylistInteractor(
 
         presenter.setPlaylist(playlist)
         presenter.setPlaylistTitle(playlist.name ?: "Untitled Playlist")
-        presenter.setIsShuffled(musicPlayer.isShuffled)
-        presenter.setIsLooped(musicPlayer.isLooped)
-
-        musicPlayer.updatePlaylist(playlist)
+        musicPlayer.setDefaultPlaylist(playlist)
 
         attachChild(musicPlayerBlock, presenter.getMusicPlayerContainer())
+
+        musicPlayer.getActionStream()
+            .collectOn(DudeDispatcher())
+            .collectLatest {
+                if (it == MusicPlayerAction.PLAY) {
+                    presenter.setPlayingState(true)
+                } else if (it == MusicPlayerAction.STOP) {
+                    presenter.setPlayingState(false)
+                }
+            }.disposeOn(disposer = this)
+
+        presenter.setPlayListener(object : Listener {
+            override fun invoke() {
+                val firstPress = !playlistUpdated
+                updatePlaylist()
+                if (firstPress) {
+                    musicPlayer.startPlaylist()
+                    presenter.setPlayingState(true)
+                } else if (musicPlayer.isPlaying()) {
+                    musicPlayer.pause()
+                    presenter.setPlayingState(false)
+                } else {
+                    musicPlayer.playSong()
+                    presenter.setPlayingState(true)
+                }
+            }
+        })
 
         presenter.setOptionsCallback { track ->
             val optionsList = mutableListOf<OptionRowModel>()
@@ -498,7 +405,6 @@ class PlaylistInteractor(
                                 .collectFirst(DudeDispatcher()) {
                                     CoroutineScope(DudeDispatcher()).launch {
                                         val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
-
 //                                        playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
 //                                        routeTo(playlistBlock)
                                     }
@@ -520,61 +426,24 @@ class PlaylistInteractor(
         }
 
         presenter.setResultsCallback {
-            isPlaying = true
-            presenter.setPlayingState(true)
-
-            setSongProgressSubscriber(musicPlayer.startSong(it))
+            updatePlaylist()
+            musicPlayer.startSong(it)
         }
-
-
-
-        presenter.setShuffleListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.shuffle()
-                presenter.setIsShuffled(musicPlayer.isShuffled)
-            }
-        })
-
-        presenter.setLoopListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.loop()
-                presenter.setIsLooped(musicPlayer.isLooped)
-            }
-        })
-
-
-        presenter.setPlayListener(object : Listener {
-            override fun invoke() {
-                isPlaying = !isPlaying
-                presenter.setPlayingState(isPlaying)
-                if (isPlaying) {
-                    setSongProgressSubscriber(musicPlayer.play())
-                } else {
-                    musicPlayer.pause()
-                }
-            }
-        })
-
-        presenter.setNextTrackListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.goToNextSong()
-            }
-        })
-
-        presenter.setLastTrackListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.goToLastSong()
-            }
-        })
 
         presenter.setOptionsListener(object : Listener {
             override fun invoke() {
+                val optionsList = mutableListOf(
+                    OptionRowModel("Reorder Songs"),
+                    OptionRowModel("Edit Playlist"),
+                )
+
+                if (playlist.uuid != FAVORITES_UUID) {
+                    optionsList.add(OptionRowModel("Delete Playlist"))
+                }
+
                 val options = OptionsModel(
                     "Playlist Options",
-                    listOf(
-                        OptionRowModel("Edit Playlist"),
-                        OptionRowModel("Delete Playlist"),
-                    ),
+                    optionsList,
                 )
 
                 optionsBlock.setOptions(options)
@@ -605,25 +474,30 @@ class PlaylistInteractor(
                                     }
                                 })
                             }
+
+                            "Reorder Songs" -> {
+                                orderPlaylistBlock.setPlaylist(playlist)
+                                routeTo(orderPlaylistBlock)
+                            }
                         }
                     }
                 })
             }
         })
+
+        presenter.setBackListener(object : Listener {
+            override fun invoke() {
+                playlistUpdated = false
+            }
+        })
     }
 
-    private fun setSongProgressSubscriber(flow: Flow<Short>) {
-        flow.collectOn(DudeDispatcher())
-            .collectLatest {
-                if (it == 0.toShort()) {
-                    val track = musicPlayer.getCurrentTrack()
-                    presenter.setPlayingTrack(track)
-                }
-
-                val song = musicPlayer.getCurrentSong() ?: return@collectLatest
-                val songLength = song.length / song.speed
-                val progress = it / song.speed
-                presenter.setProgress("${progress.toInt().toShort().minuteTimeFormat()}/${songLength.toInt().toShort().minuteTimeFormat()}")
-            }.disposeOn(collection = MUSIC_PLAYER_COLLECTION, disposer = this@PlaylistInteractor)
+    private fun updatePlaylist() {
+        val playlist = playlist ?: return
+        if (!playlistUpdated) {
+            musicPlayer.updatePlaylist(playlist)
+            libraryRepository.updateLastPlayed(playlist)
+            playlistUpdated = true
+        }
     }
 }

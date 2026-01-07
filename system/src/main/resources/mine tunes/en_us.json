@@ -20,6 +20,8 @@
   "last_track_button": "⏮",
   "loop_button": "\uD83D\uDD01",
   "shuffle_button": "\uD83D\uDD00",
+  "up_arrow_button": "⬆",
+  "down_arrow_button": "⬇",
 
   "library_title": "§l§o§nMy Library",
   "library_search_placeholder": "§7\uD83D\uDD0D Search you library...",

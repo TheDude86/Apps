@@ -6,7 +6,7 @@ data class Playlist(
     var name: String? = null,
     var favorite: Boolean? = false,
     val createdDate: Long = 0L,
-    val lastUsedDate: Long = 0L,
+    var lastUsedDate: Long = 0L,
     val songs: MutableList<Track> = mutableListOf()
 )
 

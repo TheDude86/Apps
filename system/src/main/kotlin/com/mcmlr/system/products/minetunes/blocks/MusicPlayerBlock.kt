@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.minetunes.blocks
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
@@ -18,6 +20,7 @@ import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.blocks.core.minuteTimeFormat
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
 import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
 import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.flow.Flow
 import org.bukkit.ChatColor
@@ -208,9 +211,34 @@ class MusicPlayerInteractor(
         presenter.setIsShuffled(musicPlayer.isShuffled)
         presenter.setIsLooped(musicPlayer.isLooped)
 
-        musicPlayer.getActiveSongStream()?.let {
-            setSongProgressSubscriber(it)
+        if (musicPlayer.activeSong != null) {
+            isPlaying = musicPlayer.isPlaying()
+            presenter.setPlayingState(isPlaying)
+            presenter.setPlayingTrack(musicPlayer.getCurrentTrack())
+            setSongProgressSubscriber(musicPlayer.getSongProgressStream())
         }
+
+        musicPlayer.getActionStream()
+            .collectOn(DudeDispatcher())
+            .collectLatest {
+                when (it) {
+                    MusicPlayerAction.PLAY,
+                    MusicPlayerAction.NEXT,
+                    MusicPlayerAction.LAST -> {
+                        isPlaying = true
+                        presenter.setPlayingTrack(musicPlayer.getCurrentTrack())
+                        presenter.setPlayingState(true)
+
+                        val stream = musicPlayer.getSongProgressStream()
+                        setSongProgressSubscriber(stream)
+                    }
+                    MusicPlayerAction.STOP -> {
+                        isPlaying = false
+                        presenter.setPlayingState(false)
+                    }
+                }
+
+            }.disposeOn(disposer = this)
 
         presenter.setShuffleListener(object : Listener {
             override fun invoke() {
@@ -231,7 +259,7 @@ class MusicPlayerInteractor(
                 isPlaying = !isPlaying
                 presenter.setPlayingState(isPlaying)
                 if (isPlaying) {
-                    setSongProgressSubscriber(musicPlayer.play())
+                    setSongProgressSubscriber(musicPlayer.playSong())
                 } else {
                     musicPlayer.pause()
                 }
@@ -252,6 +280,7 @@ class MusicPlayerInteractor(
     }
 
     private fun setSongProgressSubscriber(flow: Flow<Short>) {
+        clear(MUSIC_PLAYER_COLLECTION)
         flow.collectOn(DudeDispatcher())
             .collectLatest {
                 if (it == 0.toShort()) {

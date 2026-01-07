@@ -4,12 +4,12 @@ import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.Context
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
+import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
@@ -18,29 +18,37 @@ import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.collectFirst
 import com.mcmlr.system.products.minetunes.LibraryModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.SearchFactory
+import com.mcmlr.system.products.minetunes.SearchState
 import com.mcmlr.system.products.minetunes.player.IconType
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.SkullMeta
 import java.util.Date
 import javax.inject.Inject
+import kotlin.collections.filter
 
 class MusicBlock @Inject constructor(
     player: Player,
     origin: Origin,
     createPlaylistBlock: CreatePlaylistBlock,
     playlistBlock: PlaylistBlock,
+    artistBlock: ArtistBlock,
     libraryRepository: LibraryRepository,
 ): Block(player, origin) {
     private val view = MusicViewController(player, origin)
-    private val interactor = MusicInteractor(player, view, createPlaylistBlock, playlistBlock, libraryRepository)
+    private val interactor = MusicInteractor(player, view, createPlaylistBlock, playlistBlock, artistBlock, libraryRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -61,8 +69,71 @@ class MusicViewController(
 
     private var contentItemCallback: (LibraryListModel) -> Unit = {}
 
+    override fun setSearchListener(listener: TextListener) {
+        searchBar.addTextChangedListener(listener)
+    }
+
+    override fun setPlaylistsListener(listener: Listener) {
+        playlistsButton.addListener(listener)
+    }
+
+    override fun setSongsListener(listener: Listener) {
+        songsButton.addListener(listener)
+    }
+
+    override fun setAlbumsListener(listener: Listener) {
+        albumsButton.addListener(listener)
+    }
+
+    override fun setArtistsListener(listener: Listener) {
+        artistsButton.addListener(listener)
+    }
+
     override fun setContentClickedCallback(callback: (LibraryListModel) -> Unit) {
         contentItemCallback = callback
+    }
+
+    override fun setCreatePlaylistListener(listener: Listener) {
+        createPlaylistButton.addListener(listener)
+    }
+
+    override fun setFeedState(state: LibraryListModelType?) {
+        when (state) {
+            LibraryListModelType.PLAYLIST -> {
+                playlistsButton.update(text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()).bolden())
+                albumsButton.update(text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()))
+                songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()))
+                artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()))
+            }
+
+            LibraryListModelType.ALBUM -> {
+                playlistsButton.update(text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()))
+                albumsButton.update(text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()).bolden())
+                songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()))
+                artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()))
+            }
+
+            LibraryListModelType.TRACK -> {
+                playlistsButton.update(text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()))
+                albumsButton.update(text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()))
+                songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()).bolden())
+                artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()))
+            }
+
+            LibraryListModelType.ARTIST -> {
+                playlistsButton.update(text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()))
+                albumsButton.update(text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()))
+                songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()))
+                artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()).bolden())
+            }
+
+            null -> {
+                playlistsButton.update(text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()))
+                albumsButton.update(text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()))
+                songsButton.update(text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()))
+                artistsButton.update(text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()))
+            }
+        }
     }
 
     override fun setFeed(feed: List<LibraryListModel>) {
@@ -112,7 +183,7 @@ class MusicViewController(
                                                 .alignTopToTopOf(this)
                                                 .margins(start = 50, top = 30),
                                             size = 6,
-                                            maxLength = 600,
+                                            maxLength = 1200,
                                             text = playlist.name?.bolden() ?: "Unnamed Playlist",
                                         )
 
@@ -130,15 +201,132 @@ class MusicViewController(
                             )
                         }
 
-                        else -> {}
+                        LibraryListModelType.ALBUM -> {
+                            val album = it.album ?: return@forEach
+
+                            addViewContainer(
+                                modifier = Modifier()
+                                    .size(MATCH_PARENT, 75),
+                                clickable = true,
+                                listener = object : Listener {
+                                    override fun invoke() {
+                                        contentItemCallback.invoke(it)
+                                    }
+                                },
+
+                                content = object : ContextListener<ViewContainer>() {
+                                    override fun ViewContainer.invoke() {
+
+                                        val title = addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(this)
+                                                .alignTopToTopOf(this)
+                                                .margins(start = 50, top = 30),
+                                            size = 6,
+                                            maxLength = 1200,
+                                            text = album.bolden()
+                                        )
+
+                                        addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(title)
+                                                .alignTopToBottomOf(title),
+                                            size = 4,
+                                            maxLength = 600,
+                                            text = "${ChatColor.GRAY}Album"
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        LibraryListModelType.TRACK -> {
+                            val track = it.track ?: return@forEach
+
+                            addViewContainer(
+                                modifier = Modifier()
+                                    .size(MATCH_PARENT, 75),
+                                clickable = true,
+                                listener = object : Listener {
+                                    override fun invoke() {
+                                        contentItemCallback.invoke(it)
+                                    }
+                                },
+
+                                content = object : ContextListener<ViewContainer>() {
+                                    override fun ViewContainer.invoke() {
+
+                                        val title = addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(this)
+                                                .alignTopToTopOf(this)
+                                                .margins(start = 50, top = 30),
+                                            size = 6,
+                                            maxLength = 1200,
+                                            text = track.song.bolden()
+                                        )
+
+                                        addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(title)
+                                                .alignTopToBottomOf(title),
+                                            size = 4,
+                                            maxLength = 600,
+                                            text = "${ChatColor.GRAY}Song"
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        LibraryListModelType.ARTIST -> {
+                            val artist = it.artist ?: return@forEach
+
+                            addViewContainer(
+                                modifier = Modifier()
+                                    .size(MATCH_PARENT, 75),
+                                clickable = true,
+                                listener = object : Listener {
+                                    override fun invoke() {
+                                        contentItemCallback.invoke(it)
+                                    }
+                                },
+
+                                content = object : ContextListener<ViewContainer>() {
+                                    override fun ViewContainer.invoke() {
+
+                                        val title = addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(this)
+                                                .alignTopToTopOf(this)
+                                                .margins(start = 50, top = 30),
+                                            size = 6,
+                                            maxLength = 1200,
+                                            text = artist.bolden()
+                                        )
+
+                                        addTextView(
+                                            modifier = Modifier()
+                                                .size(WRAP_CONTENT, WRAP_CONTENT)
+                                                .alignStartToStartOf(title)
+                                                .alignTopToBottomOf(title),
+                                            size = 4,
+                                            maxLength = 600,
+                                            text = "${ChatColor.GRAY}Artist"
+                                        )
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
         })
-    }
-
-    override fun setCreatePlaylistListener(listener: Listener) {
-        createPlaylistButton.addListener(listener)
     }
 
     override fun createView() {
@@ -227,11 +415,17 @@ class MusicViewController(
 }
 
 interface MusicPresenter: Presenter {
-    fun setCreatePlaylistListener(listener: Listener)
-
     fun setFeed(feed: List<LibraryListModel>)
+    fun setFeedState(state: LibraryListModelType?)
 
     fun setContentClickedCallback(callback: (LibraryListModel) -> Unit)
+
+    fun setCreatePlaylistListener(listener: Listener)
+    fun setSearchListener(listener: TextListener)
+    fun setPlaylistsListener(listener: Listener)
+    fun setSongsListener(listener: Listener)
+    fun setArtistsListener(listener: Listener)
+    fun setAlbumsListener(listener: Listener)
 }
 
 class MusicInteractor(
@@ -239,12 +433,118 @@ class MusicInteractor(
     private val presenter: MusicPresenter,
     private val createPlaylistBlock: CreatePlaylistBlock,
     private val playlistBlock: PlaylistBlock,
+    private val artistBlock: ArtistBlock,
     private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
+
+    private var contentState: LibraryListModelType? = null
+    private val artists = mutableMapOf<String, LibraryListModel>()
+    private val albums = mutableMapOf<String, LibraryListModel>()
+    private val tracks = mutableMapOf<String, LibraryListModel>()
+    private val playlists = mutableListOf<LibraryListModel>()
+    private val model = mutableListOf<LibraryListModel>()
+
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setFeed(libraryRepository.getModel().sort())
+        sort()
+
+        when(contentState) {
+            LibraryListModelType.PLAYLIST ->  presenter.setFeed(playlists)
+            LibraryListModelType.ALBUM ->  presenter.setFeed(albums.values.toList())
+            LibraryListModelType.ARTIST ->  presenter.setFeed(artists.values.toList())
+            LibraryListModelType.TRACK ->  presenter.setFeed(tracks.values.toList())
+            null -> presenter.setFeed(model)
+        }
+
+        presenter.setSearchListener(object : TextListener {
+            override fun invoke(text: String) {
+                when(contentState) {
+                    LibraryListModelType.PLAYLIST -> {
+                        val results = playlists.filter { it.playlist?.name?.lowercase()?.contains(text.lowercase()) == true }
+                        presenter.setFeed(results)
+                    }
+                    LibraryListModelType.ALBUM -> {
+                        val results = albums.values.filter { it.album?.lowercase()?.contains(text.lowercase()) == true }
+                        presenter.setFeed(results)
+                    }
+                    LibraryListModelType.ARTIST -> {
+                        val results = artists.values.filter { it.artist?.lowercase()?.contains(text.lowercase()) == true }
+                        presenter.setFeed(results)
+                    }
+                    LibraryListModelType.TRACK -> {
+                        val results = tracks.values.filter { it.track?.song?.lowercase()?.contains(text.lowercase()) == true }
+                        presenter.setFeed(results)
+                    }
+                    null -> {
+                        val playlistResults = playlists.filter { it.playlist?.name?.lowercase()?.contains(text.lowercase()) == true }
+                        val albumResults = albums.values.filter { it.album?.lowercase()?.contains(text.lowercase()) == true }
+                        val artistResults = artists.values.filter { it.artist?.lowercase()?.contains(text.lowercase()) == true }
+                        val trackResults = tracks.values.filter { it.track?.song?.lowercase()?.contains(text.lowercase()) == true }
+
+                        val model = mutableListOf<LibraryListModel>()
+                        model.addAll(playlistResults)
+                        model.addAll(albumResults)
+                        model.addAll(artistResults)
+                        model.addAll(trackResults)
+
+                        presenter.setFeed(model)
+                    }
+                }
+            }
+        })
+
+        presenter.setPlaylistsListener(object : Listener {
+            override fun invoke() {
+                presenter.setFeedState(LibraryListModelType.PLAYLIST)
+                if (contentState == LibraryListModelType.PLAYLIST) {
+                    contentState = null
+                    presenter.setFeed(model)
+                } else {
+                    presenter.setFeed(playlists)
+                    contentState = LibraryListModelType.PLAYLIST
+                }
+            }
+        })
+
+        presenter.setSongsListener(object : Listener {
+            override fun invoke() {
+                presenter.setFeedState(LibraryListModelType.TRACK)
+                if (contentState == LibraryListModelType.TRACK) {
+                    contentState = null
+                    presenter.setFeed(model)
+                } else {
+                    presenter.setFeed(tracks.values.toList())
+                    contentState = LibraryListModelType.TRACK
+                }
+            }
+        })
+
+        presenter.setArtistsListener(object : Listener {
+            override fun invoke() {
+                presenter.setFeedState(LibraryListModelType.ARTIST)
+                if (contentState == LibraryListModelType.ARTIST) {
+                    contentState = null
+                    presenter.setFeed(model)
+                } else {
+                    presenter.setFeed(artists.values.toList())
+                    contentState = LibraryListModelType.ARTIST
+                }
+            }
+        })
+
+        presenter.setAlbumsListener(object : Listener {
+            override fun invoke() {
+                presenter.setFeedState(LibraryListModelType.ALBUM)
+                if (contentState == LibraryListModelType.ALBUM) {
+                    contentState = null
+                    presenter.setFeed(model)
+                } else {
+                    presenter.setFeed(albums.values.toList())
+                    contentState = LibraryListModelType.ALBUM
+                }
+            }
+        })
 
         presenter.setContentClickedCallback {
             when (it.type) {
@@ -252,6 +552,32 @@ class MusicInteractor(
                     val playlist = it.playlist ?: return@setContentClickedCallback
                     playlistBlock.setPlaylist(playlist)
                     routeTo(playlistBlock)
+                }
+
+                LibraryListModelType.ARTIST -> {
+                    val artist = it.artist ?: return@setContentClickedCallback
+                    SearchFactory.search(artist.lowercase(), SearchState.ARTIST)
+                        .collectFirst(DudeDispatcher()) {
+                            CoroutineScope(DudeDispatcher()).launch {
+                                val artistSongs = it.filter { it.artist == artist }
+                                artistBlock.setArtist(artist, artistSongs)
+                                routeTo(artistBlock)
+                            }
+                        }
+                }
+
+                LibraryListModelType.ALBUM -> {
+                    val album = it.album ?: return@setContentClickedCallback
+                    val artist = it.artist ?: return@setContentClickedCallback
+                    SearchFactory.search(artist.lowercase(), SearchState.ARTIST)
+                        .collectFirst(DudeDispatcher()) {
+                            CoroutineScope(DudeDispatcher()).launch {
+                                val albumSongs = it.filter { it.artist == artist && it.album == album }
+
+                                playlistBlock.setPlaylist(Playlist(name = album, songs = albumSongs.toMutableList()))
+                                routeTo(playlistBlock)
+                            }
+                        }
                 }
 
                 else -> {}
@@ -264,13 +590,45 @@ class MusicInteractor(
             }
         })
     }
-}
 
-private fun LibraryModel.sort(): List<LibraryListModel> {
-    return playlists
-        .filter { (Date().time - it.lastUsedDate < 604800000L) || (it.favorite == true) }
-        .sortedBy { it.lastUsedDate }
-        .map { LibraryListModel(type = LibraryListModelType.PLAYLIST, playlist = it) }
+    fun sort() {
+        val libraryModel = libraryRepository.getModel()
+
+        libraryModel.playlists
+            .sortedBy { it.lastUsedDate }
+            .forEach { playlist ->
+                if ((Date().time - playlist.lastUsedDate < 604800000L) || (playlist.favorite == true)) {
+                    model.add(LibraryListModel(type = LibraryListModelType.PLAYLIST, playlist = playlist))
+                }
+
+                playlist.songs.forEach { track ->
+
+                    artists[track.artist] = LibraryListModel(type = LibraryListModelType.ARTIST, artist = track.artist)
+                    tracks[track.song] = LibraryListModel(type = LibraryListModelType.TRACK, track = track)
+
+                    if (track.album != "EP") {
+                        albums[track.album] = LibraryListModel(type = LibraryListModelType.ALBUM, album = track.album, artist = track.artist)
+                    }
+                }
+
+                playlists.add(LibraryListModel(type = LibraryListModelType.PLAYLIST, playlist = playlist))
+            }
+
+        artists.values.shuffled().forEachIndexed { index, artist ->
+            if (index >= 10) return@forEachIndexed
+            model.add(artist)
+        }
+
+        albums.values.shuffled().forEachIndexed { index, album ->
+            if (index >= 10) return@forEachIndexed
+            model.add(album)
+        }
+
+        tracks.values.shuffled().forEachIndexed { index, track ->
+            if (index >= 10) return@forEachIndexed
+            model.add(track)
+        }
+    }
 }
 
 data class LibraryListModel(

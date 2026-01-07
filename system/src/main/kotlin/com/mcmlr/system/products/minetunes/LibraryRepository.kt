@@ -1,11 +1,10 @@
 package com.mcmlr.system.products.minetunes
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.AppScope
+import com.mcmlr.system.products.minetunes.blocks.OrderPlaylistAction
 import com.mcmlr.system.products.minetunes.player.Icon
 import com.mcmlr.system.products.minetunes.player.IconType
 import com.mcmlr.system.products.minetunes.player.Playlist
@@ -40,6 +39,16 @@ class LibraryRepository @Inject constructor(
                 )
             )
         )
+    }
+
+    fun updatePlaylistSongOrder(playlistId: String, songIndex: Int, action: OrderPlaylistAction) = save {
+        val playlist = model.playlists.find { it.uuid == playlistId } ?: return@save
+        val offset = if (action == OrderPlaylistAction.UP) -1 else 1
+        if (songIndex + offset !in 0..<playlist.songs.size) return@save
+
+        val swap = playlist.songs[songIndex]
+        playlist.songs[songIndex] = playlist.songs[songIndex + offset]
+        playlist.songs[songIndex + offset] = swap
     }
 
     fun getPlaylists() = model.playlists
@@ -85,6 +94,12 @@ class LibraryRepository @Inject constructor(
         val playlist = model.playlists.find { it.uuid == playlistId } ?: return@save
         playlist.name = name
         playlist.icon = icon
+    }
+
+    fun updateLastPlayed(updatedPlaylist: Playlist) = save {
+        val playlistId = updatedPlaylist.uuid ?: return@save
+        val playlist = model.playlists.find { it.uuid == playlistId } ?: return@save
+        playlist.lastUsedDate = Date().time
     }
 
     fun getModel() = model
