@@ -1,17 +1,18 @@
 package com.mcmlr.system.products.minetunes.blocks
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
-import com.mcmlr.blocks.core.minuteTimeFormat
 import com.mcmlr.system.OptionRowModel
 import com.mcmlr.system.OptionsBlock
 import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
@@ -20,14 +21,15 @@ import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.PLAYLIST_PICKER_BUNDLE_KEY
+import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.ChatColor
+import org.bukkit.Color
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
@@ -37,11 +39,22 @@ class ArtistBlock @Inject constructor(
     optionsBlock: OptionsBlock,
     playlistPickerBlock: PlaylistPickerBlock,
     playlistBlock: PlaylistBlock,
+    musicPlayerBlock: MusicPlayerBlock,
+    trackBlock: TrackBlock,
     musicPlayerRepository: MusicPlayerRepository,
     libraryRepository: LibraryRepository
 ): Block(player, origin) {
     private val view = ArtistViewController(player, origin)
-    private val interactor = ArtistInteractor(player, view, optionsBlock, playlistPickerBlock, playlistBlock, musicPlayerRepository, libraryRepository)
+    private val interactor = ArtistInteractor(
+        player,
+        view,
+        optionsBlock,
+        playlistPickerBlock,
+        playlistBlock,
+        musicPlayerBlock,
+        musicPlayerRepository,
+        libraryRepository
+    )
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -58,30 +71,28 @@ class ArtistViewController(
 
     private lateinit var artistTitle: TextView
     private lateinit var stats: TextView
-    private lateinit var startPlaylistButton: ButtonView
+    private lateinit var playButton: ButtonView
     private lateinit var contentFeed: ListFeedView
 
-    private lateinit var songName: TextView
-    private lateinit var artist: TextView
-    private lateinit var songProgress: TextView
-    private lateinit var playButton: ButtonView
-    private lateinit var lastTrackButton: ButtonView
-    private lateinit var shuffleButton: ButtonView
-    private lateinit var nextTrackButton: ButtonView
-    private lateinit var loopButton: ButtonView
+    private lateinit var musicPlayerContainer: ViewContainer
 
     private lateinit var trackCallback: (Int) -> Unit
     private lateinit var showMoreListener: Listener
     private lateinit var albumCallback: (String) -> Unit
 
-    override fun setIsShuffled(isShuffled: Boolean) {
-        val shuffleString = R.getString(player, S.SHUFFLE_BUTTON.resource())
-        val shuffleText = if (isShuffled) "${ChatColor.GOLD}$shuffleString" else shuffleString
-        shuffleButton.update(text = shuffleText)
+    override fun getMusicPlayerContainer(): ViewContainer = musicPlayerContainer
+
+    override fun setPlayingState(isPlaying: Boolean) {
+        val icon = if (isPlaying) S.PAUSE_BUTTON else S.PLAY_BUTTON
+        playButton.update(text = R.getString(player, icon.resource()))
     }
 
-    override fun setProgress(songProgress: String) {
-        this.songProgress.update(text = "${ChatColor.GRAY}$songProgress")
+    override fun setBackListener(listener: Listener) {
+        backButton?.addListener(listener)
+    }
+
+    override fun setPlayListener(listener: Listener) {
+        playButton.addListener(listener)
     }
 
     override fun setAlbumCallback(callback: (String) -> Unit) {
@@ -94,38 +105,6 @@ class ArtistViewController(
 
     override fun setTrackCallback(callback: (Int) -> Unit) {
         trackCallback = callback
-    }
-
-    override fun setPlayingState(isPlaying: Boolean) {
-        val icon = if (isPlaying) S.PAUSE_BUTTON else S.PLAY_BUTTON
-        playButton.update(text = R.getString(player, icon.resource()))
-        startPlaylistButton.update(text = R.getString(player, icon.resource()))
-    }
-
-    override fun setPlayingTrack(track: Track) {
-        songName.update(text = track.song.bolden())
-        artist.update(text = "${ChatColor.GRAY}${track.artist}")
-    }
-
-    override fun setPlayListener(listener: Listener) {
-//        playButton.addListener(listener)
-    }
-
-    override fun setShuffleListener(listener: Listener) {
-        shuffleButton.addListener(listener)
-    }
-
-    override fun setNextTrackListener(listener: Listener) {
-        nextTrackButton.addListener(listener)
-    }
-
-    override fun setLastTrackListener(listener: Listener) {
-        lastTrackButton.addListener(listener)
-    }
-
-    override fun setPlayButtonListener(listener: Listener) {
-        playButton.addListener(listener)
-        startPlaylistButton.addListener(listener)
     }
 
     override fun setArtistInfo(artist: String, stats: String) {
@@ -153,7 +132,7 @@ class ArtistViewController(
                                         .centerVertically()
                                         .margins(start = 50),
                                     size = 10,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = R.getString(player, S.ARTIST_ALL_SONGS_TITLE.resource()),
                                 )
                             }
@@ -180,7 +159,7 @@ class ArtistViewController(
                                             .alignTopToTopOf(this)
                                             .margins(start = 50, top = 30),
                                         size = 6,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = track.song.bolden(),
                                     )
 
@@ -190,7 +169,7 @@ class ArtistViewController(
                                             .alignStartToStartOf(title)
                                             .alignTopToBottomOf(title),
                                         size = 4,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = R.getString(player, S.ARTIST_PLAYS_PLACEHOLDER.resource(), track.plays)
                                     )
 
@@ -233,7 +212,7 @@ class ArtistViewController(
                                         .centerVertically()
                                         .margins(start = 50),
                                     size = 10,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = R.getString(player, S.ARTIST_POPULAR_SONGS_TITLE.resource()),
                                 )
                             }
@@ -260,7 +239,7 @@ class ArtistViewController(
                                             .alignTopToTopOf(this)
                                             .margins(start = 50, top = 30),
                                         size = 6,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = track.song.bolden(),
                                     )
 
@@ -270,7 +249,7 @@ class ArtistViewController(
                                             .alignStartToStartOf(title)
                                             .alignTopToBottomOf(title),
                                         size = 4,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = R.getString(player, S.ARTIST_PLAYS_PLACEHOLDER.resource(), track.plays)
                                     )
 
@@ -304,7 +283,7 @@ class ArtistViewController(
                                             .size(WRAP_CONTENT, WRAP_CONTENT)
                                             .center(),
                                         size = 4,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = R.getString(player, S.ARTIST_SEE_ALL_SONGS_BUTTON.resource()),
                                         callback = showMoreListener
                                     )
@@ -325,7 +304,7 @@ class ArtistViewController(
                                         .centerVertically()
                                         .margins(start = 50),
                                     size = 10,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = R.getString(player, S.ARTIST_ALBUMS_TITLE.resource()),
                                 )
                             }
@@ -352,7 +331,7 @@ class ArtistViewController(
                                             .centerVertically()
                                             .margins(start = 50),
                                         size = 6,
-                                        maxLength = 600,
+                                        lineWidth = 600,
                                         text = album.bolden(),
                                     )
                                 }
@@ -381,7 +360,7 @@ class ArtistViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToBottomOf(title)
                 .alignStartToStartOf(title)
-                .margins(top = 250),
+                .margins(top = 150),
             text = "",
             size = 12,
         )
@@ -405,7 +384,7 @@ class ArtistViewController(
                 .margins(top = 100, bottom = 600)
         )
 
-        startPlaylistButton = addButtonView(
+        playButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignEndToEndOf(contentFeed)
@@ -415,83 +394,14 @@ class ArtistViewController(
             text = R.getString(player, S.PLAY_BUTTON.resource())
         )
 
-        playButton = addButtonView(
+        musicPlayerContainer = addViewContainer(
             modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .size(FILL_ALIGNMENT, FILL_ALIGNMENT)
                 .alignTopToBottomOf(contentFeed)
-                .alignBottomToBottomOf(this)
-                .centerHorizontally(),
-            size = 24,
-            text = R.getString(player, S.PLAY_BUTTON.resource())
-        )
-
-        lastTrackButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignEndToStartOf(playButton)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton)
-                .margins(end = 150),
-            size = 18,
-            text = R.getString(player, S.LAST_TRACK_BUTTON.resource())
-        )
-
-        nextTrackButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignStartToEndOf(playButton)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton)
-                .margins(start = 150),
-            size = 18,
-            text = R.getString(player, S.NEXT_TRACK_BUTTON.resource())
-        )
-
-        shuffleButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(contentFeed)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton),
-            size = 18,
-            text = R.getString(player, S.SHUFFLE_BUTTON.resource())
-        )
-
-        loopButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignEndToEndOf(contentFeed)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton),
-            size = 18,
-            text = R.getString(player, S.LOOP_BUTTON.resource())
-        )
-
-        artist = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToTopOf(playButton)
-                .alignStartToStartOf(shuffleButton),
-            size = 6,
-            text = ""
-        )
-
-        songName = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToTopOf(artist)
-                .alignStartToStartOf(artist),
-            size = 8,
-            text = ""
-        )
-
-        songProgress = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToTopOf(playButton)
-                .alignEndToEndOf(loopButton),
-            size = 6,
-            text = ""
+                .alignBottomToBottomOf(this),
+            background = Color.fromARGB(0, 0, 0, 0)
         )
     }
 
@@ -504,22 +414,19 @@ interface ArtistPresenter: Presenter {
     fun setContent(popularTracks: List<Track>, albums: List<String>, showMoreTracks: Boolean, optionsCallback: (Track) -> Unit)
     fun setShowMoreContent(tracks: List<Track>, optionsCallback: (Track) -> Unit)
 
-    fun setPlayButtonListener(listener: Listener)
     fun setPlayingState(isPlaying: Boolean)
-    fun setPlayingTrack(track: Track)
-    fun setProgress(songProgress: String)
-    fun setIsShuffled(isShuffled: Boolean)
 
     fun setPlayListener(listener: Listener)
-    fun setShuffleListener(listener: Listener)
-    fun setNextTrackListener(listener: Listener)
-    fun setLastTrackListener(listener: Listener)
 
     fun setTrackCallback(callback: (Int) -> Unit)
 
     fun setShowMoreListener(listener: Listener)
 
     fun setAlbumCallback(callback: (String) -> Unit)
+
+    fun getMusicPlayerContainer(): ViewContainer
+
+    fun setBackListener(listener: Listener)
 }
 
 class ArtistInteractor(
@@ -528,40 +435,53 @@ class ArtistInteractor(
     private val optionsBlock: OptionsBlock,
     private val playlistPickerBlock: PlaylistPickerBlock,
     private val playlistBlock: PlaylistBlock,
+    private val musicPlayerBlock: MusicPlayerBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
     private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
-    companion object {
-        private const val MUSIC_PLAYER_COLLECTION = "music player"
-    }
 
     private var artist: String = ""
     private var tracks = listOf<Track>()
     private var albumsSet = mutableSetOf<String>()
-    private var isPlaying = false
+    private var playlistUpdated = false
     private var musicPlayer = musicPlayerRepository.getMusicPlayer(player)
 
     override fun onCreate() {
         super.onCreate()
 
-        presenter.setPlayButtonListener(object : Listener {
-            override fun invoke() {
-                isPlaying = !isPlaying
-                if (isPlaying) {
-                    setSongProgressSubscriber(musicPlayer.playSong())
-                } else {
-                    musicPlayer.pause()
-                }
+        attachChild(musicPlayerBlock, presenter.getMusicPlayerContainer())
+        musicPlayer.setDefaultPlaylist(Playlist(songs = tracks.toMutableList()))
 
-                presenter.setPlayingState(isPlaying)
+        musicPlayer.getActionStream()
+            .collectOn(DudeDispatcher())
+            .collectLatest {
+                if (it == MusicPlayerAction.PLAY) {
+                    presenter.setPlayingState(true)
+                } else if (it == MusicPlayerAction.STOP) {
+                    presenter.setPlayingState(false)
+                }
+            }.disposeOn(disposer = this)
+
+        presenter.setPlayListener(object : Listener {
+            override fun invoke() {
+                val firstPress = !playlistUpdated
+                updatePlaylist()
+                if (firstPress) {
+                    musicPlayer.startPlaylist()
+                    presenter.setPlayingState(true)
+                } else if (musicPlayer.isPlaying()) {
+                    musicPlayer.pause()
+                    presenter.setPlayingState(false)
+                } else {
+                    musicPlayer.playSong()
+                    presenter.setPlayingState(true)
+                }
             }
         })
 
         presenter.setTrackCallback {
-            isPlaying = true
-            presenter.setPlayingState(true)
-
-            setSongProgressSubscriber(musicPlayer.startSong(it))
+            updatePlaylist()
+            musicPlayer.startSong(it)
         }
 
         presenter.setAlbumCallback { album ->
@@ -574,7 +494,6 @@ class ArtistInteractor(
         val trackCount = tracks.size
 
         presenter.setArtistInfo(artist, R.getString(player, S.ARTIST_STATS_PLACEHOLDER.resource(), trackCount, albumCount))
-        presenter.setIsShuffled(musicPlayer.isShuffled)
 
         val popularTracks = tracks.sortedBy { it.plays }
         val topFiveTracks = if (popularTracks.size > 5) popularTracks.subList(0, 5) else popularTracks
@@ -627,29 +546,13 @@ class ArtistInteractor(
             }
         })
 
+        presenter.setBackListener(object : Listener {
+            override fun invoke() {
+                playlistUpdated = false
+            }
+        })
+
         presenter.setContent(topFiveTracks, albumsSet.toList(), popularTracks.size > 5, optionsCallback)
-
-        presenter.setNextTrackListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.goToNextSong()
-            }
-        })
-
-        presenter.setLastTrackListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.goToLastSong()
-            }
-        })
-
-        presenter.setShuffleListener(object : Listener {
-            override fun invoke() {
-                musicPlayer.shuffle()
-                presenter.setIsShuffled(musicPlayer.isShuffled)
-            }
-        })
-
-        val playlist = Playlist(songs = popularTracks.toMutableList())
-        musicPlayer.updatePlaylist(playlist)
     }
 
     fun setArtist(artist: String, tracks: List<Track>) {
@@ -660,18 +563,12 @@ class ArtistInteractor(
         tracks.forEach { if (it.album != "EP") albumsSet.add(it.album) }
     }
 
-    private fun setSongProgressSubscriber(flow: Flow<Short>) {
-        flow.collectOn(DudeDispatcher())
-            .collectLatest {
-                if (it == 0.toShort()) {
-                    val track = musicPlayer.getCurrentTrack()
-                    presenter.setPlayingTrack(track)
-                }
-
-                val song = musicPlayer.getCurrentSong() ?: return@collectLatest
-                val songLength = song.length / song.speed
-                val progress = it / song.speed
-                presenter.setProgress("${progress.toInt().toShort().minuteTimeFormat()}/${songLength.toInt().toShort().minuteTimeFormat()}")
-            }.disposeOn(collection = MUSIC_PLAYER_COLLECTION, disposer = this@ArtistInteractor)
+    private fun updatePlaylist() {
+        if (!playlistUpdated) {
+            val playlist = Playlist(songs = tracks.toMutableList())
+            musicPlayer.updatePlaylist(playlist)
+            libraryRepository.updateLastPlayed(playlist)
+            playlistUpdated = true
+        }
     }
 }

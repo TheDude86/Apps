@@ -26,6 +26,7 @@ import com.mcmlr.system.OptionsBlock
 import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
 import com.mcmlr.system.OptionsModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
+import com.mcmlr.system.products.minetunes.MusicPlayerRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.SearchFactory
 import com.mcmlr.system.products.minetunes.SearchState
@@ -51,9 +52,20 @@ class SearchBlock @Inject constructor(
     playlistPickerBlock: PlaylistPickerBlock,
     playlistBlock: PlaylistBlock,
     libraryRepository: LibraryRepository,
+    musicPlayerRepository: MusicPlayerRepository,
 ): Block(player, origin) {
     private val view = SearchViewController(player, origin)
-    private val interactor = SearchInteractor(player, view, trackBlock, artistBlock, optionsBlock, playlistPickerBlock, playlistBlock, libraryRepository)
+    private val interactor = SearchInteractor(
+        player,
+        view,
+        trackBlock,
+        artistBlock,
+        optionsBlock,
+        playlistPickerBlock,
+        playlistBlock,
+        libraryRepository,
+        musicPlayerRepository
+    )
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -62,7 +74,7 @@ class SearchBlock @Inject constructor(
 class SearchViewController(
     private val player: Player,
     origin: Origin,
-): NavigationViewController(player, origin), SearchPresenter {
+): ViewController(player, origin), SearchPresenter {
 
     private lateinit var searchBar: TextInputView
     private lateinit var resultsFeed: ListFeedView
@@ -112,7 +124,7 @@ class SearchViewController(
                                         .centerVertically()
                                         .margins(start = 50),
                                     size = 6,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = artist.bolden(),
                                 )
                             }
@@ -146,7 +158,7 @@ class SearchViewController(
                                         .alignTopToTopOf(this)
                                         .margins(start = 50, top = 30),
                                     size = 6,
-                                    maxLength = 1200,
+                                    lineWidth = 1200,
                                     text = track.song.bolden(),
                                 )
 
@@ -156,7 +168,7 @@ class SearchViewController(
                                         .alignStartToStartOf(title)
                                         .alignTopToBottomOf(title),
                                     size = 4,
-                                    maxLength = 1200,
+                                    lineWidth = 1200,
                                     text = "${ChatColor.GRAY}${track.artist}"
                                 )
 
@@ -186,63 +198,22 @@ class SearchViewController(
     }
 
     override fun createView() {
-        super.createView()
-        val title = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
-            text = R.getString(player, S.SEARCH_TITLE.resource()),
-            size = 16,
-        )
-
         searchBar = addTextInputView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(title)
-                .centerHorizontally()
-                .margins(top = 75),
+                .alignTopToTopOf(this)
+                .centerHorizontally(),
             text = R.getString(player, S.SEARCH_PLACEHOLDER.resource()),
             highlightedText = R.getString(player, S.SEARCH_PLACEHOLDER.resource()).bolden(),
-        )
-
-        addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .x(-500)
-                .margins(bottom = 300),
-            text = R.getString(player, S.HOME_BUTTON.resource()),
-            highlightedText = R.getString(player, S.HOME_BUTTON.resource()).bolden(),
-        )
-
-        val searchButton = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .centerHorizontally()
-                .margins(bottom = 300),
-            text = R.getString(player, S.SEARCH_BUTTON.resource()).bolden(),
-        )
-
-        addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .x(500)
-                .margins(bottom = 300),
-            text = R.getString(player, S.MUSIC_BUTTON.resource()),
-            highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
         )
 
         resultsFeed = addListFeedView(
             modifier = Modifier()
                 .size(1000, FILL_ALIGNMENT)
                 .alignTopToBottomOf(searchBar)
-                .alignBottomToTopOf(searchButton)
+                .alignBottomToBottomOf(this)
                 .centerHorizontally()
-                .margins(top = 150, bottom = 50)
+                .margins(top = 150)
         )
 
         songsButton = addButtonView(
@@ -291,9 +262,11 @@ class SearchInteractor(
     private val playlistPickerBlock: PlaylistPickerBlock,
     private val playlistBlock: PlaylistBlock,
     private val libraryRepository: LibraryRepository,
+    musicPlayerRepository: MusicPlayerRepository,
 ): Interactor(presenter) {
 
-    private val client = OkHttpClient()
+    private val musicPlayer = musicPlayerRepository.getMusicPlayer(player)
+
     private var searchState = SearchState.SONG
     private var results: List<Track> = listOf()
     private var isRouting = false
@@ -421,7 +394,8 @@ class SearchInteractor(
                 })
 
             }) {
-                trackBlock.setTrack(it)
+                musicPlayer.updatePlaylist(Playlist(songs = mutableListOf(it)))
+                musicPlayer.startPlaylist()
                 routeTo(trackBlock)
             }
         } else {

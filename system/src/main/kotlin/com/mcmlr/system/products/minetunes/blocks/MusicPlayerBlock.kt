@@ -23,6 +23,8 @@ import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
 import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.flow.Flow
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import javax.inject.Inject
@@ -30,10 +32,11 @@ import javax.inject.Inject
 class MusicPlayerBlock @Inject constructor(
     player: Player,
     origin: Origin,
+    trackBlock: TrackBlock,
     musicPlayerRepository: MusicPlayerRepository,
 ): Block(player, origin) {
     private val view = MusicPlayerViewController(player, origin)
-    private val interactor = MusicPlayerInteractor(player, view, musicPlayerRepository)
+    private val interactor = MusicPlayerInteractor(player, view, trackBlock, musicPlayerRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -51,9 +54,14 @@ class MusicPlayerViewController(
     private lateinit var shuffleButton: ButtonView
     private lateinit var nextTrackButton: ButtonView
     private lateinit var loopButton: ButtonView
+    private lateinit var expandButton: ButtonView
 
     override fun setPlayListener(listener: Listener) {
         playButton.addListener(listener)
+    }
+
+    override fun setExpandListener(listener: Listener) {
+        expandButton.addListener(listener)
     }
 
     override fun setLoopListener(listener: Listener) {
@@ -139,10 +147,20 @@ class MusicPlayerViewController(
             text = R.getString(player, S.SHUFFLE_BUTTON.resource())
         )
 
-        loopButton = addButtonView(
+        expandButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignEndToEndOf(this)
+                .alignTopToTopOf(playButton)
+                .alignBottomToBottomOf(playButton),
+            size = 18,
+            text = R.getString(player, S.EXPAND_BUTTON.resource())
+        )
+
+        loopButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignEndToStartOf(expandButton)
                 .alignTopToTopOf(playButton)
                 .alignBottomToBottomOf(playButton),
             size = 18,
@@ -154,6 +172,7 @@ class MusicPlayerViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignBottomToTopOf(playButton)
                 .alignStartToStartOf(shuffleButton),
+            lineWidth = 800,
             size = 6,
             text = ""
         )
@@ -163,6 +182,7 @@ class MusicPlayerViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignBottomToTopOf(artist)
                 .alignStartToStartOf(artist),
+            lineWidth = 800,
             size = 8,
             text = ""
         )
@@ -189,6 +209,7 @@ interface MusicPlayerPresenter: Presenter {
     fun setPlayListener(listener: Listener)
     fun setShuffleListener(listener: Listener)
     fun setLoopListener(listener: Listener)
+    fun setExpandListener(listener: Listener)
     fun setNextTrackListener(listener: Listener)
     fun setLastTrackListener(listener: Listener)
 }
@@ -196,6 +217,7 @@ interface MusicPlayerPresenter: Presenter {
 class MusicPlayerInteractor(
     private val player: Player,
     private val presenter: MusicPlayerPresenter,
+    private val trackBlock: TrackBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
 ): Interactor(presenter) {
     companion object {
@@ -242,6 +264,8 @@ class MusicPlayerInteractor(
 
         presenter.setShuffleListener(object : Listener {
             override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
                 musicPlayer.shuffle()
                 presenter.setIsShuffled(musicPlayer.isShuffled)
             }
@@ -249,6 +273,8 @@ class MusicPlayerInteractor(
 
         presenter.setLoopListener(object : Listener {
             override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
                 musicPlayer.loop()
                 presenter.setIsLooped(musicPlayer.isLooped)
             }
@@ -256,6 +282,8 @@ class MusicPlayerInteractor(
 
         presenter.setPlayListener(object : Listener {
             override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
                 isPlaying = !isPlaying
                 presenter.setPlayingState(isPlaying)
                 if (isPlaying) {
@@ -268,15 +296,36 @@ class MusicPlayerInteractor(
 
         presenter.setNextTrackListener(object : Listener {
             override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
                 musicPlayer.goToNextSong()
             }
         })
 
         presenter.setLastTrackListener(object : Listener {
             override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
                 musicPlayer.goToLastSong()
             }
         })
+
+        presenter.setExpandListener(object : Listener {
+            override fun invoke() {
+                if (!isPlaylistLoaded()) return
+
+                routeTo(trackBlock)
+            }
+        })
+    }
+
+    private fun isPlaylistLoaded(): Boolean {
+        val isLoaded = musicPlayer.isPlaylistLoaded()
+        if (!isLoaded) {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.ITALIC}No playlist selected!"))
+        }
+
+        return isLoaded
     }
 
     private fun setSongProgressSubscriber(flow: Flow<Short>) {

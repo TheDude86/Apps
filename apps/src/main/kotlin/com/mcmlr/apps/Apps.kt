@@ -2,6 +2,7 @@ package com.mcmlr.apps
 
 import com.mcmlr.blocks.api.AppInjectionListener
 import com.mcmlr.blocks.api.AppInjector
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.*
 import com.mcmlr.system.CommandRepository
 import com.mcmlr.system.PlayerEventRepository
@@ -21,6 +23,7 @@ import com.mcmlr.system.products.info.TutorialEnvironment
 import com.mcmlr.system.products.kits.KitsEnvironment
 import com.mcmlr.system.products.market.MarketEnvironment
 import com.mcmlr.system.products.minetunes.MineTunesEnvironment
+import com.mcmlr.system.products.minetunes.NewsRepository
 import com.mcmlr.system.products.pong.PongEnvironment
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
 import com.mcmlr.system.products.recipe.RecipeEnvironment
@@ -79,6 +82,8 @@ class Apps : JavaPlugin() {
         Metrics(this, 27644)
 
         instance = this
+
+        NewsRepository.init()
 
         managerComponent = DaggerManagerComponent.builder()
             .plugin(this)

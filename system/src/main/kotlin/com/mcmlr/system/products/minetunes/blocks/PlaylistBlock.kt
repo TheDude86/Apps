@@ -36,6 +36,7 @@ import com.mcmlr.system.OptionsModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.LibraryRepository.Companion.FAVORITES_UUID
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
+import com.mcmlr.system.products.minetunes.NewsRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.SearchFactory
 import com.mcmlr.system.products.minetunes.SearchState
@@ -160,7 +161,7 @@ class PlaylistViewController(
                                         .alignTopToTopOf(this)
                                         .margins(start = 50, top = 30),
                                     size = 6,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = track.song.bolden(),
                                 )
 
@@ -171,7 +172,7 @@ class PlaylistViewController(
                                         .alignTopToBottomOf(title)
                                         .margins(top = 30),
                                     size = 4,
-                                    maxLength = 600,
+                                    lineWidth = 600,
                                     text = "${ChatColor.GRAY}${track.length.minuteTimeFormat()}"
                                 )
 
@@ -304,7 +305,8 @@ class PlaylistInteractor(
 
         val playlist = playlist ?: return
 
-        presenter.setPlaylist(playlist)
+//        NewsRepository.updatePlaylist(playlist)
+
         presenter.setPlaylistTitle(playlist.name ?: "Untitled Playlist")
         musicPlayer.setDefaultPlaylist(playlist)
 
@@ -490,6 +492,8 @@ class PlaylistInteractor(
                 playlistUpdated = false
             }
         })
+
+        presenter.setPlaylist(playlist)
     }
 
     private fun updatePlaylist() {

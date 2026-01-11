@@ -2,9 +2,11 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
@@ -73,6 +75,7 @@ open class ViewController(
 
     override fun updateFocus(view: Viewable) {
         children.forEach { it.updateFocus(view) }
+        router.updateFocus(view)
     }
 
     override fun getPosition(): Coordinates {

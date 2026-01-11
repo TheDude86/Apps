@@ -1,57 +1,51 @@
 package com.mcmlr.system.products.minetunes.blocks
 
+import com.mcmlr.apps.app.block.data.Bundle
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.R
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.app.RouteToCallback
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.views.ButtonView
-import com.mcmlr.blocks.api.views.ItemView
-import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.blocks.api.views.TextView
-import com.mcmlr.blocks.api.views.ViewContainer
-import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.blocks.core.bolden
-import com.mcmlr.blocks.core.collectLatest
-import com.mcmlr.blocks.core.collectOn
-import com.mcmlr.blocks.core.disposeOn
-import com.mcmlr.blocks.core.minuteTimeFormat
-import com.mcmlr.system.products.minetunes.DownloadService
+import com.mcmlr.blocks.api.views.*
+import com.mcmlr.blocks.core.*
+import com.mcmlr.system.OptionRowModel
+import com.mcmlr.system.OptionsBlock
+import com.mcmlr.system.OptionsBlock.Companion.OPTION_BUNDLE_KEY
+import com.mcmlr.system.OptionsModel
+import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
-import com.mcmlr.system.products.minetunes.MusicRepository
 import com.mcmlr.system.products.minetunes.S
+import com.mcmlr.system.products.minetunes.SearchFactory
+import com.mcmlr.system.products.minetunes.SearchState
+import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.PLAYLIST_PICKER_BUNDLE_KEY
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
 class TrackBlock @Inject constructor(
     player: Player,
     origin: Origin,
     resources: Resources,
-    musicRepository: MusicRepository,
+    optionsBlock: OptionsBlock,
+    playlistPickerBlock: PlaylistPickerBlock,
     musicPlayerRepository: MusicPlayerRepository,
+    libraryRepository: LibraryRepository,
 ): Block(player, origin) {
     private val view = TrackViewController(player, origin)
-    private val interactor = TrackInteractor(player, resources, view, musicRepository, musicPlayerRepository)
+    private val interactor = TrackInteractor(player, resources, view, optionsBlock, playlistPickerBlock, musicPlayerRepository, libraryRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
-
-    fun setTrack(track: Track) {
-        view.setTitle(track.song)
-        interactor.setTrack(track)
-    }
 }
 
 class TrackViewController(
@@ -59,31 +53,100 @@ class TrackViewController(
     origin: Origin,
 ): NavigationViewController(player, origin), TrackPresenter {
 
-    private var title: String = "Song"
-
     private lateinit var playButton: ButtonView
     private lateinit var lastTrackButton: ButtonView
     private lateinit var shuffleButton: ButtonView
     private lateinit var nextTrackButton: ButtonView
     private lateinit var loopButton: ButtonView
+    private lateinit var optionsButton: ButtonView
     private lateinit var progressBar: ViewContainer
     private lateinit var progressIndicator: ItemView
     private lateinit var progressTime: TextView
     private lateinit var songLength: TextView
     private lateinit var artist: TextView
     private lateinit var songTitle: TextView
+    private lateinit var contentFeed: ListFeedView
 
-    fun setTitle(title: String) {
-        this.title = title
+    private lateinit var resultCallback: (Int) -> Unit
+
+    override fun setResultsCallback(callback: (Int) -> Unit) {
+        resultCallback = callback
     }
 
-    override fun addPlayListener(listener: Listener) {
+    override fun setPlayListener(listener: Listener) {
         playButton.addListener(listener)
+    }
+
+    override fun setLoopListener(listener: Listener) {
+        loopButton.addListener(listener)
+    }
+
+    override fun setShuffleListener(listener: Listener) {
+        shuffleButton.addListener(listener)
+    }
+
+    override fun setNextTrackListener(listener: Listener) {
+        nextTrackButton.addListener(listener)
+    }
+
+    override fun setLastTrackListener(listener: Listener) {
+        lastTrackButton.addListener(listener)
+    }
+
+    override fun setOptionsListener(listener: Listener) {
+        optionsButton.addListener(listener)
+    }
+
+    override fun setIsLooped(isLooped: Boolean) {
+        val loopedString = R.getString(player, S.LOOP_BUTTON.resource())
+        val loopedText = if (isLooped) "${ChatColor.GOLD}$loopedString" else loopedString
+        loopButton.update(text = loopedText)
+    }
+
+    override fun setIsShuffled(isShuffled: Boolean) {
+        val shuffleString = R.getString(player, S.SHUFFLE_BUTTON.resource())
+        val shuffleText = if (isShuffled) "${ChatColor.GOLD}$shuffleString" else shuffleString
+        shuffleButton.update(text = shuffleText)
     }
 
     override fun setPlayingState(isPlaying: Boolean) {
         val buttonText = if (isPlaying) R.getString(player, S.PAUSE_BUTTON.resource()) else R.getString(player, S.PLAY_BUTTON.resource())
         playButton.update(text = buttonText, highlightedText = "${ChatColor.BOLD}$buttonText")
+    }
+
+    override fun setPlaylist(playlist: Playlist) {
+        contentFeed.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                playlist.songs.forEachIndexed { index, track ->
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 50),
+                        clickable = true,
+                        listener = object : Listener {
+                            override fun invoke() {
+                                resultCallback.invoke(index)
+                            }
+                        },
+
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .alignStartToStartOf(this)
+                                        .centerVertically()
+                                        .margins(start = 50),
+                                    size = 4,
+                                    lineWidth = 600,
+                                    text = track.song,
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        })
+
     }
 
     override fun setTrack(track: Track) {
@@ -125,93 +188,15 @@ class TrackViewController(
             size = 16,
         )
 
-        addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .x(-500)
-                .margins(bottom = 300),
-            text = R.getString(player, S.HOME_BUTTON.resource()),
-            highlightedText = R.getString(player, S.HOME_BUTTON.resource()).bolden(),
-        )
-
-        val searchButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .centerHorizontally()
-                .margins(bottom = 300),
-            text = R.getString(player, S.SEARCH_BUTTON.resource()),
-            highlightedText = R.getString(player, S.SEARCH_BUTTON.resource()).bolden(),
-        )
-
-        addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToBottomOf(this)
-                .x(500)
-                .margins(bottom = 300),
-            text = R.getString(player, S.MUSIC_BUTTON.resource()),
-            highlightedText = R.getString(player, S.MUSIC_BUTTON.resource()).bolden(),
-        )
-
         playButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToTopOf(searchButton)
+                .alignBottomToBottomOf(this)
                 .centerHorizontally()
-                .margins(bottom = 100),
+                .margins(bottom = 200),
             size = 30,
             text = R.getString(player, S.PLAY_BUTTON.resource()),
             highlightedText = R.getString(player, S.PLAY_BUTTON.resource()).bolden(),
-        )
-
-        lastTrackButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton)
-                .alignEndToStartOf(playButton)
-                .margins(end = 200),
-            size = 20,
-            text = R.getString(player, S.LAST_TRACK_BUTTON.resource()),
-            highlightedText = R.getString(player, S.LAST_TRACK_BUTTON.resource()).bolden(),
-        )
-
-        shuffleButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(lastTrackButton)
-                .alignBottomToBottomOf(lastTrackButton)
-                .alignEndToStartOf(lastTrackButton)
-                .margins(end = 300),
-            size = 30,
-            text = R.getString(player, S.SHUFFLE_BUTTON.resource()),
-            highlightedText = R.getString(player, S.SHUFFLE_BUTTON.resource()).bolden(),
-        )
-
-        nextTrackButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(playButton)
-                .alignBottomToBottomOf(playButton)
-                .alignStartToEndOf(playButton)
-                .margins(start = 200),
-            size = 20,
-            text = R.getString(player, S.NEXT_TRACK_BUTTON.resource()),
-            highlightedText = R.getString(player, S.NEXT_TRACK_BUTTON.resource()).bolden(),
-        )
-
-        loopButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(nextTrackButton)
-                .alignBottomToBottomOf(nextTrackButton)
-                .alignStartToEndOf(nextTrackButton)
-                .margins(start = 300),
-            size = 30,
-            text = R.getString(player, S.LOOP_BUTTON.resource()),
-            highlightedText = R.getString(player, S.LOOP_BUTTON.resource()).bolden(),
         )
 
         progressBar = addViewContainer(
@@ -270,117 +255,269 @@ class TrackViewController(
             size = 14,
             text = "Song Name".bolden()
         )
+
+        lastTrackButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(playButton)
+                .alignBottomToBottomOf(playButton)
+                .alignEndToStartOf(playButton)
+                .margins(end = 200),
+            size = 20,
+            text = R.getString(player, S.LAST_TRACK_BUTTON.resource()),
+            highlightedText = R.getString(player, S.LAST_TRACK_BUTTON.resource()).bolden(),
+        )
+
+        shuffleButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(lastTrackButton)
+                .alignBottomToBottomOf(lastTrackButton)
+                .alignEndToStartOf(lastTrackButton)
+                .margins(end = 300),
+            size = 30,
+            text = R.getString(player, S.SHUFFLE_BUTTON.resource()),
+            highlightedText = R.getString(player, S.SHUFFLE_BUTTON.resource()).bolden(),
+        )
+
+        nextTrackButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(playButton)
+                .alignBottomToBottomOf(playButton)
+                .alignStartToEndOf(playButton)
+                .margins(start = 200),
+            size = 20,
+            text = R.getString(player, S.NEXT_TRACK_BUTTON.resource()),
+            highlightedText = R.getString(player, S.NEXT_TRACK_BUTTON.resource()).bolden(),
+        )
+
+        loopButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(nextTrackButton)
+                .alignBottomToBottomOf(nextTrackButton)
+                .alignStartToEndOf(nextTrackButton)
+                .margins(start = 300),
+            size = 30,
+            text = R.getString(player, S.LOOP_BUTTON.resource()),
+            highlightedText = R.getString(player, S.LOOP_BUTTON.resource()).bolden(),
+        )
+
+        optionsButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(songTitle)
+                .alignEndToEndOf(progressBar),
+            size = 20,
+            text = R.getString(player, S.OPTIONS_BUTTON.resource())
+        )
+
+        contentFeed = addListFeedView(
+            modifier = Modifier()
+                .size(900, FILL_ALIGNMENT)
+                .alignTopToBottomOf(title)
+                .alignBottomToBottomOf(this)
+                .centerHorizontally()
+                .margins(top = 100, bottom = 850)
+        )
     }
 
 }
 
 interface TrackPresenter: Presenter {
-    fun addPlayListener(listener: Listener)
-
     fun setPlayingState(isPlaying: Boolean)
-
+    fun setPlaylist(playlist: Playlist)
     fun setTrack(track: Track)
-
     fun setProgress(time: Short, length: Short, speed: Float)
+    fun setIsShuffled(isShuffled: Boolean)
+    fun setIsLooped(isLooped: Boolean)
+
+    fun setPlayListener(listener: Listener)
+    fun setShuffleListener(listener: Listener)
+    fun setLoopListener(listener: Listener)
+    fun setNextTrackListener(listener: Listener)
+    fun setLastTrackListener(listener: Listener)
+    fun setOptionsListener(listener: Listener)
+
+    fun setResultsCallback(callback: (Int) -> Unit)
 }
 
 class TrackInteractor(
     private val player: Player,
     private val resources: Resources,
     private val presenter: TrackPresenter,
-    private val musicRepository: MusicRepository,
+    private val optionsBlock: OptionsBlock,
+    private val playlistPickerBlock: PlaylistPickerBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
+    private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
     companion object {
-        private const val MUSIC_PLAYER_DISPOSER = "music player"
+        private const val MUSIC_PLAYER_COLLECTION = "music player"
     }
 
     private val musicPlayer = musicPlayerRepository.getMusicPlayer(player)
 
-    val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    val service: DownloadService = retrofit.create(DownloadService::class.java)
-    var isPlaying = false
-
-    private var track: Track? = null
-
-    fun setTrack(track: Track) {
-        this.track = track
-    }
+    private var isRouting = false
+    private var isPlaying = false
 
     override fun onCreate() {
         super.onCreate()
 
-        val track = track ?: return
+        val track = musicPlayer.getCurrentTrack()
+
         presenter.setTrack(track)
-        musicPlayer.updatePlaylist(Playlist(songs = mutableListOf(track)))
+        presenter.setIsShuffled(musicPlayer.isShuffled)
+        presenter.setIsLooped(musicPlayer.isLooped)
 
-        presenter.addPlayListener(object : Listener {
+        if (musicPlayer.activeSong != null) {
+            isPlaying = musicPlayer.isPlaying()
+            presenter.setPlayingState(isPlaying)
+            presenter.setTrack(musicPlayer.getCurrentTrack())
+            setSongProgressSubscriber(musicPlayer.getSongProgressStream())
+        }
+
+        presenter.setShuffleListener(object : Listener {
             override fun invoke() {
-
-                isPlaying = !isPlaying
-                if (isPlaying) {
-                    musicPlayer.startPlaylist()
-                        .collectOn(DudeDispatcher())
-                        .collectLatest {
-                            val song = musicPlayer.getCurrentSong() ?: return@collectLatest
-                            presenter.setProgress(it, song.length, song.speed)
-                        }
-                        .disposeOn(collection = MUSIC_PLAYER_DISPOSER, disposer = this@TrackInteractor)
-                } else {
-                    musicPlayer.pause()
-                    clear(MUSIC_PLAYER_DISPOSER)
-                }
-
-                presenter.setPlayingState(isPlaying)
-
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    val response = service.download("https://firebasestorage.googleapis.com/v0/b/mc-apps-9477a.firebasestorage.app/o/apps%2Fminetunes%2F${track.downloadUrl}")
-//
-//                    var input: InputStream? = null
-//                    try {
-//                        input = response.body()?.byteStream() ?: return@launch
-//
-//                        val fileName = "${track.artist.replace("/", "%!")} - ${track.song}.nbs"
-//                        val fos = File(resources.dataFolder(), "${File.separator}Mine Tunes${File.separator}Songs${File.separator}$fileName")
-//                        fos.outputStream().use { output ->
-//                            val buffer = ByteArray(4 * 1024)
-//                            var read: Int
-//                            while (input.read(buffer).also { read = it } != -1) {
-//                                output.write(buffer, 0, read)
-//                            }
-//                            output.flush()
-//                        }
-//
-//                        val song = musicRepository.loadSong(fileName) ?: return@launch
-//
-//                        CoroutineScope(DudeDispatcher()).launch {
-//                            isPlaying = !isPlaying
-//
-//                            if (isPlaying) {
-//                                musicPlayer.playSong(song, player)
-//                                    .collectOn(DudeDispatcher())
-//                                    .collectLatest {
-//                                        presenter.setProgress(it, song.length, song.speed)
-//                                    }
-//                                    .disposeOn(disposer = this@TrackInteractor)
-//                            } else {
-//                                musicPlayer.pauseSong()
-//                            }
-//
-//                            presenter.setPlayingState(isPlaying)
-//                        }
-//
-//                    } catch (e: Throwable) {
-//                        println("Error: $e")
-//                    } finally {
-//                        input?.close()
-//                    }
-//                }
+                musicPlayer.shuffle()
+                presenter.setIsShuffled(musicPlayer.isShuffled)
             }
         })
+
+        presenter.setLoopListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.loop()
+                presenter.setIsLooped(musicPlayer.isLooped)
+            }
+        })
+
+        presenter.setPlayListener(object : Listener {
+            override fun invoke() {
+                isPlaying = !isPlaying
+                presenter.setPlayingState(isPlaying)
+                if (isPlaying) {
+                    setSongProgressSubscriber(musicPlayer.playSong())
+                } else {
+                    musicPlayer.pause()
+                }
+            }
+        })
+
+        presenter.setNextTrackListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.goToNextSong()
+            }
+        })
+
+        presenter.setLastTrackListener(object : Listener {
+            override fun invoke() {
+                musicPlayer.goToLastSong()
+            }
+        })
+
+        presenter.setOptionsListener(object : Listener {
+            override fun invoke() {
+
+
+                val optionsList = mutableListOf<OptionRowModel>()
+
+                if (!libraryRepository.isFavorite(track)) {
+                    optionsList.add(OptionRowModel("Favorite song"))
+                }
+
+                optionsList.add(OptionRowModel("Add to playlist"))
+//            optionsList.add(OptionRowModel("Go to artist"))
+
+//            if (track.album != "EP") {
+//                optionsList.add(OptionRowModel("Go to album"))
+//            }
+
+                val optionsModel = OptionsModel(
+                    "Song Options",
+                    optionsList,
+                )
+
+                optionsBlock.setOptions(optionsModel)
+
+                isRouting = true
+                routeTo(optionsBlock, object : RouteToCallback {
+                    override fun invoke(bundle: Bundle) {
+                        val option = bundle.getData<String>(OPTION_BUNDLE_KEY)
+                        when (option) {
+                            "Favorite song" -> {
+                                libraryRepository.addToFavorites(track)?.invokeOnCompletion {
+                                    CoroutineScope(DudeDispatcher()).launch {
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
+                                    }
+                                }
+                            }
+
+                            "Add to playlist" -> {
+                                routeTo(playlistPickerBlock, object : RouteToCallback {
+                                    override fun invoke(bundle: Bundle) {
+                                        val playlist = bundle.getData<Playlist>(PLAYLIST_PICKER_BUNDLE_KEY) ?: return
+                                        val uuid = playlist.uuid ?: return
+                                        if (libraryRepository.addToPlaylist(track, uuid)) {
+                                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to ${playlist.name?.bolden()}${ChatColor.GREEN}!"))
+                                        } else {
+                                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.RED}${ChatColor.ITALIC}Song is already in ${playlist.name?.bolden()}${ChatColor.RED}!"))
+                                        }
+                                    }
+                                })
+                            }
+
+                            "Go to artist" -> {
+                                SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                    .collectFirst(DudeDispatcher()) {
+                                        CoroutineScope(DudeDispatcher()).launch {
+                                            val artistSongs = it.filter { it.artist == track.artist }
+//                                        artistBlock.setArtist(track.artist, artistSongs)
+//                                        routeTo(artistBlock)
+                                        }
+                                    }
+                            }
+
+                            "Go to album" -> {
+                                SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
+                                    .collectFirst(DudeDispatcher()) {
+                                        CoroutineScope(DudeDispatcher()).launch {
+                                            val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
+//                                        playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
+//                                        routeTo(playlistBlock)
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                })
+
+
+
+            }
+        })
+
+        presenter.setResultsCallback {
+            musicPlayer.startSong(it)
+        }
+
+        presenter.setPlaylist(musicPlayer.playlist)
+    }
+
+
+
+    private fun setSongProgressSubscriber(flow: Flow<Short>) {
+        clear(MUSIC_PLAYER_COLLECTION)
+        flow.collectOn(DudeDispatcher())
+            .collectLatest {
+                if (it == 0.toShort()) {
+                    val track = musicPlayer.getCurrentTrack()
+                    presenter.setTrack(track)
+                }
+
+                val song = musicPlayer.getCurrentSong() ?: return@collectLatest
+                val songLength = song.length / song.speed
+                val progress = it / song.speed
+                presenter.setProgress(it, song.length, song.speed)
+            }.disposeOn(collection = MUSIC_PLAYER_COLLECTION, disposer = this@TrackInteractor)
     }
 }
