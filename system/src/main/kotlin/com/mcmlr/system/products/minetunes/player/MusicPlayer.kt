@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import java.util.*
 
 class MusicPlayer(
@@ -40,7 +39,7 @@ class MusicPlayer(
         return activeJob?.isActive == true
     }
 
-    fun getActiveSongStream(): Flow<Short>? = if (activeJob == null || activeJob?.isActive != true) null else songProgressStream
+    fun isPlaylistLoaded(): Boolean = songList.isNotEmpty()
 
     fun getSongProgressStream(): Flow<Short> = songProgressStream
 

@@ -1,5 +1,7 @@
 package com.mcmlr.system.products.minetunes
 
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
@@ -9,6 +11,13 @@ import com.mcmlr.system.products.minetunes.player.Icon
 import com.mcmlr.system.products.minetunes.player.IconType
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.Date
@@ -39,6 +48,41 @@ class LibraryRepository @Inject constructor(
                 )
             )
         )
+    }
+
+    fun fetchPlaylist(playlistId: String): Flow<Playlist> {
+        val flow = MutableSharedFlow<Playlist>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val url = "https://fetchplaylist-l5cijtvgrq-uc.a.run.app"
+
+            val request = Request.Builder().url("$url/?id=$playlistId").build()
+            val response = OkHttpClient().newCall(request).execute() //TODO: Move OkHTTPClient to dependency
+            val body = response.body?.string() ?: return@launch
+            val data = JsonParser.parseString(body).asJsonObject.get("playlist").asJsonObject
+
+            val uuid = if (data.has("uuid")) data.get("uuid").asString else null
+            val name = if (data.has("name")) data.get("name").asString else null
+            val icon = if (data.has("icon")) {
+                val iconData = data.get("icon").asJsonObject
+                Icon(
+                    type = IconType.valueOf(iconData.get("type").asString),
+                    data = iconData.get("data").asString
+                )
+            } else null
+
+            val tracks = data.get("songs").asJsonObject.keySet().map { songId ->
+                val result = data.get("songs").asJsonObject.get(songId).asJsonObject
+                Gson().fromJson(result, Track::class.java)
+            }
+
+            val playlist = Playlist(uuid = uuid, icon = icon, name = name, songs = tracks.toMutableList())
+
+            response.close()
+            flow.emit(playlist)
+        }
+
+        return flow
     }
 
     fun updatePlaylistSongOrder(playlistId: String, songIndex: Int, action: OrderPlaylistAction) = save {

@@ -1,27 +1,13 @@
 package com.mcmlr.system.products.minetunes.blocks
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.R
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.ContextListener
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.TextListener
-import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
-import com.mcmlr.blocks.api.views.ButtonView
-import com.mcmlr.blocks.api.views.ListFeedView
-import com.mcmlr.blocks.api.views.Modifier
-import com.mcmlr.blocks.api.views.TextInputView
-import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.collectFirst
-import com.mcmlr.system.products.minetunes.LibraryModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.SearchFactory
@@ -35,9 +21,8 @@ import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import java.util.Date
+import java.util.*
 import javax.inject.Inject
-import kotlin.collections.filter
 
 class MusicBlock @Inject constructor(
     player: Player,
@@ -57,7 +42,7 @@ class MusicBlock @Inject constructor(
 class MusicViewController(
     private val player: Player,
     origin: Origin,
-): NavigationViewController(player, origin), MusicPresenter {
+): ViewController(player, origin), MusicPresenter {
 
     private lateinit var searchBar: TextInputView
     private lateinit var contentFeed: ListFeedView
@@ -183,7 +168,7 @@ class MusicViewController(
                                                 .alignTopToTopOf(this)
                                                 .margins(start = 50, top = 30),
                                             size = 6,
-                                            maxLength = 1200,
+                                            lineWidth = 600,
                                             text = playlist.name?.bolden() ?: "Unnamed Playlist",
                                         )
 
@@ -193,7 +178,7 @@ class MusicViewController(
                                                 .alignStartToStartOf(title)
                                                 .alignTopToBottomOf(title),
                                             size = 4,
-                                            maxLength = 600,
+                                            lineWidth = 600,
                                             text = "${playlist.songs.size} Songs"
                                         )
                                     }
@@ -224,7 +209,7 @@ class MusicViewController(
                                                 .alignTopToTopOf(this)
                                                 .margins(start = 50, top = 30),
                                             size = 6,
-                                            maxLength = 1200,
+                                            lineWidth = 600,
                                             text = album.bolden()
                                         )
 
@@ -234,7 +219,7 @@ class MusicViewController(
                                                 .alignStartToStartOf(title)
                                                 .alignTopToBottomOf(title),
                                             size = 4,
-                                            maxLength = 600,
+                                            lineWidth = 600,
                                             text = "${ChatColor.GRAY}Album"
                                         )
                                     }
@@ -265,7 +250,7 @@ class MusicViewController(
                                                 .alignTopToTopOf(this)
                                                 .margins(start = 50, top = 30),
                                             size = 6,
-                                            maxLength = 1200,
+                                            lineWidth = 600,
                                             text = track.song.bolden()
                                         )
 
@@ -275,7 +260,7 @@ class MusicViewController(
                                                 .alignStartToStartOf(title)
                                                 .alignTopToBottomOf(title),
                                             size = 4,
-                                            maxLength = 600,
+                                            lineWidth = 600,
                                             text = "${ChatColor.GRAY}Song"
                                         )
                                     }
@@ -306,7 +291,7 @@ class MusicViewController(
                                                 .alignTopToTopOf(this)
                                                 .margins(start = 50, top = 30),
                                             size = 6,
-                                            maxLength = 1200,
+                                            lineWidth = 600,
                                             text = artist.bolden()
                                         )
 
@@ -316,7 +301,7 @@ class MusicViewController(
                                                 .alignStartToStartOf(title)
                                                 .alignTopToBottomOf(title),
                                             size = 4,
-                                            maxLength = 600,
+                                            lineWidth = 600,
                                             text = "${ChatColor.GRAY}Artist"
                                         )
                                     }
@@ -330,23 +315,11 @@ class MusicViewController(
     }
 
     override fun createView() {
-        super.createView()
-        val title = addTextView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
-            text = R.getString(player, S.LIBRARY_TITLE.resource()),
-            size = 16,
-        )
-
         searchBar = addTextInputView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(title)
-                .centerHorizontally()
-                .margins(top = 75),
+                .alignTopToTopOf(this)
+                .centerHorizontally(),
             text = R.getString(player, S.LIBRARY_SEARCH_PLACEHOLDER.resource()),
             highlightedText = R.getString(player, S.LIBRARY_SEARCH_PLACEHOLDER.resource()).bolden(),
         )
@@ -357,15 +330,15 @@ class MusicViewController(
                 .alignTopToBottomOf(searchBar)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally()
-                .margins(top = 200, bottom = 300)
+                .margins(top = 75)
         )
 
         playlistsButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(contentFeed)
                 .alignStartToStartOf(contentFeed)
-                .margins(top = 50),
+                .margins(bottom = 25),
             size = 5,
             text = R.getString(player, S.SEARCH_PLAYLISTS_BUTTON.resource()),
         )
@@ -373,9 +346,9 @@ class MusicViewController(
         songsButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(contentFeed)
                 .alignStartToEndOf(playlistsButton)
-                .margins(top = 50, start = 50),
+                .margins(start = 50, bottom = 25),
             size = 5,
             text = R.getString(player, S.SEARCH_SONGS_BUTTON.resource()),
         )
@@ -383,9 +356,9 @@ class MusicViewController(
         artistsButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(contentFeed)
                 .alignStartToEndOf(songsButton)
-                .margins(top = 50, start = 50),
+                .margins(start = 50, bottom = 25),
             size = 5,
             text = R.getString(player, S.SEARCH_ARTISTS_BUTTON.resource()),
         )
@@ -393,9 +366,9 @@ class MusicViewController(
         albumsButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(contentFeed)
                 .alignStartToEndOf(artistsButton)
-                .margins(top = 50, start = 50),
+                .margins(start = 50, bottom = 25),
             size = 5,
             text = R.getString(player, S.SEARCH_ALBUMS_BUTTON.resource()),
         )
@@ -403,9 +376,9 @@ class MusicViewController(
         createPlaylistButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignTopToBottomOf(searchBar)
+                .alignBottomToTopOf(contentFeed)
                 .alignEndToEndOf(contentFeed)
-                .margins(top = 50, start = 50),
+                .margins(start = 50, bottom = 25),
             size = 5,
             text = R.getString(player, S.LIBRARY_CREATE_PLAYLIST_BUTTON.resource()),
         )
@@ -448,6 +421,10 @@ class MusicInteractor(
         super.onCreate()
 
         sort()
+
+        contentState?.let {
+            presenter.setFeedState(it)
+        }
 
         when(contentState) {
             LibraryListModelType.PLAYLIST ->  presenter.setFeed(playlists)
@@ -592,6 +569,12 @@ class MusicInteractor(
     }
 
     fun sort() {
+        playlists.clear()
+        artists.clear()
+        albums.clear()
+        tracks.clear()
+        model.clear()
+
         val libraryModel = libraryRepository.getModel()
 
         libraryModel.playlists
