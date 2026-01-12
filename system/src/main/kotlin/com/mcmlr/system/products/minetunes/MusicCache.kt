@@ -1,10 +1,8 @@
 package com.mcmlr.system.products.minetunes
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
-import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.minetunes.nbs.NBSDecoder
 import com.mcmlr.system.products.minetunes.nbs.data.Song

@@ -84,6 +84,7 @@ class PlaylistBlock @Inject constructor(
 
     fun setPlaylist(playlist: Playlist) {
         interactor.setPlaylist(playlist)
+        view.showOptions = playlist.uuid != null
     }
 }
 
@@ -91,6 +92,8 @@ class PlaylistViewController(
     private val player: Player,
     origin: Origin,
 ): NavigationViewController(player, origin), PlaylistPresenter {
+
+    var showOptions = true
 
     private lateinit var title: TextView
     private lateinit var addButton: ButtonView
@@ -219,15 +222,17 @@ class PlaylistViewController(
                 .margins(top = 300, bottom = 600)
         )
 
-        optionsButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignBottomToTopOf(contentFeed)
-                .alignEndToEndOf(contentFeed)
-                .margins(bottom = 50),
-            size = 16,
-            text = R.getString(player, S.OPTIONS_BUTTON.resource())
-        )
+        if (showOptions) {
+            optionsButton = addButtonView(
+                modifier = Modifier()
+                    .size(WRAP_CONTENT, WRAP_CONTENT)
+                    .alignBottomToTopOf(contentFeed)
+                    .alignEndToEndOf(contentFeed)
+                    .margins(bottom = 50),
+                size = 16,
+                text = R.getString(player, S.OPTIONS_BUTTON.resource())
+            )
+        }
 
 //        addButton = addButtonView(
 //            modifier = Modifier()
