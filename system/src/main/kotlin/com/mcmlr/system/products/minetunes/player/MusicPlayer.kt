@@ -52,10 +52,10 @@ class MusicPlayer(
     fun shuffle() {
         isShuffled = !isShuffled
 
-        if (isShuffled) {
-            songList = songList.shuffled()
+        songList = if (isShuffled) {
+            songList.shuffled()
         } else {
-            songList = playlist.songs
+            playlist.songs
         }
     }
 

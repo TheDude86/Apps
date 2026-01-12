@@ -64,9 +64,6 @@ class Apps : JavaPlugin() {
     lateinit var inputRepository: InputRepository
 
     @Inject
-    lateinit var packetManager: PacketManager
-
-    @Inject
     lateinit var playerCursorCaptureTask: PlayerCursorCaptureTask
 
     @Inject

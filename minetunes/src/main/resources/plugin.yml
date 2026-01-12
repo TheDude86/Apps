@@ -1,0 +1,10 @@
+name: MineTunes
+version: 1.3.3
+main: com.mcmlr.minetunes.Minetunes
+api-version: '1.20'
+authors: [ The_Dude___ ]
+description: Music streaming with a holographic GUI
+commands:
+  mt:
+    description: Opens Mine Tunes
+    usage: /mt
