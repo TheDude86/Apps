@@ -48,10 +48,12 @@ fun Job.disposeOn(collection: String = FlowDisposer.DEFAULT, disposer: FlowDispo
     disposer.addJob(collection, this)
 }
 
+var pluginName = ""
+
 class DudeDispatcher: CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         try {
-            Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("Apps")!!, block)
+            Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin(pluginName)!!, block)
         } catch (_: Exception) { } //TODO: Fix crash when app is disabled
     }
 }

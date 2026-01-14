@@ -578,7 +578,7 @@ class MusicInteractor(
         val libraryModel = libraryRepository.getModel()
 
         libraryModel.playlists
-            .sortedBy { it.lastUsedDate }
+            .sortedBy { if (it.lastUsedDate == 0L) Long.MIN_VALUE else -it.lastUsedDate }
             .forEach { playlist ->
                 if ((Date().time - playlist.lastUsedDate < 604800000L) || (playlist.favorite == true)) {
                     model.add(LibraryListModel(type = LibraryListModelType.PLAYLIST, playlist = playlist))

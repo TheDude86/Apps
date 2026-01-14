@@ -24,14 +24,16 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
     protected var parentApp: BaseApp? = null
     protected var deeplink: String? = null
+    protected var useSystem: Boolean = true
 
     lateinit var resources: Resources
     var calibrating = false
 
     abstract fun root(): Block
 
-    fun create(resources: Resources) {
+    fun create(resources: Resources, useSystem: Boolean) {
         this.resources = resources
+        this.useSystem = useSystem
         onCreate()
         head = root()
         head.context = this

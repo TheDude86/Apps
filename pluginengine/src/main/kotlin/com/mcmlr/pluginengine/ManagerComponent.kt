@@ -1,4 +1,4 @@
-package com.mcmlr.apps
+package com.mcmlr.pluginengine
 
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.CursorRepository
@@ -26,11 +26,11 @@ interface ManagerComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun plugin(plugin: Apps): Builder
+        fun plugin(plugin: Engine): Builder
         fun build(): ManagerComponent
     }
 
-    fun inject(plugin: Apps)
+    fun inject(plugin: Engine)
 
 }
 
@@ -38,13 +38,13 @@ interface ManagerComponent {
 object ManagerModule {
 
     @Provides
-    fun plugin(plugin: Apps): JavaPlugin = plugin
+    fun plugin(plugin: Engine): JavaPlugin = Engine.instance
 
     @Provides
-    fun server(plugin: Apps): Server = plugin.server
+    fun server(plugin: Engine): Server = Engine.instance.server
 
     @Provides
-    fun dataFolder(plugin: Apps): File = plugin.dataFolder
+    fun dataFolder(plugin: Engine): File = Engine.instance.dataFolder
 
     @Provides
     fun economy(server: Server): Economy? = server.servicesManager.getRegistration(Economy::class.java)?.provider

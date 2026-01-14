@@ -1,5 +1,7 @@
 package com.mcmlr.system
 
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.emitBackground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -101,8 +101,8 @@ class MineTunesViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 900),
             text = R.getString(player, S.MINE_TUNES_TITLE.resource()),
             size = 16,
         )

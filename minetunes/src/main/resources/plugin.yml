@@ -7,4 +7,10 @@ description: Music streaming with a holographic GUI
 commands:
   mt:
     description: Opens Mine Tunes
-    usage: /mt
+    usage: /.
+  c:
+    description: Closes Apps
+    usage: /c
+  k:
+    description: Kills all Apps related entities
+    usage: /k
