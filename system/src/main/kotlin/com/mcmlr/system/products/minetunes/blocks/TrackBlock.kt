@@ -38,11 +38,12 @@ class TrackBlock @Inject constructor(
     resources: Resources,
     optionsBlock: OptionsBlock,
     playlistPickerBlock: PlaylistPickerBlock,
+    volumeBlock: VolumeBlock,
     musicPlayerRepository: MusicPlayerRepository,
     libraryRepository: LibraryRepository,
 ): Block(player, origin) {
     private val view = TrackViewController(player, origin)
-    private val interactor = TrackInteractor(player, resources, view, optionsBlock, playlistPickerBlock, musicPlayerRepository, libraryRepository)
+    private val interactor = TrackInteractor(player, resources, view, optionsBlock, playlistPickerBlock, volumeBlock, musicPlayerRepository, libraryRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -59,6 +60,7 @@ class TrackViewController(
     private lateinit var nextTrackButton: ButtonView
     private lateinit var loopButton: ButtonView
     private lateinit var optionsButton: ButtonView
+    private lateinit var volumeButton: ButtonView
     private lateinit var progressBar: ViewContainer
     private lateinit var progressIndicator: ItemView
     private lateinit var progressTime: TextView
@@ -95,6 +97,10 @@ class TrackViewController(
 
     override fun setOptionsListener(listener: Listener) {
         optionsButton.addListener(listener)
+    }
+
+    override fun setVolumeListener(listener: Listener) {
+        volumeButton.addListener(listener)
     }
 
     override fun setIsLooped(isLooped: Boolean) {
@@ -313,13 +319,22 @@ class TrackViewController(
             text = R.getString(player, S.OPTIONS_BUTTON.resource())
         )
 
+        volumeButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignTopToTopOf(songTitle)
+                .alignEndToStartOf(optionsButton),
+            size = 20,
+            text = R.getString(player, S.VOLUME_BUTTON.resource())
+        )
+
         contentFeed = addListFeedView(
             modifier = Modifier()
                 .size(900, FILL_ALIGNMENT)
                 .alignTopToBottomOf(title)
                 .alignBottomToBottomOf(this)
                 .centerHorizontally()
-                .margins(top = 100, bottom = 850)
+                .margins(top = 100, bottom = 900)
         )
     }
 
@@ -339,6 +354,7 @@ interface TrackPresenter: Presenter {
     fun setNextTrackListener(listener: Listener)
     fun setLastTrackListener(listener: Listener)
     fun setOptionsListener(listener: Listener)
+    fun setVolumeListener(listener: Listener)
 
     fun setResultsCallback(callback: (Int) -> Unit)
 }
@@ -349,6 +365,7 @@ class TrackInteractor(
     private val presenter: TrackPresenter,
     private val optionsBlock: OptionsBlock,
     private val playlistPickerBlock: PlaylistPickerBlock,
+    private val volumeBlock: VolumeBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
     private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
@@ -412,6 +429,12 @@ class TrackInteractor(
         presenter.setLastTrackListener(object : Listener {
             override fun invoke() {
                 musicPlayer.goToLastSong()
+            }
+        })
+
+        presenter.setVolumeListener(object : Listener {
+            override fun invoke() {
+                routeTo(volumeBlock)
             }
         })
 

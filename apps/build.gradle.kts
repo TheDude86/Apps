@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation(project(":block"))
     implementation(project(":system"))
+    implementation(project(":pluginengine"))
 
     //Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

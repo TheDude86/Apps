@@ -1,8 +1,14 @@
 package com.mcmlr.system.products.minetunes.player
 
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
+import com.mcmlr.blocks.core.collectLatest
+import com.mcmlr.blocks.core.collectOn
+import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.blocks.core.emitBackground
+import com.mcmlr.system.products.minetunes.MusicCache
 import com.mcmlr.system.products.minetunes.MusicRepository
 import com.mcmlr.system.products.minetunes.nbs.data.Song
 import com.mcmlr.system.products.minetunes.util.NoteUtils
@@ -33,6 +39,7 @@ class MusicPlayer(
     var isLooped = true
     var tick: Short = 0
     var songIndex = 0
+    var playerVolume: Float = 1f
 
     //TODO: Come up with better way to track if is playing, jobs cancel async and can lead to race conditions
     fun isPlaying(): Boolean {
@@ -177,12 +184,12 @@ class MusicPlayer(
                 CoroutineScope(DudeDispatcher()).launch {
                     song.layersMap.values.forEach {
                         val note = it.notesMap[tick.toInt()] ?: return@forEach
-                        val volume = it.volume
+                        val volume = it.volume.toFloat() / 100f
                         val pitch = NoteUtils.pitch(note.key, note.pitch)
                         val player = Bukkit.getPlayer(playerId)
 
                         if (player != null) {
-                            player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume.toFloat(), pitch)
+                            player.playSound(player.eyeLocation, NoteUtils.getInstrumentName(note.instrument), volume * playerVolume, pitch)
                         } else {
                             activeJob?.cancel(PLAYER_LEFT)
                         }

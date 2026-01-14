@@ -84,7 +84,7 @@ abstract class App(player: Player): BaseApp(player) {
         inputRepository.updateUserInputState(player.uniqueId, getInput)
     }
 
-    override fun hasParent(): Boolean = true
+    override fun hasParent(): Boolean = useSystem
 
     override fun routeBack() {
         val parent = head.parent

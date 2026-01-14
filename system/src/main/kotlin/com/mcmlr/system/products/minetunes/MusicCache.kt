@@ -1,8 +1,10 @@
 package com.mcmlr.system.products.minetunes
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
+import com.mcmlr.blocks.api.log
 import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.minetunes.nbs.NBSDecoder
 import com.mcmlr.system.products.minetunes.nbs.data.Song
@@ -11,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.InputStream
@@ -22,13 +26,30 @@ class MusicCache @Inject constructor(
     private val resources: Resources,
     private val service: DownloadService,
 ): Repository<MusicCacheModel>(resources.dataFolder()) {
+    companion object {
+        val NULL_SONG = Song(
+            title = "NULL",
+            nbsArtist = "",
+            artist = "",
+            description = "",
+            layersMap = mapOf(),
+            height = 0,
+            length = 0,
+            speed = 0f,
+            delay = 0f,
+            customInstruments = listOf(),
+            firstCustomInstrumentIndex = 0,
+            isStereo = false,
+            path = File("")
+        )
+    }
 
     init {
         loadModel("Mine Tunes${File.separator}Cache", "tracks", MusicCacheModel())
     }
 
     fun lookup(track: Track): Flow<Song?> {
-        val songFlow = MutableSharedFlow<Song?>()
+        val songFlow = MutableStateFlow<Song?>(NULL_SONG)
 
         CoroutineScope(Dispatchers.IO).launch {
             val fileName = "${track.artist.replace("/", "%!")} - ${track.song}.nbs"
@@ -66,7 +87,7 @@ class MusicCache @Inject constructor(
             }
         }
 
-        return songFlow
+        return songFlow.filter { it != NULL_SONG }
     }
 
     private fun loadSong(song: String): Song? {

@@ -20,6 +20,7 @@ object NBSDecoder {
         val layerMap = mutableMapOf<Int, Layer>()
         var isStereo = false
         try {
+
             val input = DataInputStream(inputStream)
             var length = decodeShort(input)
             val nbsVersion = if (length == 0.toShort()) input.readByte() else 0
@@ -137,12 +138,14 @@ object NBSDecoder {
                 isStereo,
                 File(""), //TODO: Update file
             )
-        } catch (_: FileNotFoundException) {
+        } catch (e: FileNotFoundException) {
+            log(Log.ASSERT, "FileNotFoundException: $e")
             return null
         } catch (_: EOFException) {
-            Bukkit.getServer().consoleSender.sendMessage("Song is corrupted")
+            log(Log.ASSERT, "Song is corrupted")
             return null
-        } catch (_: IOException) {
+        } catch (e: IOException) {
+            log(Log.ASSERT, "IOException: $e")
             return null
         }
     }

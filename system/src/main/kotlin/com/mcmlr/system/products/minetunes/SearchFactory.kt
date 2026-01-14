@@ -23,9 +23,13 @@ object SearchFactory {
             val body = response.body?.string() ?: return@launch
             val data = JsonParser.parseString(body).asJsonObject
 
-            val results = data.get("results").asJsonObject.keySet().map {
-                val result = data.get("results").asJsonObject.get(it).asJsonObject
-                Gson().fromJson(result, Track::class.java)
+            val results = if (!data.get("results").isJsonNull) {
+                data.get("results").asJsonObject.keySet().map {
+                    val result = data.get("results").asJsonObject.get(it).asJsonObject
+                    Gson().fromJson(result, Track::class.java)
+                }
+            } else {
+                listOf()
             }
 
             response.close()

@@ -14,19 +14,5 @@ class MusicRepository @Inject constructor(
     private val resources: Resources,
     private val musicCache: MusicCache,
 ) {
-
-
-
     fun downloadTrack(track: Track): Flow<Song?> = musicCache.lookup(track)
-
-    fun loadSong(song: String): Song? {
-        val homes = File(resources.dataFolder(), "Mine Tunes${File.separator}Cache${File.separator}$song")
-        return NBSDecoder.parse(homes.inputStream())
-    }
-
-    fun songList(): List<String> {
-        val songDirectory = File(resources.dataFolder(), "Mine Tunes${File.separator}Cache")
-        return songDirectory.list().toList()
-    }
-
 }

@@ -39,6 +39,7 @@ import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import okhttp3.OkHttpClient
 import org.bukkit.ChatColor
+import org.bukkit.Color
 import org.bukkit.entity.Player
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -104,6 +105,26 @@ class SearchViewController(
     override fun setArtistsSearchResults(results: List<String>, resultCallback: (String) -> Unit) {
         resultsFeed.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
+                if (results.isEmpty()) {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 75),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .center(),
+                                    size = 6,
+                                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}No results found..."
+                                )
+                            }
+                        }
+                    )
+                }
+
                 results.forEach { artist ->
                     addViewContainer(
                         modifier = Modifier()
@@ -138,6 +159,26 @@ class SearchViewController(
     override fun setSongsSearchResults(results: List<Track>, optionsCallback: (Track) -> Unit, resultCallback: (Track) -> Unit) {
         resultsFeed.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
+                if (results.isEmpty()) {
+                    addViewContainer(
+                        modifier = Modifier()
+                            .size(MATCH_PARENT, 75),
+                        background = Color.fromARGB(0, 0, 0, 0),
+                        content = object : ContextListener<ViewContainer>() {
+                            override fun ViewContainer.invoke() {
+
+                                addTextView(
+                                    modifier = Modifier()
+                                        .size(WRAP_CONTENT, WRAP_CONTENT)
+                                        .center(),
+                                    size = 6,
+                                    text = "${ChatColor.GRAY}${ChatColor.ITALIC}No results found..."
+                                )
+                            }
+                        }
+                    )
+                }
+
                 results.forEach { track ->
                     addViewContainer(
                         modifier = Modifier()
@@ -317,7 +358,6 @@ class SearchInteractor(
     }
 
     private fun setResults() {
-        if (results.isEmpty()) return
         if (searchState == SearchState.SONG) {
             presenter.setSongsSearchResults(results, { track ->
                 val optionsList = mutableListOf<OptionRowModel>()

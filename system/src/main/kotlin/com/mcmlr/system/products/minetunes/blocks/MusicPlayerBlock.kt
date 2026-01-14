@@ -1,23 +1,12 @@
 package com.mcmlr.system.products.minetunes.blocks
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
-import com.mcmlr.blocks.core.DudeDispatcher
-import com.mcmlr.blocks.core.bolden
-import com.mcmlr.blocks.core.collectLatest
-import com.mcmlr.blocks.core.collectOn
-import com.mcmlr.blocks.core.disposeOn
-import com.mcmlr.blocks.core.minuteTimeFormat
+import com.mcmlr.blocks.core.*
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
@@ -33,10 +22,11 @@ class MusicPlayerBlock @Inject constructor(
     player: Player,
     origin: Origin,
     trackBlock: TrackBlock,
+    volumeBlock: VolumeBlock,
     musicPlayerRepository: MusicPlayerRepository,
 ): Block(player, origin) {
     private val view = MusicPlayerViewController(player, origin)
-    private val interactor = MusicPlayerInteractor(player, view, trackBlock, musicPlayerRepository)
+    private val interactor = MusicPlayerInteractor(player, view, trackBlock, volumeBlock, musicPlayerRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -55,9 +45,14 @@ class MusicPlayerViewController(
     private lateinit var nextTrackButton: ButtonView
     private lateinit var loopButton: ButtonView
     private lateinit var expandButton: ButtonView
+    private lateinit var volumeButton: ButtonView
 
     override fun setPlayListener(listener: Listener) {
         playButton.addListener(listener)
+    }
+
+    override fun setVolumeListener(listener: Listener) {
+        volumeButton.addListener(listener)
     }
 
     override fun setExpandListener(listener: Listener) {
@@ -137,12 +132,23 @@ class MusicPlayerViewController(
             text = R.getString(player, S.NEXT_TRACK_BUTTON.resource())
         )
 
-        shuffleButton = addButtonView(
+        volumeButton = addButtonView(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(this)
                 .alignTopToTopOf(playButton)
                 .alignBottomToBottomOf(playButton),
+            size = 18,
+            text = R.getString(player, S.VOLUME_BUTTON.resource())
+        )
+
+        shuffleButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToEndOf(volumeButton)
+                .alignTopToTopOf(playButton)
+                .alignBottomToBottomOf(playButton)
+                .margins(start = -20),
             size = 18,
             text = R.getString(player, S.SHUFFLE_BUTTON.resource())
         )
@@ -210,6 +216,7 @@ interface MusicPlayerPresenter: Presenter {
     fun setShuffleListener(listener: Listener)
     fun setLoopListener(listener: Listener)
     fun setExpandListener(listener: Listener)
+    fun setVolumeListener(listener: Listener)
     fun setNextTrackListener(listener: Listener)
     fun setLastTrackListener(listener: Listener)
 }
@@ -218,6 +225,7 @@ class MusicPlayerInteractor(
     private val player: Player,
     private val presenter: MusicPlayerPresenter,
     private val trackBlock: TrackBlock,
+    private val volumeBlock: VolumeBlock,
     private val musicPlayerRepository: MusicPlayerRepository,
 ): Interactor(presenter) {
     companion object {
@@ -315,6 +323,12 @@ class MusicPlayerInteractor(
                 if (!isPlaylistLoaded()) return
 
                 routeTo(trackBlock)
+            }
+        })
+
+        presenter.setVolumeListener(object : Listener {
+            override fun invoke() {
+                routeTo(volumeBlock)
             }
         })
     }

@@ -22,6 +22,7 @@ abstract class Environment<out T: App>: BaseEnvironment<T>() {
         inputRepository: InputRepository,
         origin: Origin,
         deeplink: String?,
+        useSystem: Boolean,
     ): App {
         this.parentEnvironment = parentEnvironment
         this.parentApp = parentApp
@@ -29,7 +30,7 @@ abstract class Environment<out T: App>: BaseEnvironment<T>() {
         R.loadStrings(name(), player.locale)
         val app = getInstance(player)
         app.configure(appManager, this.parentEnvironment, this.parentApp, inputRepository, deeplink, origin)
-        app.create(resources)
+        app.create(resources, useSystem)
 
         return app
     }

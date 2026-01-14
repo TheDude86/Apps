@@ -1,4 +1,4 @@
-package com.mcmlr.apps
+package com.mcmlr.pluginengine
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
