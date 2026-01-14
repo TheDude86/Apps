@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
-import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.entity.BlockDisplay
@@ -67,9 +66,10 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
 
-    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Origin, inputRepository: InputRepository) {
+    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Origin, inputRepository: InputRepository, useSystem: Boolean = true) {
         this.parentEnvironment = environment
         this.deeplink = deeplink
+        this.useSystem = useSystem
 //        this.origin = origin
         this.inputRepository = inputRepository
     }
@@ -296,7 +296,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
         val backgroundApp = backgroundApps[app.name()]
         val newApp = if (backgroundApp == null) {
-            app.launch(parentEnvironment, this, this, player, inputRepository, origin, deeplink)
+            app.launch(parentEnvironment, this, this, player, inputRepository, origin, deeplink, useSystem)
         } else {
             backgroundApp.maximize()
             backgroundApp

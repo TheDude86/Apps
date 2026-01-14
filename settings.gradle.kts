@@ -5,3 +5,5 @@ plugins {
 include("apps")
 include("block")
 include("system")
+include("minetunes")
+include("pluginengine")

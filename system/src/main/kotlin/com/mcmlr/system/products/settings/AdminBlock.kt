@@ -88,7 +88,7 @@ class AdminBlockViewController(
                 .alignTopToBottomOf(titleButton)
                 .margins(top = 50),
             text = R.getString(player, S.PERMISSIONS_BUTTON.resource()),
-            highlightedText = R.getString(player, S.SET_TITLE_BUTTON.resource()).bolden(),
+            highlightedText = R.getString(player, S.PERMISSIONS_BUTTON.resource()).bolden(),
         )
 
         enabledAppsButton = addButtonView(

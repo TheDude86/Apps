@@ -1,0 +1,50 @@
+{
+  "mine_tunes_title": "§l§o§nMine Tunes",
+  "home_button": "§6Home",
+  "music_button": "§6Music",
+  "search_button": "§6Search",
+
+  "search_title": "§l§o§nSearch",
+  "search_placeholder": "§7\uD83D\uDD0D Search Songs, Artists, Albums...",
+  "search_songs_button": "§6Songs",
+  "search_artists_button": "§6Artists",
+  "search_playlists_button": "§6Playlists",
+  "search_albums_button": "§6Albums",
+
+  "player_title": "§l§o§nPlayer",
+  "play_button": "▶",
+  "pause_button": "⏸",
+  "add_button": "➕",
+  "options_button": "\uD83D\uDEA6",
+  "next_track_button": "⏭",
+  "last_track_button": "⏮",
+  "loop_button": "\uD83D\uDD01",
+  "shuffle_button": "\uD83D\uDD00",
+  "up_arrow_button": "⬆",
+  "down_arrow_button": "⬇",
+  "expand_button": "↔",
+  "volume_button": "\uD83D\uDD0A",
+
+  "library_title": "§l§o§nMy Library",
+  "library_search_placeholder": "§7\uD83D\uDD0D Search you library...",
+  "library_create_playlist_button": "+ Playlist",
+
+  "artist_title": "§l§o§nArtist",
+  "artist_stats_placeholder": "%s Songs • %s Albums",
+  "artist_plays_placeholder": "§7%s Plays",
+  "artist_see_all_songs_button": "§6Show all songs",
+  "artist_popular_songs_title": "§l§nPopular Songs",
+  "artist_all_songs_title": "§l§nAll Songs",
+  "artist_albums_title": "§l§nAlbums",
+
+  "create_playlist_title": "§l§o§nCreate Playlist",
+  "create_playlist_name_placeholder": "Click to set playlist name...",
+  "create_playlist_select_icon": "Select\nIcon",
+  "create_playlist_create_button": "§6Create",
+  "create_playlist_update_button": "§6Update",
+  "create_playlist_cancel_button": "§cCancel",
+
+  "playlist_title": "§l§o§nPlaylist",
+
+  "playlist_picker_title": "§l§o§nSelect Playlist"
+}

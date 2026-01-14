@@ -74,6 +74,8 @@ open class ButtonView(
 
         if (text != null && highlightedText == null) {
             this.highlightedText = text.bolden()
+        } else if (highlightedText != null) {
+            this.highlightedText = highlightedText
         }
 
         highlighted?.let { this.highlighted = it }

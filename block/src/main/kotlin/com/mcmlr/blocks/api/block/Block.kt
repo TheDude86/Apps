@@ -2,11 +2,14 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.*
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.api.views.Viewable
 import kotlinx.coroutines.flow.Flow
 import org.bukkit.Location
 import org.bukkit.entity.Entity
@@ -112,8 +115,13 @@ abstract class Block(protected val player: Player, val origin: Origin): Context 
 
     override fun setInputState(getInput: Boolean) = context.setInputState(getInput)
 
+    fun updateFocus(view: Viewable) {
+        view().updateFocus(view)
+    }
+
     fun textInputEvent(event: AsyncPlayerChatEvent) {
         view().textInputEvent(event)
+        router().textInputEvent(event)
     }
 
     open fun scrollEvent(event: ScrollModel, isChild: Boolean = false) {

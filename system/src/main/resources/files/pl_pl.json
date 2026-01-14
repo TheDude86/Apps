@@ -1,0 +1,19 @@
+{
+  "at": "o",
+  "created": "Utworzono",
+  "kb": "KB",
+  "file_icon": "\uD83D\uDCC4",
+  "editable_file_icon": "\uD83D\uDCDD",
+  "modified": "Zmodyfikowano",
+  "open": "Otwórz",
+  "plugins": "Pluginy",
+  "files": "Pliki",
+  "file": "Plik",
+  "edit": "Edytuj",
+  "error_no_file_selected": "Błąd: Nie wybrano żadnego pliku!",
+  "error_file": "Błąd: plik",
+  "doesnt_exist": "nie istnieje!",
+  "save": "Zapisz",
+  "value_saved": "Wartość zapisana!",
+  "list": "Lista"
+}

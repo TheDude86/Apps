@@ -1,5 +1,10 @@
 package com.mcmlr.system.products.market
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.mcmlr.blocks.api.Log
+import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.products.data.VaultRepository
 import com.mcmlr.blocks.api.block.Block
@@ -11,12 +16,15 @@ import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFactory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import javax.inject.Inject
 import kotlin.math.max
@@ -57,6 +65,7 @@ class PurchaseViewController(
     private lateinit var zero: ButtonView
     private lateinit var purchase: ButtonView
     private lateinit var message: TextView
+    private lateinit var metaContainer: ListFeedView
 
     override fun createView() {
         super.createView()
@@ -125,6 +134,16 @@ class PurchaseViewController(
                         text = "",
                         size = 7,
                     )
+
+
+                    metaContainer = addListFeedView(
+                        modifier = Modifier()
+                            .size(400, 100)
+                            .alignStartToStartOf(sellerHead)
+                            .alignTopToBottomOf(sellerName)
+                            .margins(top = 30),
+                    )
+
 
                     price = addTextView(
                         modifier = Modifier()
@@ -335,7 +354,27 @@ class PurchaseViewController(
         })
     }
 
-    override fun setOrder(material: Material, order: Order) {
+    private fun setMetadata(meta: ItemMeta?) {
+        val meta = meta ?: return
+        val metaLines = MetadataFactory.getMetadataStrings(player, meta)
+        if (metaLines.isEmpty()) return
+
+        metaContainer.updateView(object : ContextListener<ViewContainer>() {
+            override fun ViewContainer.invoke() {
+                metaLines.forEach {
+                    addTextView(
+                        modifier = Modifier()
+                            .size(WRAP_CONTENT, WRAP_CONTENT)
+                            .alignStartToStartOf(this),
+                        text = "${ChatColor.GRAY}$it",
+                        size = 4,
+                    )
+                }
+            }
+        })
+    }
+
+    override fun setOrder(material: Material, order: Order, meta: ItemMeta?) {
         head.item = ItemStack(material)
         name.text = "${ChatColor.BOLD}${material.name.fromMCItem()}"
 
@@ -345,11 +384,10 @@ class PurchaseViewController(
 
         val playerHead = ItemStack(Material.PLAYER_HEAD)
         val headMeta = playerHead.itemMeta as SkullMeta
-        headMeta.setOwningPlayer(Bukkit.getOfflinePlayer(order.playerId))
+        headMeta.owningPlayer = Bukkit.getOfflinePlayer(order.playerId)
         playerHead.itemMeta = headMeta
 
         sellerHead.item = playerHead
-
 
         updateItemDisplay(head)
         updateItemDisplay(sellerHead)
@@ -357,6 +395,7 @@ class PurchaseViewController(
         updateTextDisplay(sellerName)
         updateTextDisplay(quantity)
         updateTextDisplay(price)
+        setMetadata(meta)
     }
 
     override fun setZeroListener(listener: Listener) = zero.addListener(listener)
@@ -389,7 +428,7 @@ class PurchaseViewController(
 }
 
 interface PurchasePresenter: Presenter {
-    fun setOrder(material: Material, order: Order)
+    fun setOrder(material: Material, order: Order, meta: ItemMeta?)
 
     fun setZeroListener(listener: Listener)
 
@@ -493,7 +532,7 @@ class PurchaseInteractor(
         })
 
         if (order != null) {
-            presenter.setOrder(order.first, order.second)
+            presenter.setOrder(order.first, order.second, Bukkit.getItemFactory().createItemStack("${order.first.key}${order.second.meta}").itemMeta)
         } else {
             routeBack()
         }

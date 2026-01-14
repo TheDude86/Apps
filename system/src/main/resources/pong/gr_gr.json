@@ -1,0 +1,10 @@
+{
+  "pong_title": "§2§l§o§nPong!",
+  "win_goal": "§a§l§oΓΚΟΛ!!!",
+  "lose_goal": "§c§l§oΓΚΟΛ...",
+  "winner": "§a§l§oΝικητής!!!",
+  "loser": "§c§l§oΈχασες...",
+  "default_score": "§l0 - 0",
+  "score_template": "§l%s - %s",
+  "play": "Παίξε"
+}

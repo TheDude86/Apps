@@ -75,7 +75,7 @@ class AddHomeViewController(
                 .alignEndToStartOf(homeNameButton)
                 .alignTopToTopOf(homeNameButton)
                 .alignBottomToBottomOf(homeNameButton)
-                .margins(start = 50),
+                .margins(end = 50),
             background = Color.fromARGB(0x00000000),
             content = object : ContextListener<ViewContainer>() {
                 override fun ViewContainer.invoke() {

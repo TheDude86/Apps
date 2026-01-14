@@ -1,0 +1,10 @@
+{
+  "pong_title": "§2§l§o§nPong!",
+  "win_goal": "§a§l§oDoelpunt!!!",
+  "lose_goal": "§c§l§oDoelpunt...",
+  "winner": "§a§l§oJe bent de Winnaar!!!",
+  "loser": "§c§l§oJe hebt Verloren...",
+  "default_score": "§l0 - 0",
+  "score_template": "§l%s - %s",
+  "play": "Spelen"
+}

@@ -1,0 +1,27 @@
+{
+  "warps_title": "§l§o§nWarpy",
+  "add_new_warp": "Dodaj nowy warp",
+  "remove_warp": "Usuń warp",
+  "cancel": "Anuluj",
+  "empty_warps_list": "§7§oNie ma jeszcze żadnych\nwarpów...",
+  "delete": "\uD83D\uDDD1",
+  "edit": "✎",
+  "cooldown_error_message": "§cMusisz poczekać %s sekund%s, zanim będziesz mógł się teleportować",
+  "delay_message": "Zostaniesz przeteleportowany za %s sekund%s",
+  "plural": "y",
+  "add_warp_title": "§l§o§nDodaj Nowy Warp",
+  "warp_name_placeholder": "§7§oKliknij, aby ustawić nazwę warpa...",
+  "select_icon": "§7Wybierz\nIkonę...",
+  "save_warp": "§6Zapisz warp",
+  "warp_error_message": "§cBłąd: Twórca nie chciał sprawdzić, co poszło nie tak...",
+
+  "warp_config_title": "§l§o§nUstawienia Warpów",
+  "config_delay_title": "Opóźnienie Teleportacji",
+  "config_delay_message": "§7Czas w sekundach, jaki gracz musi odczekać przed teleportacją do wybranego warpa.",
+  "config_default_wait_value": "§60 Sekund",
+  "config_cooldown_title": "Czas Odnowienia Teleportacji",
+  "config_cooldown_message": "§7Czas w sekundach, jaki gracz musi odczekać po teleportacji do warpa, zanim będzie mógł teleportować się ponownie.",
+  "config_input_seconds_placeholder": "%s Sekund%s",
+  "config_delay_error_message": "§cWartości opóźnienia teleportacji muszą być liczbami całkowitymi!",
+  "config_cooldown_error_message": "§cWartości czasu odnowienia teleportacji muszą być liczbami całkowitymi!"
+}

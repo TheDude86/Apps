@@ -12,8 +12,10 @@ import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.api.views.Viewable
 import org.bukkit.Location
 import org.bukkit.entity.Entity
+import org.bukkit.event.player.AsyncPlayerChatEvent
 
 open class Router {
     private val childNodes = mutableListOf<Block>()
@@ -69,6 +71,14 @@ open class Router {
     fun detachChild(child: Block) {
         childNodes.remove(child)
         child.onClose()
+    }
+
+    fun textInputEvent(event: AsyncPlayerChatEvent) {
+        childNodes.forEach { it.textInputEvent(event) }
+    }
+
+    fun updateFocus(view: Viewable) {
+        childNodes.forEach { it.updateFocus(view) }
     }
 
     fun onResume(newOrigin: Location?) {

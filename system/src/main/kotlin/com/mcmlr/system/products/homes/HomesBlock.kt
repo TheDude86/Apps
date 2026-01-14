@@ -18,6 +18,7 @@ import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
+import com.mcmlr.system.products.data.PermissionsRepository
 import kotlinx.coroutines.*
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
@@ -34,9 +35,10 @@ class HomesBlock @Inject constructor(
     addHomeBlock: AddHomeBlock,
     homesRepository: HomesRepository,
     homesConfigRepository: HomesConfigRepository,
+    permissionsRepository: PermissionsRepository,
 ): Block(player, origin) {
     private val view = HomesViewController(player, origin)
-    private val interactor = HomesInteractor(player, view, addHomeBlock, homesRepository, homesConfigRepository)
+    private val interactor = HomesInteractor(player, view, addHomeBlock, homesRepository, homesConfigRepository, permissionsRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -215,6 +217,7 @@ class HomesInteractor(
     private val addHomeBlock: AddHomeBlock,
     private val homesRepository: HomesRepository,
     private val homesConfigRepository: HomesConfigRepository,
+    private val permissionsRepository: PermissionsRepository,
 ): Interactor(presenter), HomeActionListener {
 
     private var deleteMode = false

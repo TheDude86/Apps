@@ -49,4 +49,5 @@ enum class PermissionNode(val node: String) {
     PLAYER("apps.player"),
     ADMIN("apps.admin"),
     PONG("apps.pong"),
+    MUSIC("apps.music"),
 }

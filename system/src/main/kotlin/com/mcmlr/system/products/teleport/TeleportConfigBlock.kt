@@ -56,7 +56,7 @@ class TeleportConfigViewController(
                 .alignTopToTopOf(this)
                 .alignStartToEndOf(backButton!!)
                 .margins(top = 250, start = 400),
-            text = R.getString(player, S.TELEPORT_CONFIG_FILE.resource()),
+            text = R.getString(player, S.TELEPORT_CONFIG_TITLE.resource()),
             size = 16,
         )
 
@@ -76,7 +76,7 @@ class TeleportConfigViewController(
                             .alignTopToTopOf(this)
                             .alignStartToStartOf(this),
                         size = 6,
-                        text = R.getString(player, S.CONFIG_DELAY_TITLE.resource()),
+                        text = R.getString(player, S.TELEPORT_DELAY_TITLE.resource()),
                     )
 
                     val teleportDelayMessage = addTextView(
