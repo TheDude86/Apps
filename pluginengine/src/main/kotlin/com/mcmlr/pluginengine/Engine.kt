@@ -26,6 +26,7 @@ import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.SystemEnvironment
 import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.NotificationManager
+import com.mcmlr.system.products.data.PermissionNode
 import com.mcmlr.system.products.data.PermissionsRepository
 import com.mcmlr.system.products.homes.HomesEnvironment
 import com.mcmlr.system.products.info.TutorialEnvironment
@@ -163,7 +164,11 @@ class Engine(private val model: EngineModel) {
                 } else if (command == "c") {
                     systemEnvironment.shutdown(player)
                 } else if (command == "k") {
-                    Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
+                    if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN.node)) {
+                        Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
+                    } else {
+                        player.sendMessage("${ChatColor.RED}You don't have permission to use this command!")
+                    }
                 }
             }
             .disposeOn(disposer = disposer)

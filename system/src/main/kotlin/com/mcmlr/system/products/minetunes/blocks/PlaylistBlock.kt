@@ -44,6 +44,7 @@ import com.mcmlr.system.products.minetunes.blocks.PlaylistPickerBlock.Companion.
 import com.mcmlr.system.products.minetunes.player.MusicPlayerAction
 import com.mcmlr.system.products.minetunes.player.Playlist
 import com.mcmlr.system.products.minetunes.player.Track
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
@@ -62,6 +63,8 @@ class PlaylistBlock @Inject constructor(
     confirmationBlock: ConfirmationBlock,
     musicPlayerBlock: MusicPlayerBlock,
     orderPlaylistBlock: OrderPlaylistBlock,
+    artistBlock: Lazy<ArtistBlock>,
+    playlistBlock: Lazy<PlaylistBlock>,
     musicPlayerRepository: MusicPlayerRepository,
     libraryRepository: LibraryRepository,
 ): Block(player, origin) {
@@ -75,6 +78,8 @@ class PlaylistBlock @Inject constructor(
         confirmationBlock,
         musicPlayerBlock,
         orderPlaylistBlock,
+        artistBlock,
+        playlistBlock,
         musicPlayerRepository,
         libraryRepository
     )
@@ -94,10 +99,10 @@ class PlaylistViewController(
 ): NavigationViewController(player, origin), PlaylistPresenter {
 
     var showOptions = true
+    var optionsButton: ButtonView? = null
 
     private lateinit var title: TextView
     private lateinit var addButton: ButtonView
-    private lateinit var optionsButton: ButtonView
     private lateinit var playButton: ButtonView
     private lateinit var musicPlayerContainer: ViewContainer
     
@@ -121,7 +126,7 @@ class PlaylistViewController(
     }
 
     override fun setOptionsListener(listener: Listener) {
-        optionsButton.addListener(listener)
+        optionsButton?.addListener(listener)
     }
 
     override fun setBackListener(listener: Listener) {
@@ -292,6 +297,8 @@ class PlaylistInteractor(
     private val confirmationBlock: ConfirmationBlock,
     private val musicPlayerBlock: MusicPlayerBlock,
     private val orderPlaylistBlock: OrderPlaylistBlock,
+    private val artistBlock: Lazy<ArtistBlock>,
+    private val playlistBlock: Lazy<PlaylistBlock>,
     private val musicPlayerRepository: MusicPlayerRepository,
     private val libraryRepository: LibraryRepository,
 ): Interactor(presenter) {
@@ -352,11 +359,11 @@ class PlaylistInteractor(
             }
 
             optionsList.add(OptionRowModel("Add to playlist"))
-//            optionsList.add(OptionRowModel("Go to artist"))
+            optionsList.add(OptionRowModel("Go to artist"))
 
-//            if (track.album != "EP") {
-//                optionsList.add(OptionRowModel("Go to album"))
-//            }
+            if (track.album != "EP") {
+                optionsList.add(OptionRowModel("Go to album"))
+            }
 
             if (playlist.uuid != null) {
                 optionsList.add(OptionRowModel("Remove from playlist"))
@@ -401,8 +408,10 @@ class PlaylistInteractor(
                                 .collectFirst(DudeDispatcher()) {
                                     CoroutineScope(DudeDispatcher()).launch {
                                         val artistSongs = it.filter { it.artist == track.artist }
-//                                        artistBlock.setArtist(track.artist, artistSongs)
-//                                        routeTo(artistBlock)
+                                        playlistUpdated = false
+                                        val block = artistBlock.get()
+                                        block.setArtist(track.artist, artistSongs)
+                                        routeTo(block)
                                     }
                                 }
                         }
@@ -412,8 +421,10 @@ class PlaylistInteractor(
                                 .collectFirst(DudeDispatcher()) {
                                     CoroutineScope(DudeDispatcher()).launch {
                                         val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
-//                                        playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
-//                                        routeTo(playlistBlock)
+                                        playlistUpdated = false
+                                        val block = playlistBlock.get()
+                                        block.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
+                                        routeTo(block)
                                     }
                                 }
                         }
@@ -503,6 +514,7 @@ class PlaylistInteractor(
 
     private fun updatePlaylist() {
         val playlist = playlist ?: return
+
         if (!playlistUpdated) {
             musicPlayer.updatePlaylist(playlist)
             libraryRepository.updateLastPlayed(playlist)

@@ -1,14 +1,8 @@
 package com.mcmlr.system.products.minetunes.player
 
-import com.mcmlr.blocks.api.Log
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectFirst
-import com.mcmlr.blocks.core.collectLatest
-import com.mcmlr.blocks.core.collectOn
-import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.blocks.core.emitBackground
-import com.mcmlr.system.products.minetunes.MusicCache
 import com.mcmlr.system.products.minetunes.MusicRepository
 import com.mcmlr.system.products.minetunes.nbs.data.Song
 import com.mcmlr.system.products.minetunes.util.NoteUtils
@@ -24,6 +18,7 @@ class MusicPlayer(
     private val musicRepository: MusicRepository,
 ) {
     companion object {
+        const val SONG_PLAYED_TICK: Short = 60
         const val SONG_COMPLETED = "complete"
         const val SONG_PAUSED = "pause"
         const val PLAYER_LEFT = "left"
@@ -198,6 +193,10 @@ class MusicPlayer(
                 }
 
                 songProgressStream.emit(tick)
+
+                if (tick == SONG_PLAYED_TICK) {
+
+                }
 
                 if (tick >= song.length) cancel(SONG_COMPLETED)
 
