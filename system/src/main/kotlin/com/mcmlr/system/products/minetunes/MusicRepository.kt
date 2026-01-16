@@ -32,7 +32,7 @@ class MusicRepository @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 if (songMap.isNotEmpty()) {
-                    val url = "https://searchartist-l5cijtvgrq-uc.a.run.app"
+                    val url = "https://trackplays-l5cijtvgrq-uc.a.run.app"
                     val data = Gson().toJson(songMap)
 
                     val request = Request.Builder().url("$url/?data=$data").build()
