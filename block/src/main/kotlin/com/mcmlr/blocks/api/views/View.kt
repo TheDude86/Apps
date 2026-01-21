@@ -182,10 +182,6 @@ abstract class View(
 
     override fun updateTextDisplay(view: TextView) = parent.updateTextDisplay(view)
 
-    override fun addEntityDisplay(view: EntityView): EntityDudeDisplay? = parent.addEntityDisplay(view)
-
-    override fun updateEntityDisplay(view: EntityView): EntityDudeDisplay? = parent.updateEntityDisplay(view)
-
     override fun addItemDisplay(view: ItemView): ItemDudeDisplay? = parent.addItemDisplay(view)
 
     override fun addItemDisplay(view: ItemButtonView): ItemDudeDisplay? = parent.addItemDisplay(view)

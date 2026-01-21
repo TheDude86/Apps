@@ -28,7 +28,7 @@ import kotlin.math.min
 open class ViewContainer(
     modifier: Modifier,
     val clickable: Boolean = false,
-    val background: Color = Color.fromARGB(0x40000000),
+    val background: Color = Color.fromARGB(0x40000001),
     val backgroundHighlight: Color = Color.fromARGB(64, 64, 255, 255),
     override var listeners: MutableList<Listener> = mutableListOf(),
     override var highlighted: Boolean = false,
@@ -37,8 +37,8 @@ open class ViewContainer(
 ): View(modifier, teleportDuration = teleportDuration, height = height), ClickableView {
 
     protected val children = mutableListOf<Viewable>()
-    protected val buttonMap = HashMap<UUID, ButtonView>()
-    protected val scrollMap = HashMap<UUID, FeedView>()
+    protected val buttonMap = HashMap<Int, ButtonView>()
+    protected val scrollMap = HashMap<Int, FeedView>()
 
     override fun collides(position: Coordinates): Boolean = false
 
@@ -138,7 +138,7 @@ open class ViewContainer(
 
     fun addPagerView(
         modifier: Modifier,
-        background: Color = Color.fromARGB(0x40000000),
+        background: Color = Color.fromARGB(0x40000001),
         height: Int = 0,
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): PagerView {
@@ -154,7 +154,7 @@ open class ViewContainer(
 
     fun addListView(
         modifier: Modifier,
-        background: Color = Color.fromARGB(0x40000000),
+        background: Color = Color.fromARGB(0x40000001),
         height: Int = 0,
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): ListView {
@@ -170,7 +170,7 @@ open class ViewContainer(
 
     fun addListFeedView(
         modifier: Modifier,
-        background: Color = Color.fromARGB(0x40000000),
+        background: Color = Color.fromARGB(0x40000001),
         height: Int = 0,
         backgroundHighlight: Color = Color.fromARGB(64, 255, 255, 255),
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
@@ -187,7 +187,7 @@ open class ViewContainer(
 
     open fun addFeedView(
         modifier: Modifier,
-        background: Color = Color.fromARGB(0x40000000),
+        background: Color = Color.fromARGB(0x40000001),
         height: Int = 0,
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): FeedView {
@@ -204,7 +204,7 @@ open class ViewContainer(
     open fun addViewContainer(
         modifier: Modifier,
         clickable: Boolean = false,
-        background: Color = Color.fromARGB(0x40000000),
+        background: Color = Color.fromARGB(0x40000001),
         backgroundHighlight: Color = Color.fromARGB(64, 255, 255, 255),
         teleportDuration: Int = 3,
         height: Int = 0,
@@ -217,22 +217,6 @@ open class ViewContainer(
 
         content.invokeContext(view)
 
-        return view
-    }
-
-    open fun addEntityView(
-        modifier: Modifier,
-        entity: EntityType,
-        height: Int = 0,
-    ): EntityView {
-        val view = EntityView(
-            modifier = modifier,
-            entity = entity,
-            height = height,
-        )
-
-        view.attach(this)
-        children.add(view)
         return view
     }
 

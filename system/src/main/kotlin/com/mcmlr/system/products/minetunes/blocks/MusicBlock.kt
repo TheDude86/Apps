@@ -18,6 +18,7 @@ import com.mcmlr.system.products.minetunes.player.Track
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.bukkit.ChatColor
+import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -132,6 +133,7 @@ class MusicViewController(
                             addViewContainer(
                                 modifier = Modifier()
                                     .size(MATCH_PARENT, 75),
+
                                 clickable = true,
                                 listener = object : Listener {
                                     override fun invoke() {

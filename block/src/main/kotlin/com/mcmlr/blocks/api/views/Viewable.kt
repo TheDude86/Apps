@@ -53,14 +53,6 @@ interface Viewable {
         view: TextView
     )
 
-    fun addEntityDisplay(
-        view: EntityView
-    ): EntityDudeDisplay?
-
-    fun updateEntityDisplay(
-        view: EntityView
-    ): EntityDudeDisplay?
-
     fun addItemDisplay(
         view: ItemView
     ): ItemDudeDisplay?

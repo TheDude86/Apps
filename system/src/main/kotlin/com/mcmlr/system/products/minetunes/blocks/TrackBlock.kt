@@ -164,7 +164,6 @@ class TrackViewController(
     override fun setProgress(time: Short, length: Short, speed: Float) {
         val songLength = (length / speed).toInt().toShort()
 
-
         val progress = (time / speed) / songLength.toFloat()
         val position = progress * 1800
 

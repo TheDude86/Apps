@@ -6,6 +6,7 @@ import org.bukkit.Color
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
+import org.joml.Quaternionf
 import org.joml.Vector3f
 
 class ItemButtonView(
@@ -17,7 +18,7 @@ class ItemButtonView(
     visible: Boolean = true,
     teleportDuration: Int = 3,
     height: Int = 0,
-): ButtonView(
+) : ButtonView(
     modifier,
     parent,
     "",
@@ -48,7 +49,13 @@ class ItemButtonView(
         visible: Boolean? = null,
         height: Int? = null,
     ) {
-        update(modifier = modifier, teleportDuration = teleportDuration, visible = visible, height = height, reconfigure = false)
+        update(
+            modifier = modifier,
+            teleportDuration = teleportDuration,
+            visible = visible,
+            height = height,
+            reconfigure = false
+        )
         item?.let { this.item = it }
         parent.updateItemDisplay(this)
     }
@@ -62,8 +69,14 @@ class ItemButtonView(
     override fun bottom(): Int = getPosition().y - getDimensions().height
 
     fun setSize(width: Float, height: Float) {
-        val display = dudeDisplay ?: return
-        dudeDisplay?.transformation = Transformation(Vector3f(0f, 0f, 0f), AxisAngle4f(0f, 0f, 0f, 1f), Vector3f(ITEM_VIEW_MULTIPLIER * width, ITEM_VIEW_MULTIPLIER * height, ITEM_VIEW_MULTIPLIER * width), AxisAngle4f(0f, 0f, 0f, 1f)
+        if (dudeDisplay == null) return
+        dudeDisplay?.setTransformation(
+            com.mojang.math.Transformation(
+                Vector3f(0f, 0f, 0f),
+                Quaternionf(0f, 0f, 0f, 1f),
+                Vector3f(ITEM_VIEW_MULTIPLIER * width, ITEM_VIEW_MULTIPLIER * height, ITEM_VIEW_MULTIPLIER * width),
+                Quaternionf(0f, 0f, 0f, 1f)
+            )
         )
     }
 }

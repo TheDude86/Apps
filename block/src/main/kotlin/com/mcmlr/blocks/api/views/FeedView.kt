@@ -100,15 +100,17 @@ open class FeedView(
         val display = dudeDisplay ?: return
         isFocused = highlighted
         if (highlighted) {
-            (display as TextDudeDisplay).display.backgroundColor = backgroundHighlight
+            display.setBackgroundColor(backgroundHighlight)
         } else {
-            (display as TextDudeDisplay).display.backgroundColor = background
+            display.setBackgroundColor(background)
         }
 
         if (highlighted != previousHighlightedState) {
             setScrolling(highlighted)
             previousHighlightedState = highlighted
         }
+
+        display.renderUpdate()
     }
 }
 

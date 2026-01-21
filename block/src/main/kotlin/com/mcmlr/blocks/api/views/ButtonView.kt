@@ -12,7 +12,7 @@ open class ButtonView(
     size: Int = 10,
     alignment: Alignment = Alignment.CENTER,
     maxLength: Int = 1,
-    background: Color = Color.fromARGB(0x40000000),
+    background: Color = Color.fromARGB(0x40000001),
     lineWidth: Int = 200,
     var highlightedText: String?,
     override var highlighted: Boolean = false,

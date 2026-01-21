@@ -1,24 +1,36 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
-import com.mcmlr.blocks.api.isSpigotServer
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
-import org.bukkit.ChatColor
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.world.entity.Display
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.attribute.Attribute
-import org.bukkit.entity.*
+import org.bukkit.craftbukkit.v1_21_R5.CraftWorld
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_21_R5.inventory.CraftItemStack
+import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
 import org.joml.AxisAngle4f
+import org.joml.Quaternionf
 import org.joml.Vector3f
-import java.util.*
+import kotlin.experimental.and
+import kotlin.experimental.inv
+import kotlin.experimental.or
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -34,8 +46,8 @@ class RootView(
 
     private val debug = false
     private val corners: MutableList<BlockDisplay> = mutableListOf()
-    private val buttonMap = HashMap<UUID, ClickableView>()
-    private val scrollMap = HashMap<UUID, FeedView>()
+    private val buttonMap = HashMap<Int, ClickableView>()
+    private val scrollMap = HashMap<Int, FeedView>()
     private val measurements: ServerMeasurementConstants = getMeasurements()
 
     override fun render() { }
@@ -57,6 +69,8 @@ class RootView(
     override fun bottom(): Int = -1080
 
     override fun clear() {
+        buttonMap.clear()
+        scrollMap.clear()
         corners.forEach { it.remove() }
     }
 
@@ -103,8 +117,6 @@ class RootView(
     }
 
     private fun updateV2(position: Coordinates) {
-//        log(Log.ERROR, "X=${position.x} Y=${position.y}")
-
         val x = buttonMap.values.mapNotNull {
             val display = it.dudeDisplay ?: return@mapNotNull null
             val view = (it as? Viewable) ?: return@mapNotNull null
@@ -138,11 +150,24 @@ class RootView(
     }
 
     private fun update(displays: List<Entity>, cursor: Location) {
-        val button = displays
-            .filter {
-                buttonMap.containsKey(it.uniqueId)
+        var button: DudeDisplay? = null
+        var d = 1.0
+        buttonMap.values.forEach {
+            val display = it.dudeDisplay ?: return@forEach
+            val pos = display.pos
+            val dx = abs(pos.x - cursor.x)
+            val dy = abs(pos.y - cursor.y)
+            val dz = abs(pos.z - cursor.z)
+
+            if (dx <= 0.09 && dy <= 0.04 && dz <= 0.09) {
+                val horizontal = sqrt(dx.pow(2) + dz.pow(2))
+                val distance = sqrt(horizontal.pow(2) + dy.pow(2))
+                if (d > distance) {
+                    button = it.dudeDisplay
+                    d = distance
+                }
             }
-            .minByOrNull { cursor.distance(it.location) }
+        }
 
         buttonMap.values.forEach {
             val display = it.dudeDisplay ?: return@forEach
@@ -155,11 +180,25 @@ class RootView(
             }
         }
 
-        val feed = displays
-            .filter {
-                scrollMap.containsKey(it.uniqueId)
+
+        var feed: DudeDisplay? = null
+        d = 1.0
+        scrollMap.values.forEach {
+            val display = it.dudeDisplay ?: return@forEach
+            val pos = display.pos
+            val dx = abs(pos.x - cursor.x)
+            val dy = abs(pos.y - cursor.y)
+            val dz = abs(pos.z - cursor.z)
+
+            if (dx <= 0.09 && dy <= 0.04 && dz <= 0.09) {
+                val horizontal = sqrt(dx.pow(2) + dz.pow(2))
+                val distance = sqrt(horizontal.pow(2) + dy.pow(2))
+                if (d > distance) {
+                    feed = it.dudeDisplay
+                    d = distance
+                }
             }
-            .minByOrNull { cursor.distance(it.location) }
+        }
 
         scrollMap.values.forEach {
             it.highlighted(it.dudeDisplay?.uniqueId == feed?.uniqueId)
@@ -176,16 +215,20 @@ class RootView(
             itemButtonView.setSize(dimensions.width.toFloat(), dimensions.height.toFloat())
             itemButtonView.highlighted = false
         }
+
+        itemButtonView.dudeDisplay?.renderUpdate()
     }
 
     private fun updateContainerButton(viewContainer: ViewContainer, highlighted: Boolean) {
         if (highlighted) {
-            (viewContainer.dudeDisplay as? TextDudeDisplay)?.background(viewContainer.backgroundHighlight)
+            viewContainer.dudeDisplay?.setBackgroundColor(viewContainer.backgroundHighlight)
             viewContainer.highlighted = true
         } else {
-            (viewContainer.dudeDisplay as? TextDudeDisplay)?.background(viewContainer.background)
+            viewContainer.dudeDisplay?.setBackgroundColor(viewContainer.background)
             viewContainer.highlighted = false
         }
+
+        viewContainer.dudeDisplay?.renderUpdate()
     }
 
     private fun updateButton(buttonView: ButtonView, highlighted: Boolean) {
@@ -196,6 +239,8 @@ class RootView(
             (buttonView.dudeDisplay as? TextDudeDisplay)?.text = buttonView.text
             buttonView.highlighted = false
         }
+
+        buttonView.dudeDisplay?.renderUpdate()
     }
 
     private fun click() {
@@ -210,32 +255,37 @@ class RootView(
         val dimensions = view.getDimensions()
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = player.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
-        if (isSpigotServer()) display.teleport(location)
+        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, (player.world as CraftWorld).handle)
+        display.setPos(location.x, location.y, location.z)
+        display.yRot = location.yaw
+        display.xRot = location.pitch
 
-        display.addScoreboardTag("mcmlr.apps")
-        display.text = "....."
+        display.addTag("mcmlr.apps")
+        display.text = Component.literal(".....")
         display.textOpacity = 4.toByte()
-        display.backgroundColor = view.background
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        display.entityData.set<Int>(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, view.background.asARGB())
+
+        if (checkVersion(Versions.V1_20_2)) display.transformationInterpolationDuration = view.teleportDuration
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(
                 measurements.containerXOffset * dimensions.width,
                 measurements.containerYOffset * dimensions.height,
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.containerWidth * dimensions.width,
                 measurements.containerHeight * dimensions.height,
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
-        if (view is FeedView) scrollMap[display.uniqueId] = view
-        if (view.clickable) buttonMap[display.uniqueId] = view
-        return TextDudeDisplay(display)
+        if (view is FeedView) scrollMap[display.id] = view
+        if (view.clickable) buttonMap[display.id] = view
+
+        render(display)
+        return TextDudeDisplay(display, player)
     }
 
     override fun addTextDisplay(view: TextView): TextDudeDisplay? {
@@ -246,28 +296,44 @@ class RootView(
 
         val textSize = 0.04f * (view.size / 10.0f)
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = player.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
-        if (isSpigotServer()) display.teleport(location)
+        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, (player.world as CraftWorld).handle)
+        display.setPos(location.x, location.y, location.z)
+        display.yRot = location.yaw
+        display.xRot = location.pitch
 
-        display.addScoreboardTag("mcmlr.apps")
-        display.text = view.text
-        display.lineWidth = view.lineWidth
-        display.backgroundColor = view.background
-        display.alignment = view.alignment.textAlignment
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        display.addTag("mcmlr.apps")
+        display.text = Component.literal(view.text)
+        display.entityData.set<Int>(Display.TextDisplay.DATA_LINE_WIDTH_ID, view.lineWidth)
+        display.entityData.set<Int>(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, view.background.asARGB())
+
+        var flags = display.flags.toInt()
+        flags = flags and 0b11111100
+
+        val alignmentBits = when (view.alignment) {
+            Alignment.LEFT -> flags or 0b00001000
+            Alignment.CENTER -> flags and 0b11100111
+            Alignment.RIGHT -> flags or 0b00010000
+        }
+
+        display.flags = alignmentBits.toByte()
+
+        if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
+
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(
                 0f,
                 measurements.textYOffset * (dimensions.height / (2 + (dimensions.height * 0.0005f))),
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(textSize, textSize, textSize),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
-        if (view is ButtonView) buttonMap[display.uniqueId] = view
-        return TextDudeDisplay(display)
+        if (view is ButtonView) buttonMap[display.id] = view
+
+        render(display)
+        return TextDudeDisplay(display, player)
     }
 
     override fun updateContainerDisplay(view: ViewContainer) {
@@ -277,27 +343,26 @@ class RootView(
         val pos = view.getPosition().offset(view.parent.getAbsolutePosition())
         val dimensions = view.getDimensions()
 
-        val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = (view.dudeDisplay as? TextDudeDisplay)?.display ?: return
-        display.teleport(location)
-
-        display.backgroundColor = view.background
-        display.transformation = Transformation(
+        val display = (view.dudeDisplay as? TextDudeDisplay) ?: return
+        display.teleport(player, getDisplayLocation(pos.x, pos.y, view.level()))
+        display.setBackgroundColor(view.background)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(
                 measurements.containerXOffset * dimensions.width,
                 measurements.containerYOffset * dimensions.height,
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.containerWidth * dimensions.width,
                 measurements.containerHeight * dimensions.height,
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
         if (view.clickable) buttonMap[display.uniqueId] = view
+        view.dudeDisplay?.renderUpdate()
     }
 
     override fun updateTextDisplay(view: TextView) {
@@ -316,52 +381,26 @@ class RootView(
 
         val textSize = 0.04f * (view.size / 10.0f)
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = (view.dudeDisplay as? TextDudeDisplay)?.display ?: return
-        display.teleport(location)
+        val display = (view.dudeDisplay as? TextDudeDisplay) ?: return
+        display.teleport(player, location)
 
         display.text = view.text
-        display.lineWidth = view.lineWidth
-        display.backgroundColor = view.background
-        display.alignment = view.alignment.textAlignment
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        display.setLineWidth(view.lineWidth)
+        display.setBackgroundColor(view.background)
+        display.setAlignment(view.alignment)
+        display.setTeleportDuration(view.teleportDuration)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(
                 0f,
                 measurements.textYOffset * (dimensions.height / 2),
                 0f
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f),
-            Vector3f(textSize, textSize, textSize), AxisAngle4f(0f, 0f, 0f, 1f)
-        )
-    }
+            Quaternionf(0f, 0f, 0f, 1f),
+            Vector3f(textSize, textSize, textSize),
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
-    override fun addEntityDisplay(view: EntityView): EntityDudeDisplay? {
-        if (!view.visible) return null
-        showCorners(view, Material.OBSIDIAN)
-        val pos = view.getPosition().offset(view.parent.getAbsolutePosition())
-        val dimensions = view.getDimensions()
-
-        val location = getDisplayLocation(pos.x, pos.y, view.level())
-        location.yaw -= 180
-        val display = player.world.spawnEntity(location, view.entity) as LivingEntity
-        display.setAI(false)
-        display.setGravity(false)
-        display.getAttribute(Attribute.SCALE)?.baseValue = 0.001
-        display.addScoreboardTag("mcmlr.apps")
-        Attribute.SCALE
-
-        if (isSpigotServer()) display.teleport(location)
-
-        return EntityDudeDisplay(display)
-    }
-
-    override fun updateEntityDisplay(view: EntityView): EntityDudeDisplay? {
-        if (!view.visible) return null
-        showCorners(view, Material.OBSIDIAN)
-        val pos = view.getPosition().offset(view.parent.getAbsolutePosition())
-        val dimensions = view.getDimensions()
-
-        return null
+        view.dudeDisplay?.renderUpdate()
     }
 
     override fun addItemDisplay(view: ItemView): ItemDudeDisplay? {
@@ -372,24 +411,27 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = player.world.spawnEntity(location, EntityType.ITEM_DISPLAY) as ItemDisplay
-        display.addScoreboardTag("mcmlr.apps")
-        if (isSpigotServer()) display.teleport(location)
+        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, (player.world as CraftWorld).handle)
+        display.addTag("mcmlr.apps")
+        display.setPos(location.x, location.y, location.z)
+        display.yRot = location.yaw
+        display.xRot = location.pitch
 
-        display.itemStack = view.item
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        display.itemStack = CraftItemStack.asNMSCopy(view.item)
+        if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(0f, getItemYOffset(view.item.type, dimensions.height), 0f),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.itemDimension * dimensions.width,
                 measurements.itemDimension * dimensions.height,
                 measurements.itemDimension * dimensions.width
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
-        return ItemDudeDisplay(display)
+        render(display)
+        return ItemDudeDisplay(display, player)
     }
 
     override fun addItemDisplay(view: ItemButtonView): ItemDudeDisplay? {
@@ -400,25 +442,29 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = player.world.spawnEntity(location, EntityType.ITEM_DISPLAY) as ItemDisplay
-        display.addScoreboardTag("mcmlr.apps")
-        if (isSpigotServer()) display.teleport(location)
+        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, (player.world as CraftWorld).handle)
+        display.addTag("mcmlr.apps")
+        display.setPos(location.x, location.y, location.z)
+        display.yRot = location.yaw
+        display.xRot = location.pitch
 
-        view.item?.let { display.itemStack = it }
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        view.item?.let { display.itemStack = CraftItemStack.asNMSCopy(it) }
+        if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(0f, getItemYOffset(view.item?.type, dimensions.height), 0f),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.itemDimension * dimensions.width,
                 measurements.itemDimension * dimensions.height,
                 measurements.itemDimension * dimensions.width
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
 
-        buttonMap[display.uniqueId] = view
-        return ItemDudeDisplay(display)
+        buttonMap[display.id] = view
+
+        render(display)
+        return ItemDudeDisplay(display, player)
     }
 
     override fun updateItemDisplay(view: ItemView) {
@@ -437,21 +483,23 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = (view.dudeDisplay as? ItemDudeDisplay)?.display ?: return
-        display.teleport(location)
+        val display = (view.dudeDisplay as? ItemDudeDisplay) ?: return
+        display.teleport(player, location)
 
-        display.itemStack = ItemStack(view.item)
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        display.itemStack = CraftItemStack.asNMSCopy(ItemStack(view.item))
+        display.setTeleportDuration(view.teleportDuration)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(0f, getItemYOffset(view.item.type, dimensions.height), 0f),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.itemDimension * dimensions.width,
                 measurements.itemDimension * dimensions.height,
                 measurements.itemDimension * dimensions.width
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
+
+        display.renderUpdate()
     }
 
     override fun updateItemDisplay(view: ItemButtonView) {
@@ -470,21 +518,23 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = (view.dudeDisplay as? ItemDudeDisplay)?.display ?: return
-        display.teleport(location)
+        val display = (view.dudeDisplay as? ItemDudeDisplay) ?: return
+        display.teleport(player, location)
 
-        view.item?.let { display.itemStack = ItemStack(it) }
-        if (checkVersion(Versions.V1_20_2)) display.teleportDuration = view.teleportDuration
-        display.transformation = Transformation(
+        view.item?.let { display.itemStack = CraftItemStack.asNMSCopy(ItemStack(it)) }
+        if (checkVersion(Versions.V1_20_2)) display.setTeleportDuration(view.teleportDuration)
+        display.setTransformation(com.mojang.math.Transformation(
             Vector3f(0f, getItemYOffset(view.item?.type, dimensions.height), 0f),
-            AxisAngle4f(0f, 0f, 0f, 1f),
+            Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
                 measurements.itemDimension * dimensions.width,
                 measurements.itemDimension * dimensions.height,
                 measurements.itemDimension * dimensions.width,
             ),
-            AxisAngle4f(0f, 0f, 0f, 1f)
-        )
+            Quaternionf(0f, 0f, 0f, 1f)
+        ))
+
+        display.renderUpdate()
     }
 
     private fun getItemYOffset(item: Material?, height: Int) = when(item) {
@@ -529,6 +579,32 @@ class RootView(
         }
 
         view.addCorners(cornerDisplays)
+    }
+
+    private fun render(display: Display) {
+        val handle = (player as CraftPlayer).handle
+        val playerConnection = handle.connection
+
+        playerConnection.send(ClientboundAddEntityPacket(
+            display.id,
+            display.getUUID(),
+            display.x,
+            display.y,
+            display.z,
+            display.xRot,
+            display.yRot,
+            display.type,
+            0,
+            display.deltaMovement,
+            display.yHeadRot.toDouble())
+        )
+
+        playerConnection.send(
+            ClientboundSetEntityDataPacket(
+                display.id,
+                display.getEntityData().nonDefaultValues
+            )
+        )
     }
 
     private fun xVector(direction: Vector): Vector = Vector(direction.z, 0.0, -direction.x)

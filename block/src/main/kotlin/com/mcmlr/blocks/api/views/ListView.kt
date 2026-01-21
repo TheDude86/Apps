@@ -47,15 +47,6 @@ class ListView(
         )
     }
 
-    override fun addEntityView(
-        modifier: Modifier,
-        entity: EntityType,
-        height: Int,
-    ): EntityView {
-        setListAlignment(modifier)
-        return super.addEntityView(modifier, entity, height)
-    }
-
     override fun addItemView(
         modifier: Modifier,
         item: Material,

@@ -96,18 +96,18 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
                 val direction = it.data.direction.normalize()
                 val cursor = it.data.add(direction.clone().multiply(origin.distance + ((modifier / 60f) * 0.1)))
-                val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
-                    entity is TextDisplay ||
-                            entity is ItemDisplay ||
-                            entity is BlockDisplay
-                }
+//                val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
+//                    entity is TextDisplay ||
+//                            entity is ItemDisplay ||
+//                            entity is BlockDisplay
+//                }
 
                 val app = foregroundApp
                 if (app != null) {
                     app.cursorEvent(it)
-                    app.cursorEvent(displays, cursor, it)
+                    app.cursorEvent(listOf(), cursor, it)
                 } else {
-                    head.cursorEvent(displays, cursor, it)
+                    head.cursorEvent(listOf(), cursor, it)
                 }
 
                 if (it.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, it.data, CursorEvent.CLEAR))
