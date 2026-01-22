@@ -94,7 +94,7 @@ abstract class DudeDisplay(
     }
 
     fun background(color: Color) {
-        textDisplay?.backgroundColor = color
+        textDisplay?.backgroundColor = color 
     }
 
     fun setTeleportDuration(duration: Int) {
