@@ -16,6 +16,7 @@ import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
 import org.bukkit.entity.Player
+import kotlin.math.abs
 
 
 class BlockDudeDisplay(
@@ -121,12 +122,12 @@ abstract class DudeDisplay(
         val dx = location.x - p.x
         val dy = location.y - p.y
         val dz = location.z - p.z
-        val nx = if (dx >= DELTA_MINIMUM) location.x else p.x
-        val ny = if (dy >= DELTA_MINIMUM) location.y else p.y
-        val nz = if (dz >= DELTA_MINIMUM) location.z else p.z
-        val px = if (dx >= DELTA_MINIMUM) dx else 0.0
-        val py = if (dy >= DELTA_MINIMUM) dy else 0.0
-        val pz = if (dz >= DELTA_MINIMUM) dz else 0.0
+        val nx = if (abs(dx) >= DELTA_MINIMUM) location.x else p.x
+        val ny = if (abs(dy) >= DELTA_MINIMUM) location.y else p.y
+        val nz = if (abs(dz) >= DELTA_MINIMUM) location.z else p.z
+        val px = if (abs(dx) >= DELTA_MINIMUM) dx else 0.0
+        val py = if (abs(dy) >= DELTA_MINIMUM) dy else 0.0
+        val pz = if (abs(dz) >= DELTA_MINIMUM) dz else 0.0
 
         textDisplay?.setPos(nx, ny, nz)
         itemDisplay?.setPos(nx, ny, nz)

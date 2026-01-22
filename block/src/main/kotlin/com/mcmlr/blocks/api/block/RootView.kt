@@ -344,6 +344,7 @@ class RootView(
         val dimensions = view.getDimensions()
 
         val display = (view.dudeDisplay as? TextDudeDisplay) ?: return
+
         display.teleport(player, getDisplayLocation(pos.x, pos.y, view.level()))
         display.setBackgroundColor(view.background)
         display.setTransformation(com.mojang.math.Transformation(
