@@ -12,17 +12,11 @@ import com.mcmlr.system.products.applications.ApplicationsBlock
 import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.data.PermissionNode
 import com.mcmlr.system.products.data.PermissionsRepository
-import com.mcmlr.system.products.homes.HomesBlock
 import com.mcmlr.system.products.info.SetupBlock
-import com.mcmlr.system.products.info.TutorialBlock
 import com.mcmlr.system.products.landing.AppsListBlock
 import com.mcmlr.system.products.landing.FeedBlock
 import com.mcmlr.system.products.landing.SpawnShortcutBlock
-import com.mcmlr.system.products.market.MarketBlock
-import com.mcmlr.system.products.pong.PongBlock
 import com.mcmlr.system.products.spawn.SpawnRepository
-import com.mcmlr.system.products.teleport.TeleportBlock
-import com.mcmlr.system.products.warps.WarpsBlock
 import org.bukkit.ChatColor
 import org.bukkit.Color
 import org.bukkit.Location
@@ -32,16 +26,10 @@ import javax.inject.Inject
 class LandingBlock @Inject constructor(
     player: Player,
     origin: Origin,
-    homesBlock: HomesBlock,
-    warpsBlock: WarpsBlock,
-    teleportBlock: TeleportBlock,
-    marketBlock: MarketBlock,
-    pongBlock: PongBlock,
     appsListBlock: AppsListBlock,
     applicationsBlock: ApplicationsBlock,
     spawnShortcutBlock: SpawnShortcutBlock,
     feedBlock: FeedBlock,
-    tutorialBlock: TutorialBlock,
     setupBlock: SetupBlock,
     permissionsRepository: PermissionsRepository,
     spawnRepository: SpawnRepository,
@@ -52,16 +40,10 @@ class LandingBlock @Inject constructor(
     private val interactor: LandingInteractor = LandingInteractor(
         player,
         view,
-        homesBlock,
-        warpsBlock,
-        teleportBlock,
-        marketBlock,
-        pongBlock,
         appsListBlock,
         spawnShortcutBlock,
         applicationsBlock,
         feedBlock,
-        tutorialBlock,
         setupBlock,
         permissionsRepository,
         spawnRepository,
@@ -174,16 +156,10 @@ interface LandingPresenter: Presenter {
 class LandingInteractor(
     private val player: Player,
     private val presenter: LandingPresenter,
-    private val homesBlock: HomesBlock,
-    private val warpsBlock: WarpsBlock,
-    private val teleportBlock: TeleportBlock,
-    private val marketBlock: MarketBlock,
-    private val pongBlock: PongBlock,
     private val appsListBlock: AppsListBlock,
     private val spawnShortcutBlock: SpawnShortcutBlock,
     private val applicationsBlock: ApplicationsBlock,
     private val feedBlock: FeedBlock,
-    private val tutorialBlock: TutorialBlock,
     private val setupBlock: SetupBlock,
     private val permissionsRepository: PermissionsRepository,
     private val spawnRepository: SpawnRepository,

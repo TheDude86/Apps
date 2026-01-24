@@ -589,7 +589,7 @@ class TutorialInteractor(
 
         clockJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     val string = if (timer == 1) "" else R.getString(player, S.PLURAL.resource())
                     val message = R.getString(player, S.TIMER_TEXT.resource(), timer, string)
                     presenter.setClockText("${ChatColor.DARK_AQUA}$message")

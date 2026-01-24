@@ -145,7 +145,7 @@ class NewsInteractor(
 
         presenter.setCallback { model ->
             libraryRepository.fetchPlaylist(model.data)
-                .collectFirst(DudeDispatcher()) {
+                .collectFirst(DudeDispatcher(player)) {
                     playlistBlock.setPlaylist(it)
                     routeTo(playlistBlock)
                 }

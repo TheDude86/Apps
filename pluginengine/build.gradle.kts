@@ -11,6 +11,9 @@ version = "1.3.3"
 repositories {
     mavenCentral()
     mavenLocal()
+    maven("https://repo.papermc.io/repository/maven-public/") {
+        name = "papermc"
+    }
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {
         name = "spigotmc-repo"
     }
@@ -24,6 +27,7 @@ repositories {
 dependencies {
     implementation(project(":block"))
     implementation(project(":system"))
+    implementation(project(":folia"))
 
     //Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

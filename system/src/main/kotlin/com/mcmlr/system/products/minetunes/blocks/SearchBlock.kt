@@ -346,10 +346,10 @@ class SearchInteractor(
         presenter.addSearchListener(object : TextListener {
             override fun invoke(text: String) {
                 SearchFactory.search(text, searchState)
-                    .collectFirst(DudeDispatcher()) {
+                    .collectFirst(DudeDispatcher(player)) {
                         results = it
 
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player)).launch {
                             setResults()
                         }
                     }
@@ -387,7 +387,7 @@ class SearchInteractor(
                         when (option) {
                             "Favorite song" -> {
                                 libraryRepository.addToFavorites(track)?.invokeOnCompletion {
-                                    CoroutineScope(DudeDispatcher()).launch {
+                                    CoroutineScope(DudeDispatcher(player)).launch {
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
                                     }
                                 }
@@ -409,8 +409,8 @@ class SearchInteractor(
 
                             "Go to artist" -> {
                                 SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                    .collectFirst(DudeDispatcher()) {
-                                        CoroutineScope(DudeDispatcher()).launch {
+                                    .collectFirst(DudeDispatcher(player)) {
+                                        CoroutineScope(DudeDispatcher(player)).launch {
                                             val artistSongs = it.filter { it.artist == track.artist }
                                             artistBlock.setArtist(track.artist, artistSongs)
                                             routeTo(artistBlock)
@@ -420,8 +420,8 @@ class SearchInteractor(
 
                             "Go to album" -> {
                                 SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                    .collectFirst(DudeDispatcher()) {
-                                        CoroutineScope(DudeDispatcher()).launch {
+                                    .collectFirst(DudeDispatcher(player)) {
+                                        CoroutineScope(DudeDispatcher(player)).launch {
                                             val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
 
                                             playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
@@ -442,7 +442,7 @@ class SearchInteractor(
             val artistSet = hashSetOf<String>()
             results.forEach { artistSet.add(it.artist) }
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 presenter.setArtistsSearchResults(artistSet.toList()) { artist ->
                     val artistSongs = results.filter { it.artist == artist }
                     artistBlock.setArtist(artist, artistSongs)

@@ -249,7 +249,7 @@ class MusicPlayerInteractor(
         }
 
         musicPlayer.getActionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 when (it) {
                     MusicPlayerAction.PLAY,
@@ -344,7 +344,7 @@ class MusicPlayerInteractor(
 
     private fun setSongProgressSubscriber(flow: Flow<Short>) {
         clear(MUSIC_PLAYER_COLLECTION)
-        flow.collectOn(DudeDispatcher())
+        flow.collectOn(DudeDispatcher(player))
             .collectLatest {
                 if (it == 0.toShort()) {
                     val track = musicPlayer.getCurrentTrack()

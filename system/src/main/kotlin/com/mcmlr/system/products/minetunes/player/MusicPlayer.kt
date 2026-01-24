@@ -116,7 +116,7 @@ class MusicPlayer(
             val currentTrack = songList[songIndex]
 
             musicRepository.downloadTrack(currentTrack)
-                .collectFirst(DudeDispatcher()) {
+                .collectFirst(DudeDispatcher(Bukkit.getPlayer(playerId))) {
                     val song = it ?: return@collectFirst
                     updateSong(song)
                     setNextSongListener()
@@ -176,7 +176,7 @@ class MusicPlayer(
                 val start = Date().time
                 val song = activeSong ?: return@launch
 
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(Bukkit.getPlayer(playerId))).launch {
                     song.layersMap.values.forEach {
                         val note = it.notesMap[tick.toInt()] ?: return@forEach
                         val volume = it.volume.toFloat() / 100f

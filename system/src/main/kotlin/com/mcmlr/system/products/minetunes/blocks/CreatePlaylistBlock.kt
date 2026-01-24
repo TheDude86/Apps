@@ -268,14 +268,14 @@ class CreatePlaylistInteractor(
                 if (editingPlaylist != null) {
                     val uuid = editingPlaylist.uuid ?: return
                     libraryRepository.updatePlaylist(icon?.name, name, uuid)?.invokeOnCompletion {
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player)).launch {
                             this@CreatePlaylistInteractor.editingPlaylist = null
                             routeBack()
                         }
                     }
                 } else {
                     libraryRepository.createPlaylist(icon?.name, name)?.invokeOnCompletion {
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player)).launch {
                             routeBack()
                         }
                     }

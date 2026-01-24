@@ -193,7 +193,7 @@ class TeleportResponseInteractor(
                 CoroutineScope(Dispatchers.IO).launch {
                     var delay = teleportConfigRepository.model.delay
                     while (delay > 0) {
-                        CoroutineScope(DudeDispatcher()).launch {
+                        CoroutineScope(DudeDispatcher(player)).launch {
                             val passenger = if (request.type == TeleportRequestType.GOTO) request.sender else player
                             val destination = if (request.type == TeleportRequestType.GOTO) player else request.sender
                             val passengerMessage = R.getString(player, S.PASSENGER_MESSAGE.resource(), delay, if (delay != 1) R.getString(player, S.PLURAL.resource()) else "")
@@ -208,7 +208,7 @@ class TeleportResponseInteractor(
                         delay--
                     }
 
-                    CoroutineScope(DudeDispatcher()).launch {
+                    CoroutineScope(DudeDispatcher(player)).launch {
                         if (request.type == TeleportRequestType.GOTO) {
                             request.sender.teleport(player)
                         } else {

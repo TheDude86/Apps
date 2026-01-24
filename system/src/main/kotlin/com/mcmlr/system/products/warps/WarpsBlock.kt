@@ -265,7 +265,7 @@ class WarpsInteractor(
             val parent = this
             var delay = warpsConfigRepository.model.delay
             while (delay > 0) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     val message = R.getString(player, S.DELAY_MESSAGE.resource(), delay, if (delay != 1) R.getString(player, S.PLURAL.resource()) else "")
                     //TODO: Check spigot vs paper
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(message))
@@ -275,7 +275,7 @@ class WarpsInteractor(
                 delay--
             }
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 val location = Location(
                     Bukkit.getWorld(warp.world),
                     warp.x,

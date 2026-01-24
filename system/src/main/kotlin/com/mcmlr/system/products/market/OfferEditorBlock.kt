@@ -507,7 +507,7 @@ class OfferEditorInteractor(
         presenter.setDeleteListener(object : Listener {
             override fun invoke() {
                 orderRepository.selectedMaterial?.let {
-                    orderRepository.deleteOrder(it, updatingOrder).collectFirst(DudeDispatcher()) { orderResponse ->
+                    orderRepository.deleteOrder(it, updatingOrder).collectFirst(DudeDispatcher(player)) { orderResponse ->
                         if (orderResponse == OrderStatus.ERROR) {
                             presenter.setMessage(R.getString(player, S.UNKNOWN_ERROR_MESSAGE.resource()))
                         } else {
@@ -556,7 +556,7 @@ class OfferEditorInteractor(
                     order.quantity -= updatingOrder.quantity
                     if (checkValidQuantity(updatingOrder)) {
                         if (order.quantity > 0) {
-                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher(player)) {
                                 player.inventory.remove(material, order.meta, order.quantity)
                                 presenter.animateOrderSuccess(material, order, object : Listener {
                                     override fun invoke() {
@@ -565,7 +565,7 @@ class OfferEditorInteractor(
                                 })
                             }
                         } else if (order.quantity < 0) {
-                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher(player)) {
 //                            @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
 //                                material.keyOrNull
 //                            } else {
@@ -585,7 +585,7 @@ class OfferEditorInteractor(
                                 })
                             }
                         } else {
-                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher()) {
+                            orderRepository.updateOrder(material, updatingOrder, order).collectFirst(DudeDispatcher(player)) {
                                 presenter.animateOrderSuccess(material, order, object : Listener {
                                     override fun invoke() {
                                         routeBack()

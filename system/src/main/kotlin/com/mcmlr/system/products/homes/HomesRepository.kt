@@ -43,6 +43,7 @@ class HomeListRepository @Inject constructor(
 
 @AppScope
 class HomesRepository @Inject constructor(
+    private val player: Player,
     private val resources: Resources,
     private val cooldownRepository: CooldownRepository,
     private val homesConfigRepository: HomesConfigRepository,
@@ -83,7 +84,7 @@ class HomesRepository @Inject constructor(
     }
 
     private fun cachePlayerHomes(playerId: UUID, playerHomesModel: PlayerHomesModel) {
-        CoroutineScope(DudeDispatcher()).launch {
+        CoroutineScope(DudeDispatcher(player)).launch {
             playerHomesMap[playerId] = playerHomesModel
         }
     }

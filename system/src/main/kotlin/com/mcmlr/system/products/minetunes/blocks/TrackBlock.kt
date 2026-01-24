@@ -468,7 +468,7 @@ class TrackInteractor(
                         when (option) {
                             "Favorite song" -> {
                                 libraryRepository.addToFavorites(track)?.invokeOnCompletion {
-                                    CoroutineScope(DudeDispatcher()).launch {
+                                    CoroutineScope(DudeDispatcher(player)).launch {
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
                                     }
                                 }
@@ -490,8 +490,8 @@ class TrackInteractor(
 
                             "Go to artist" -> {
                                 SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                    .collectFirst(DudeDispatcher()) {
-                                        CoroutineScope(DudeDispatcher()).launch {
+                                    .collectFirst(DudeDispatcher(player)) {
+                                        CoroutineScope(DudeDispatcher(player)).launch {
                                             val artistSongs = it.filter { it.artist == track.artist }
 //                                        artistBlock.setArtist(track.artist, artistSongs)
 //                                        routeTo(artistBlock)
@@ -501,8 +501,8 @@ class TrackInteractor(
 
                             "Go to album" -> {
                                 SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                    .collectFirst(DudeDispatcher()) {
-                                        CoroutineScope(DudeDispatcher()).launch {
+                                    .collectFirst(DudeDispatcher(player)) {
+                                        CoroutineScope(DudeDispatcher(player)).launch {
                                             val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
 //                                        playlistBlock.setPlaylist(Playlist(name = track.album, songs = albumSongs.toMutableList()))
 //                                        routeTo(playlistBlock)
@@ -529,7 +529,7 @@ class TrackInteractor(
 
     private fun setSongProgressSubscriber(flow: Flow<Short>) {
         clear(MUSIC_PLAYER_COLLECTION)
-        flow.collectOn(DudeDispatcher())
+        flow.collectOn(DudeDispatcher(player))
             .collectLatest {
                 if (it == 0.toShort()) {
                     val track = musicPlayer.getCurrentTrack()

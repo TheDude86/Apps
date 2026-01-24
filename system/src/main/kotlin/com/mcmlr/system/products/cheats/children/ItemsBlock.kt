@@ -168,7 +168,7 @@ class ItemsInteractor(
         presenter.selectItemState()
 
         materialsRepository.materialsStream().collectFirst {
-            collectOn(DudeDispatcher()) { materials ->
+            collectOn(DudeDispatcher(player)) { materials ->
                 presenter.setFeed(materials) {
                     presenter.setItemMetadataState(it)
                 }
@@ -178,7 +178,7 @@ class ItemsInteractor(
         presenter.addSearchListener(object : TextListener {
             override fun invoke(text: String) {
                 materialsRepository.searchMaterialsStream(text).collectFirst {
-                    collectOn(DudeDispatcher()) { materials ->
+                    collectOn(DudeDispatcher(player)) { materials ->
                         presenter.setFeed(materials) {
 
                         }

@@ -325,7 +325,7 @@ class PlaylistInteractor(
         attachChild(musicPlayerBlock, presenter.getMusicPlayerContainer())
 
         musicPlayer.getActionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 if (it == MusicPlayerAction.PLAY) {
                     presenter.setPlayingState(true)
@@ -383,7 +383,7 @@ class PlaylistInteractor(
                     when (option) {
                         "Favorite song" -> {
                             libraryRepository.addToFavorites(track)?.invokeOnCompletion {
-                                CoroutineScope(DudeDispatcher()).launch {
+                                CoroutineScope(DudeDispatcher(player)).launch {
                                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
                                 }
                             }
@@ -405,8 +405,8 @@ class PlaylistInteractor(
 
                         "Go to artist" -> {
                             SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                .collectFirst(DudeDispatcher()) {
-                                    CoroutineScope(DudeDispatcher()).launch {
+                                .collectFirst(DudeDispatcher(player)) {
+                                    CoroutineScope(DudeDispatcher(player)).launch {
                                         val artistSongs = it.filter { it.artist == track.artist }
                                         playlistUpdated = false
                                         val block = artistBlock.get()
@@ -418,8 +418,8 @@ class PlaylistInteractor(
 
                         "Go to album" -> {
                             SearchFactory.search(track.artist.lowercase(), SearchState.ARTIST)
-                                .collectFirst(DudeDispatcher()) {
-                                    CoroutineScope(DudeDispatcher()).launch {
+                                .collectFirst(DudeDispatcher(player)) {
+                                    CoroutineScope(DudeDispatcher(player)).launch {
                                         val albumSongs = it.filter { it.artist == track.artist && it.album == track.album }
                                         playlistUpdated = false
                                         val block = playlistBlock.get()
@@ -484,7 +484,7 @@ class PlaylistInteractor(
                                         if (response == ConfirmationResponse.ACCEPT) {
                                             val uuid = playlist.uuid ?: return
                                             libraryRepository.deletePlaylist(uuid)?.invokeOnCompletion {
-                                                CoroutineScope(DudeDispatcher()).launch {
+                                                CoroutineScope(DudeDispatcher(player)).launch {
                                                     routeBack()
                                                 }
                                             }

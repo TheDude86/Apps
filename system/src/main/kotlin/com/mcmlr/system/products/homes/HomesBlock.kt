@@ -252,7 +252,7 @@ class HomesInteractor(
     private fun getHomes() {
         clear()
         homesRepository.getHomes(player)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 presenter.setHomes(it.homes, false, this)
             }
@@ -289,7 +289,7 @@ class HomesInteractor(
             val parent = this
             var delay = homesConfigRepository.model.delay
             while (delay > 0) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
 
                     val string = R.getString(
                         player,
@@ -306,7 +306,7 @@ class HomesInteractor(
                 delay--
             }
 
-            CoroutineScope(DudeDispatcher()).launch {
+            CoroutineScope(DudeDispatcher(player)).launch {
                 val location = Location(
                     Bukkit.getWorld(home.world),
                     home.x,

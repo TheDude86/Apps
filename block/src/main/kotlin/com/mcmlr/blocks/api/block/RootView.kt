@@ -100,6 +100,8 @@ class RootView(
 
     override fun updateFocus(view: Viewable) {}
 
+    override fun player(): Player = player
+
     fun cursorEventV2(position: Coordinates, event: CursorEvent) {
         when(event) {
             CursorEvent.MOVE -> updateV2(position)
@@ -265,7 +267,7 @@ class RootView(
         display.textOpacity = 4.toByte()
         display.entityData.set<Int>(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, view.background.asARGB())
 
-        if (checkVersion(Versions.V1_20_2)) display.transformationInterpolationDuration = view.teleportDuration
+        if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
         display.setTransformation(com.mojang.math.Transformation(
             Vector3f(
                 measurements.containerXOffset * dimensions.width,

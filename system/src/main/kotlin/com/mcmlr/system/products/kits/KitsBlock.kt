@@ -357,7 +357,7 @@ class KitsInteractor(
             override fun invoke() {
                 val kit = this@KitsInteractor.selectedKit ?: return
                 kitRepository.getCooldown(player, kit)
-                    .collectFirst(DudeDispatcher()) {
+                    .collectFirst(DudeDispatcher(player)) {
                         val cooldown = it
                         val balance = vaultRepository.economy?.getBalance(player) ?: 0.0
 
@@ -400,7 +400,7 @@ class KitsInteractor(
         presenter.setKitContents(selectedKit.items, selectedKit.commands)
 
         kitRepository.getCooldown(player, selectedKit)
-            .collectFirst(DudeDispatcher()) { cooldown ->
+            .collectFirst(DudeDispatcher(player)) { cooldown ->
                 if (selectedKit.kitCooldown < 0) {
                     if (cooldown != null) {
                         presenter.setCooldown(R.getString(player, S.SINGLE_USE.resource()))
@@ -440,7 +440,7 @@ class KitsInteractor(
                 if (minutes > 0 || days > 0 || hours > 0) clockTextBuilder.append(R.getString(player, S.MINUTES_INPUT.resource(), minutes))
                 clockTextBuilder.append(R.getString(player, S.SECONDS_INPUT_SENTENCE.resource(), seconds))
 
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     presenter.setCooldown(clockTextBuilder.toString())
                 }
 

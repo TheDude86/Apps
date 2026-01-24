@@ -453,7 +453,7 @@ class ArtistInteractor(
         musicPlayer.setDefaultPlaylist(Playlist(songs = tracks.toMutableList()))
 
         musicPlayer.getActionStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 if (it == MusicPlayerAction.PLAY) {
                     presenter.setPlayingState(true)
@@ -516,7 +516,7 @@ class ArtistInteractor(
                     when (option) {
                         "Favorite song" -> {
                             libraryRepository.addToFavorites(track)?.invokeOnCompletion {
-                                CoroutineScope(DudeDispatcher()).launch {
+                                CoroutineScope(DudeDispatcher(player)).launch {
                                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("${ChatColor.GREEN}${ChatColor.ITALIC}Song added to Favorites!"))
                                 }
                             }

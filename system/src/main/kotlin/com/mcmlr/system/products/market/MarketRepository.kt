@@ -35,7 +35,7 @@ class MarketRepository @Inject constructor(
             .collectLatest { request ->
                 val materialOrders = market.orders[request.material]
                 if (materialOrders == null) {
-                    CoroutineScope(DudeDispatcher()).launch {
+                    CoroutineScope(DudeDispatcher()).launch { //TODO: Folia Test code
                         request.onFinish.invoke(false)
                     }
                     return@collectLatest
@@ -47,7 +47,7 @@ class MarketRepository @Inject constructor(
                             (it.meta == request.order.meta)
                 }
                 if (order == null || order.quantity < request.order.quantity) {
-                    CoroutineScope(DudeDispatcher()).launch {
+                    CoroutineScope(DudeDispatcher()).launch { //TODO: Folia Test code
                         request.onFinish.invoke(false)
                     }
                     return@collectLatest
@@ -60,7 +60,7 @@ class MarketRepository @Inject constructor(
 
                 updateOrderFile(request.material, request.order)
 
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher()).launch { //TODO: Folia Test code
                     val cost = (request.order.quantity * request.order.price) / 100.0
                     vaultRepository.economy?.withdrawPlayer(request.player, cost)
                     vaultRepository.economy?.depositPlayer(Bukkit.getOfflinePlayer(request.order.playerId), cost)

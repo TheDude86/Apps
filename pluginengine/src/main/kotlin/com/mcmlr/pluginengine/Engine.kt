@@ -15,6 +15,7 @@ import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.plugin.Plugin
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.FlowDisposer
+import com.mcmlr.blocks.core.Scheduler
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
@@ -42,6 +43,9 @@ import com.mcmlr.system.products.spawn.SpawnEnvironment
 import com.mcmlr.system.products.teleport.TeleportEnvironment
 import com.mcmlr.system.products.warps.WarpsEnvironment
 import com.mcmlr.system.products.yaml.YAMLEnvironment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -121,53 +125,57 @@ class Engine(private val model: EngineModel) {
 
         inputRepository
             .onlinePlayerEventStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(Dispatchers.IO)
             .collectLatest { event ->
-                if (event.eventType == JOINED) {
+                CoroutineScope(DudeDispatcher(event.player)).launch {
+                    if (event.eventType == JOINED) {
 
-                    systemEnvironment.preloadLocale(event.player)
+                        systemEnvironment.preloadLocale(event.player)
 
-                    if (event.player.isOp && !systemConfigRepository.model.setupComplete && model.useSystem) {
-                        notificationManager.sendCTAMessage(event.player, "${ChatColor.WHITE}${ChatColor.ITALIC}Hello, thank you for trying out ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC}! We've created a short setup guide to help you configure ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC} however you like.\n", "Start setup", "Click to start", "/. setup://")
+                        if (event.player.isOp && !systemConfigRepository.model.setupComplete && model.useSystem) {
+                            notificationManager.sendCTAMessage(event.player, "${ChatColor.WHITE}${ChatColor.ITALIC}Hello, thank you for trying out ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC}! We've created a short setup guide to help you configure ${ChatColor.GOLD}${ChatColor.BOLD}${ChatColor.ITALIC}Apps${ChatColor.WHITE}${ChatColor.ITALIC} however you like.\n", "Start setup", "Click to start", "/. setup://")
+                        }
+                        return@launch
                     }
-                    return@collectLatest
+                    systemEnvironment.shutdown(event.player)
                 }
-                systemEnvironment.shutdown(event.player)
             }
             .disposeOn(disposer = disposer)
 
         commandRepository
             .commandStream()
-            .collectOn(DudeDispatcher())
+            .collectOn(Dispatchers.IO)
             .collectLatest {
                 val player = it.sender as? Player ?: return@collectLatest
                 val command = it.command.name.lowercase()
-                val arg = if (model.useSystem) {
-                    it.args.firstOrNull()?.lowercase()
-                } else {
-                    val app = model.apps.first()
-                    val permission = app.permission()
-                    if (permission != null) {
-                        if (permissionsRepository.checkPermission(player, permission)) {
+                CoroutineScope(DudeDispatcher(player)).launch {
+                    val arg = if (model.useSystem) {
+                        it.args.firstOrNull()?.lowercase()
+                    } else {
+                        val app = model.apps.first()
+                        val permission = app.permission()
+                        if (permission != null) {
+                            if (permissionsRepository.checkPermission(player, permission)) {
+                                "${model.apps.first().name()}://"
+                            } else {
+                                player.sendMessage("${ChatColor.RED}You don't have permission to use this command!")
+                                return@launch
+                            }
+                        } else {
                             "${model.apps.first().name()}://"
+                        }
+                    }
+                    if (command == model.openCommand) {
+                        //TODO: Handle deeplinks
+                        systemEnvironment.launch(player, arg)
+                    } else if (command == "c") {
+                        systemEnvironment.shutdown(player)
+                    } else if (command == "k") {
+                        if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN.node)) {
+                            Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
                         } else {
                             player.sendMessage("${ChatColor.RED}You don't have permission to use this command!")
-                            return@collectLatest
                         }
-                    } else {
-                        "${model.apps.first().name()}://"
-                    }
-                }
-                if (command == model.openCommand) {
-                    //TODO: Handle deeplinks
-                    systemEnvironment.launch(player, arg)
-                } else if (command == "c") {
-                    systemEnvironment.shutdown(player)
-                } else if (command == "k") {
-                    if (permissionsRepository.checkPermission(player, PermissionNode.ADMIN.node)) {
-                        Bukkit.dispatchCommand(Bukkit.getServer().consoleSender, "minecraft:kill @e[tag=mcmlr.apps]")
-                    } else {
-                        player.sendMessage("${ChatColor.RED}You don't have permission to use this command!")
                     }
                 }
             }
@@ -178,7 +186,7 @@ class Engine(private val model: EngineModel) {
         plugin.getCommand("c")?.setExecutor(eventHandler)
         plugin.getCommand("k")?.setExecutor(eventHandler)
 
-        playerCursorCaptureTask.runTaskTimer(instance, 0, 1)
+        Scheduler(plugin).runTimer(playerCursorCaptureTask, 0, 1)
     }
 
     fun onDisable() {

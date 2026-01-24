@@ -3,6 +3,7 @@ package com.mcmlr.system
 import com.mcmlr.blocks.AppManager
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.system.products.base.AppEventHandlerFactory
@@ -15,10 +16,12 @@ import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
+import com.mcmlr.blocks.core.isFolia
 import com.mcmlr.system.dagger.SystemAppComponent
 import com.mcmlr.system.products.preferences.PreferencesRepository
 import kotlinx.coroutines.CoroutineScope
@@ -29,15 +32,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
-import org.bukkit.entity.BlockDisplay
-import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import org.bukkit.entity.TextDisplay
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.min
@@ -76,56 +77,24 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
     override fun onCreate(child: Boolean) {
         inputRepository.updateActivePlayer(player.uniqueId, true)
-        inputRepository.cursorStream(player.uniqueId)
-            .filter { it.event != CursorEvent.CLEAR }
-            .collectOn(DudeDispatcher())
-            .collectLatest {
 
-                val originYaw = head.origin.location().yaw
-                val currentYaw = it.data.yaw
-
-                val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
-                    (originYaw - 180) - (180 + currentYaw)
-                } else if (originYaw < -90f && currentYaw > 90f) {
-                    (180 + originYaw) + (180 - currentYaw)
-                } else {
-                    originYaw - currentYaw
-                }
-
-                val modifier = min(60f, abs(yawDelta))
-
-                val direction = it.data.direction.normalize()
-                val cursor = it.data.add(direction.clone().multiply(origin.distance + ((modifier / 60f) * 0.1)))
-//                val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
-//                    entity is TextDisplay ||
-//                            entity is ItemDisplay ||
-//                            entity is BlockDisplay
-//                }
-
-                val app = foregroundApp
-                if (app != null) {
-                    app.cursorEvent(it)
-                    app.cursorEvent(listOf(), cursor, it)
-                } else {
-                    head.cursorEvent(listOf(), cursor, it)
-                }
-
-                if (it.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, it.data, CursorEvent.CLEAR))
-                if (it.event == CursorEvent.CALIBRATE) {
-                    calibrating = !calibrating
-                    player.inventory.heldItemSlot = 4
-
-                    if (app != null) {
-                        app.updateCalibrating(calibrating)
-                    } else {
-                        head.setCalibrating(calibrating)
+        if (isFolia()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                inputRepository.cursorStream(player.uniqueId)
+                    .filter { it.event != CursorEvent.CLEAR }
+                    .collectLatest {
+                        handleCursorEvent(it)
                     }
-
-                    inputRepository.updateUserScrollState(player.uniqueId, calibrating)
-                    toggleCalibratingMessage(calibrating)
+            }.disposeOn(disposer = this)
+        } else {
+            inputRepository.cursorStream(player.uniqueId)
+                .filter { it.event != CursorEvent.CLEAR }
+                .collectOn(DudeDispatcher(player))
+                .collectLatest {
+                    handleCursorEvent(it)
                 }
-            }
-            .disposeOn(disposer = this)
+                .disposeOn(disposer = this)
+        }
 
 //        cursorRepository.cursorStream(player.uniqueId)
 //            .filter { it.event != CursorEvent.CLEAR }
@@ -159,7 +128,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 //            .disposeOn(disposer = this)
 
         inputRepository.scrollStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -188,7 +157,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .disposeOn(disposer = this)
 
         inputRepository.playerMoveStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -202,7 +171,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             .disposeOn(disposer = this)
 
         inputRepository.chatStream(player.uniqueId)
-            .collectOn(DudeDispatcher())
+            .collectOn(DudeDispatcher(player))
             .collectLatest {
                 val app = foregroundApp
                 if (app != null) {
@@ -225,6 +194,52 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         registerEvents(eventHandler)
     }
 
+    private fun handleCursorEvent(model: CursorModel) {
+        val originYaw = head.origin.location().yaw
+        val currentYaw = model.data.yaw
+
+        val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
+            (originYaw - 180) - (180 + currentYaw)
+        } else if (originYaw < -90f && currentYaw > 90f) {
+            (180 + originYaw) + (180 - currentYaw)
+        } else {
+            originYaw - currentYaw
+        }
+
+        val modifier = min(60f, abs(yawDelta))
+
+        val direction = model.data.direction.normalize()
+        val cursor = model.data.add(direction.clone().multiply(origin.distance + ((modifier / 60f) * 0.1)))
+//                val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
+//                    entity is TextDisplay ||
+//                            entity is ItemDisplay ||
+//                            entity is BlockDisplay
+//                }
+
+        val app = foregroundApp
+        if (app != null) {
+            app.cursorEvent(model)
+            app.cursorEvent(listOf(), cursor, model)
+        } else {
+            head.cursorEvent(listOf(), cursor, model)
+        }
+
+        if (model.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, model.data, CursorEvent.CLEAR))
+        if (model.event == CursorEvent.CALIBRATE) {
+            calibrating = !calibrating
+            player.inventory.heldItemSlot = 4
+
+            if (app != null) {
+                app.updateCalibrating(calibrating)
+            } else {
+                head.setCalibrating(calibrating)
+            }
+
+            inputRepository.updateUserScrollState(player.uniqueId, calibrating)
+            toggleCalibratingMessage(calibrating)
+        }
+    }
+
     private fun toggleCalibratingMessage(show: Boolean) {
         if (!show) {
             calibrationJob?.cancel()
@@ -240,7 +255,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             )
 
             while (true) {
-                CoroutineScope(DudeDispatcher()).launch {
+                CoroutineScope(DudeDispatcher(player)).launch {
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(calibrationMessages[index]))
                     index = (index + 1) % calibrationMessages.size
                 }
@@ -266,7 +281,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                     }
                     currentCoroutineContext().cancel()
                 }
-                .collectOn(DudeDispatcher())
+                .collectOn(DudeDispatcher(player))
                 .collectLatest {
                     //Do nothing, coroutines quirk I guess
                 }

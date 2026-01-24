@@ -536,8 +536,8 @@ class MusicInteractor(
                 LibraryListModelType.ARTIST -> {
                     val artist = it.artist ?: return@setContentClickedCallback
                     SearchFactory.search(artist.lowercase(), SearchState.ARTIST)
-                        .collectFirst(DudeDispatcher()) {
-                            CoroutineScope(DudeDispatcher()).launch {
+                        .collectFirst(DudeDispatcher(player)) {
+                            CoroutineScope(DudeDispatcher(player)).launch {
                                 val artistSongs = it.filter { it.artist == artist }
                                 artistBlock.setArtist(artist, artistSongs)
                                 routeTo(artistBlock)
@@ -549,8 +549,8 @@ class MusicInteractor(
                     val album = it.album ?: return@setContentClickedCallback
                     val artist = it.artist ?: return@setContentClickedCallback
                     SearchFactory.search(artist.lowercase(), SearchState.ARTIST)
-                        .collectFirst(DudeDispatcher()) {
-                            CoroutineScope(DudeDispatcher()).launch {
+                        .collectFirst(DudeDispatcher(player)) {
+                            CoroutineScope(DudeDispatcher(player)).launch {
                                 val albumSongs = it.filter { it.artist == artist && it.album == album }
 
                                 playlistBlock.setPlaylist(Playlist(name = album, songs = albumSongs.toMutableList()))
