@@ -6,6 +6,8 @@ import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.products.data.CooldownRepository
@@ -52,7 +54,16 @@ class HomesRepository @Inject constructor(
     private var updatingHome: HomeModel? = null
 
     fun teleport(player: Player, location: Location) {
-        player.teleport(location)
+        if (isFolia()) {
+            teleportAsync(player, location)
+        } else {
+            if (isFolia()) {
+                teleportAsync(player, location)
+            } else {
+                player.teleport(location)
+            }
+        }
+
         cooldownRepository.addPlayerLastHomeTime(player)
     }
 

@@ -1,6 +1,5 @@
 package com.mcmlr.blocks.core
 
-
 import com.mcmlr.folia.FoliaScheduler
 import com.mcmlr.folia.FoliaTask
 import org.bukkit.Bukkit

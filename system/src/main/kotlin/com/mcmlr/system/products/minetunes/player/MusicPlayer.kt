@@ -106,6 +106,7 @@ class MusicPlayer(
         stopSong()
         eventStream.emitBackground(MusicPlayerAction.LAST)
         songIndex = (songIndex - 1) % songList.size
+        if (songIndex == -1) songIndex = songList.size - 1
         play()
     }
 

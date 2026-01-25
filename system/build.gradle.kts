@@ -14,6 +14,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":folia"))
     implementation(project(":block"))
 
     //Kotlin

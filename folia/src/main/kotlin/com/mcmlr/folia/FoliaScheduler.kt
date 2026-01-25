@@ -2,6 +2,7 @@ package com.mcmlr.folia
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import kotlin.math.max
@@ -41,4 +42,12 @@ class FoliaTask(private val task: ScheduledTask) {
     fun cancel() {
         task.cancel()
     }
+}
+
+fun teleportAsync(player: Player, location: Location) {
+    player.teleportAsync(location)
+}
+
+fun teleportAsync(player: Player, destination: Player) {
+    player.teleportAsync(destination.location)
 }

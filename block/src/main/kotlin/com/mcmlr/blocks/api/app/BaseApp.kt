@@ -18,10 +18,10 @@ import org.bukkit.event.Listener
 abstract class BaseApp(val player: Player): FlowDisposer(), Context {
     private val cursorStream: MutableSharedFlow<CursorModel> = MutableSharedFlow()
 
-    protected lateinit var head: Block
     protected lateinit var origin: Origin
     protected lateinit var parentEnvironment: BaseEnvironment<BaseApp>
 
+    protected var head: Block? = null
     protected var parentApp: BaseApp? = null
     protected var deeplink: String? = null
     protected var useSystem: Boolean = true
@@ -36,8 +36,8 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
         this.useSystem = useSystem
         onCreate()
         head = root()
-        head.context = this
-        head.onCreate()
+        head?.context = this
+        head?.onCreate()
     }
 
     override fun cursorEvent(cursorModel: CursorModel) = cursorStream.emitBackground(cursorModel)
@@ -52,16 +52,16 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
     override fun close(notifyShutdown: Boolean) {
         onClose()
-        head.onClose()
+        head?.onClose()
         clear()
     }
 
     override fun minimize() {
-        head.onPause()
+        head?.onPause()
     }
 
     override fun maximize() {
-        head.onResume(player.eyeLocation.clone())
+        head?.onResume(player.eyeLocation.clone())
     }
 
     override fun onPause() {}
@@ -74,33 +74,33 @@ abstract class BaseApp(val player: Player): FlowDisposer(), Context {
 
     override fun setHeadBlock(head: Block) {
         this.head = head
-        this.head.context = this
+        this.head?.context = this
     }
 
     override fun hasParent(): Boolean = false
 
     override fun routeTo(block: Block, callback: RouteToCallback?) {
         block.parent = head
-        head.onClose()
+        head?.onClose()
         head = block
-        head.context = this
+        head?.context = this
 
         block.setResultCallback(callback)
         block.onCreate()
     }
 
     override fun routeBack() {
-        val parent = head.parent
+        val parent = head?.parent
         if (parent == null) {
             close()
         } else {
             parent.onCreate()
-            head.onClose()
+            head?.onClose()
             head = parent
         }
     }
 
-    override fun getBlock(): Block = head
+    override fun getBlock(): Block? = head
 }
 
 interface RouteToCallback {

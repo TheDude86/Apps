@@ -148,9 +148,9 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
 
                         preferencesRepository.setScreenDistance(origin.distance)
 
-                        head.calibrateEvent(it)
+                        head?.calibrateEvent(it)
                     } else {
-                        head.scrollEvent(it)
+                        head?.scrollEvent(it)
                     }
                 }
             }
@@ -163,7 +163,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 if (app != null) {
                     app.minimize()
                 } else {
-                    head.minimize()
+                    head?.minimize()
                 }
 
                 enableTimeoutStream()
@@ -177,7 +177,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                 if (app != null) {
                     app.textInputEvent(it)
                 } else {
-                    head.textInputEvent(it)
+                    head?.textInputEvent(it)
                 }
             }
             .disposeOn(disposer = this)
@@ -195,7 +195,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     }
 
     private fun handleCursorEvent(model: CursorModel) {
-        val originYaw = head.origin.location().yaw
+        val originYaw = head?.origin?.location()?.yaw ?: return
         val currentYaw = model.data.yaw
 
         val yawDelta = if (originYaw > 90f && currentYaw < -90f) {
@@ -221,7 +221,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             app.cursorEvent(model)
             app.cursorEvent(listOf(), cursor, model)
         } else {
-            head.cursorEvent(listOf(), cursor, model)
+            head?.cursorEvent(listOf(), cursor, model)
         }
 
         if (model.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, model.data, CursorEvent.CLEAR))
@@ -232,7 +232,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
             if (app != null) {
                 app.updateCalibrating(calibrating)
             } else {
-                head.setCalibrating(calibrating)
+                head?.setCalibrating(calibrating)
             }
 
             inputRepository.updateUserScrollState(player.uniqueId, calibrating)
@@ -277,7 +277,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
                     if (app != null) {
                         app.maximize()
                     } else {
-                        head.maximize()
+                        head?.maximize()
                     }
                     currentCoroutineContext().cancel()
                 }

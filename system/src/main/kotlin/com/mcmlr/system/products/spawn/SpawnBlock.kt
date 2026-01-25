@@ -12,6 +12,8 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -110,7 +112,11 @@ class SpawnInteractor(
         presenter.setSpawnListener(object : Listener {
             override fun invoke() {
                 val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return
-                player.teleport(spawn)
+                if (isFolia()) {
+                    teleportAsync(player, spawn)
+                } else {
+                    player.teleport(spawn)
+                }
                 close()
             }
         })
@@ -118,7 +124,11 @@ class SpawnInteractor(
         presenter.setBackListener(object : Listener {
             override fun invoke() {
                 val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return
-                player.teleport(back)
+                if (isFolia()) {
+                    teleportAsync(player, back)
+                } else {
+                    player.teleport(back)
+                }
                 close()
             }
         })

@@ -39,18 +39,12 @@ class SystemInputRepository: InputRepository {
     private val scrollingUsers = HashSet<UUID>()
     private val activeUsers = HashSet<UUID>()
 
-    private val fooFlow = MutableStateFlow<CursorModel?>(null)
-
     override fun updateStream(data: CursorModel): Boolean {
         val mapEntry = cursorFlowMap[data.playerId]
         if (mapEntry == null) {
             cursorFlowMap[data.playerId] = MutableStateFlow(data)
         } else {
             mapEntry.emitBackground(data)
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            fooFlow.emit(data)
         }
 
         return activeUsers.contains(data.playerId)
@@ -80,11 +74,7 @@ class SystemInputRepository: InputRepository {
         if (scrollingUsers.contains(event.player.uniqueId)) event.isCancelled = true
     }
 
-    override fun cursorStream(playerId: UUID): Flow<CursorModel> {
-//        return cursorFlowMap[playerId] ?: flow { }
-
-        return fooFlow.filterNotNull()
-    }
+    override fun cursorStream(playerId: UUID): Flow<CursorModel> = cursorFlowMap[playerId] ?: flow { }
 
     override fun playerMoveStream(playerId: UUID): Flow<PlayerMoveEvent> {
         return if (playerMoveFlowMap.containsKey(playerId)) {

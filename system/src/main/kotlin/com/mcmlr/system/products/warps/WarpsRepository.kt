@@ -3,6 +3,8 @@ package com.mcmlr.system.products.warps
 import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.products.data.CooldownRepository
 import org.bukkit.Bukkit
@@ -26,7 +28,12 @@ class WarpsRepository @Inject constructor(
     }
 
     fun teleport(player: Player, location: Location) {
-        player.teleport(location)
+        if (isFolia()) {
+            teleportAsync(player, location)
+        } else {
+            player.teleport(location)
+        }
+
         cooldownRepository.addPlayerLastWarpTime(player)
     }
 

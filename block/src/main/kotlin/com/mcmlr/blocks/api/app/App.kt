@@ -38,15 +38,15 @@ abstract class App(player: Player): BaseApp(player) {
     }
 
     fun updateCalibrating(calibrating: Boolean) {
-        head.setCalibrating(calibrating)
+        head?.setCalibrating(calibrating)
     }
 
     fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
-        head.cursorEvent(displays, cursor, event)
+        head?.cursorEvent(displays, cursor, event)
     }
 
     fun scrollEvent(event: ScrollModel, isChild: Boolean = false) {
-        head.scrollEvent(event, isChild)
+        head?.scrollEvent(event, isChild)
     }
 
     fun calibrateEvent(event: ScrollModel, isChild: Boolean = false) {
@@ -56,11 +56,11 @@ abstract class App(player: Player): BaseApp(player) {
             origin.scrollIn()
         }
 
-        head.calibrateEvent(event, isChild)
+        head?.calibrateEvent(event, isChild)
     }
 
     fun textInputEvent(event: AsyncPlayerChatEvent) {
-        head.textInputEvent(event)
+        head?.textInputEvent(event)
     }
 
     override fun launchApp(app: Environment<App>, deeplink: String?) {
@@ -87,15 +87,15 @@ abstract class App(player: Player): BaseApp(player) {
     override fun hasParent(): Boolean = useSystem
 
     override fun routeBack() {
-        val parent = head.parent
+        val parent = head?.parent
         if (parent == null) {
             onClose()
-            head.onClose()
+            head?.onClose()
             clear()
             appManager.closeApp()
         } else {
             parent.onCreate()
-            head.onClose()
+            head?.onClose()
             head = parent
         }
     }

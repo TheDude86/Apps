@@ -12,6 +12,8 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import com.mcmlr.system.products.data.PermissionNode
 import com.mcmlr.system.products.data.PermissionsRepository
 import com.mcmlr.system.products.teleport.PlayerTeleportRepository
@@ -132,7 +134,11 @@ class SpawnShortcutInteractor(
         presenter.setSpawnListener(object : Listener {
             override fun invoke() {
                 val spawn = spawnRepository.model.spawnLocation?.toLocation() ?: return
-                player.teleport(spawn)
+                if (isFolia()) {
+                    teleportAsync(player, spawn)
+                } else {
+                    player.teleport(spawn)
+                }
                 close()
             }
         })
@@ -140,7 +146,11 @@ class SpawnShortcutInteractor(
         presenter.setBackListener(object : Listener {
             override fun invoke() {
                 val back = playerTeleportRepository.model.backLocation?.location?.toLocation() ?: return
-                player.teleport(back)
+                if (isFolia()) {
+                    teleportAsync(player, back)
+                } else {
+                    player.teleport(back)
+                }
                 close()
             }
         })

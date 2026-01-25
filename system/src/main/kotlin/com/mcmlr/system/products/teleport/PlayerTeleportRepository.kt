@@ -6,6 +6,8 @@ import com.mcmlr.blocks.api.data.ConfigModel
 import com.mcmlr.blocks.api.data.Repository
 import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import com.mcmlr.system.dagger.AppScope
 import com.mcmlr.system.dagger.EnvironmentScope
 import com.mcmlr.system.placeholder.placeholders
@@ -43,7 +45,11 @@ class PlayerTeleportRepository @Inject constructor(
     }
 
     fun teleport(player: Player, destination: Player) {
-        player.teleport(destination.location)
+        if (isFolia()) {
+            teleportAsync(player, destination.location)
+        } else {
+            player.teleport(destination.location)
+        }
         cooldownRepository.addPlayerLastTeleportTime(player)
     }
 
@@ -81,7 +87,11 @@ class GlobalTeleportRepository @Inject constructor(
             if (model.firstSpawn) {
                 spawnRepository.model.spawnLocation?.toLocation()?.let {
                     CoroutineScope(DudeDispatcher(e.player)).launch {
-                        e.player.teleport(it)
+                        if (isFolia()) {
+                            teleportAsync(e.player, it)
+                        } else {
+                            e.player.teleport(it)
+                        }
                     }
 
                     Bukkit.broadcastMessage(spawnRepository.model.welcomeMessage.placeholders(e.player))

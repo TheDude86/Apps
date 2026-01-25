@@ -14,6 +14,8 @@ import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.blocks.core.isFolia
+import com.mcmlr.folia.teleportAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -210,9 +212,17 @@ class TeleportResponseInteractor(
 
                     CoroutineScope(DudeDispatcher(player)).launch {
                         if (request.type == TeleportRequestType.GOTO) {
-                            request.sender.teleport(player)
+                            if (isFolia()) {
+                                teleportAsync(request.sender, player)
+                            } else {
+                                request.sender.teleport(player)
+                            }
                         } else {
-                            player.teleport(request.sender)
+                            if (isFolia()) {
+                                teleportAsync(player, request.sender)
+                            } else {
+                                player.teleport(request.sender)
+                            }
                         }
                     }
                 }

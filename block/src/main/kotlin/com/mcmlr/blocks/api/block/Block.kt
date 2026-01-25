@@ -109,7 +109,7 @@ abstract class Block(protected val player: Player, val origin: Origin): Context 
         context.maximize()
     }
 
-    override fun getBlock(): Block = this
+    override fun getBlock(): Block? = this
 
     override fun setScrollState(isScrolling: Boolean) = context.setScrollState(isScrolling)
 
@@ -185,7 +185,7 @@ interface Context {
 
     fun routeBack()
 
-    fun getBlock(): Block
+    fun getBlock(): Block?
 
     fun close(notifyShutdown: Boolean = true)
 
