@@ -19,8 +19,6 @@ import com.mcmlr.blocks.core.colorize
 import com.mcmlr.system.S
 import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.placeholder.placeholders
-import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

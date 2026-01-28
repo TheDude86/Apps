@@ -1,7 +1,6 @@
 package com.mcmlr.system.products.minetunes.blocks
 
 import com.mcmlr.apps.app.block.data.Bundle
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.app.RouteToCallback
 import com.mcmlr.blocks.api.block.Block
@@ -12,7 +11,6 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -36,7 +34,6 @@ import com.mcmlr.system.OptionsModel
 import com.mcmlr.system.products.minetunes.LibraryRepository
 import com.mcmlr.system.products.minetunes.LibraryRepository.Companion.FAVORITES_UUID
 import com.mcmlr.system.products.minetunes.MusicPlayerRepository
-import com.mcmlr.system.products.minetunes.NewsRepository
 import com.mcmlr.system.products.minetunes.S
 import com.mcmlr.system.products.minetunes.SearchFactory
 import com.mcmlr.system.products.minetunes.SearchState

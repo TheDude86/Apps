@@ -19,7 +19,6 @@ import com.mcmlr.blocks.core.titlecase
 import com.mcmlr.system.products.support.FileViewerBlock
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.io.File
 import java.nio.file.Files

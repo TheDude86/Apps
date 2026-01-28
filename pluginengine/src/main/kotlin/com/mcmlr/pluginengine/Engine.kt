@@ -8,6 +8,7 @@ import com.mcmlr.blocks.api.Resources
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.data.BillboardModel
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.PlayerChatRepository
 import com.mcmlr.blocks.api.data.PlayerOnlineEventType.JOINED
@@ -50,6 +51,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.UUID
 import javax.inject.Inject
 
 class Engine(private val model: EngineModel) {
@@ -177,6 +179,29 @@ class Engine(private val model: EngineModel) {
                             player.sendMessage("${ChatColor.RED}You don't have permission to use this command!")
                         }
                     }
+                }
+            }
+            .disposeOn(disposer = disposer)
+
+        val ledger = mutableMapOf<Player, BillboardModel>()
+
+        systemConfigRepository.getBillboardsStream()
+            .collectOn(Dispatchers.IO)
+            .collectLatest { list ->
+                val players = ledger.keys.map { it }.toMutableList()
+
+                list.forEach { instance ->
+                    if (!ledger.containsKey(instance.first)) {
+                        ledger[instance.first] = instance.second
+                        systemEnvironment.launchBillboard(instance.first, "", instance.second)
+                    } else {
+                        players.remove(instance.first)
+                    }
+                }
+
+                players.forEach {
+                    ledger.remove(it)
+                    systemEnvironment.shutdown(it)
                 }
             }
             .disposeOn(disposer = disposer)

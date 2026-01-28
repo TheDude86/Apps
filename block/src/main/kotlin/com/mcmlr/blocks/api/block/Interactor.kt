@@ -1,6 +1,7 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.apps.app.block.data.Bundle
+import com.mcmlr.blocks.api.CursorModel
 import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.app.BaseEnvironment
@@ -12,6 +13,7 @@ import com.mcmlr.blocks.api.plugin.PluginManager
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.FlowDisposer
 import org.bukkit.Location
+import org.bukkit.entity.Entity
 
 abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() {
 
@@ -19,6 +21,7 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
 
     private var isChild = false
     private val pluginManagers = mutableListOf<PluginManager<*>>()
+    private val cursorEventListeners: MutableList<CursorEventListener> = mutableListOf()
 
     protected lateinit var router: Router
 
@@ -38,6 +41,14 @@ abstract class Interactor(private val basePresenter: Presenter): FlowDisposer() 
 
     open fun onClose() {
         clear()
+    }
+
+    fun cursorEvent(cursor: Location, event: CursorModel) {
+        cursorEventListeners.forEach { it.invoke(cursor, event) }
+    }
+
+    fun addCursorEventListener(listener: CursorEventListener) {
+        cursorEventListeners.add(listener)
     }
 
     fun <T> registerPluginManager(manager: PluginManager<T>) {
@@ -86,4 +97,8 @@ class EmptyPresenter: Presenter {
     override fun createView() {}
 
     override fun updateOrigin(origin: Location) {}
+}
+
+interface CursorEventListener {
+    fun invoke(cursor: Location, event: CursorModel)
 }

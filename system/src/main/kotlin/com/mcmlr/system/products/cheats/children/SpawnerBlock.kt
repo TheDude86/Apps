@@ -14,7 +14,6 @@ import com.mcmlr.blocks.core.titlecase
 import com.mcmlr.system.products.cheats.ActiveCheatsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import javax.inject.Inject

@@ -18,7 +18,6 @@ import com.mcmlr.blocks.core.*
 import com.mcmlr.system.dagger.AppScope
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

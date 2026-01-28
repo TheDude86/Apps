@@ -5,8 +5,8 @@ import com.mcmlr.blocks.api.app.App
 import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
+import com.mcmlr.blocks.api.data.BillboardModel
 import com.mcmlr.blocks.api.data.InputRepository
-import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.system.dagger.DaggerSystemEnvironmentComponent
 import com.mcmlr.system.dagger.SystemEnvironmentComponent
 import com.mcmlr.system.products.data.ApplicationsRepository
@@ -64,10 +64,24 @@ class SystemEnvironment(private val plugin: JavaPlugin, private val useSystem: B
         R.loadStrings(name(), player.locale)
     }
 
+    fun launchBillboard(player: Player, deeplink: String?, billboard: BillboardModel) {
+        R.loadStrings(name(), player.locale)
+        val app = getInstance(player)
+        app.configure(this, deeplink, inputRepository, useSystem, billboard)
+
+        if (appMap.containsKey(app.player.uniqueId)) {
+            appMap[app.player.uniqueId]?.shutdown()
+        }
+
+        app.create(resources, useSystem)
+        appMap[app.player.uniqueId] = app
+    }
+
+
     fun launch(player: Player, deeplink: String?) {
         R.loadStrings(name(), player.locale)
         val app = getInstance(player)
-        app.configure(this, deeplink, Origin(player), inputRepository, useSystem)
+        app.configure(this, deeplink, inputRepository, useSystem)
 
         if (appMap.containsKey(app.player.uniqueId)) {
             appMap[app.player.uniqueId]?.shutdown()

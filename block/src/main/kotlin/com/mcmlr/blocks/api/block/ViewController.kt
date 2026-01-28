@@ -2,15 +2,11 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 
 open class ViewController(
@@ -101,9 +97,9 @@ open class ViewController(
         root.cursorEventV2(position, event)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
+    fun cursorEvent(cursor: Location, event: CursorModel) {
         val root = parent as? RootView ?: return
-        root.cursorEvent(displays, cursor, event.event)
+        root.cursorEvent(cursor, event.event)
     }
 
     override fun scrollEvent(event: ScrollModel, isChild: Boolean) {

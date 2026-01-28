@@ -19,7 +19,6 @@ import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.data.ApplicationsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

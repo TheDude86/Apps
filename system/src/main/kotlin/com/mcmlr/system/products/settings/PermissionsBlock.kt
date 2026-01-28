@@ -11,7 +11,6 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.system.SystemConfigRepository
 import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

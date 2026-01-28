@@ -10,9 +10,7 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
-import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

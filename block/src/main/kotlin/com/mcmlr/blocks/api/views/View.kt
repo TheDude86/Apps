@@ -63,6 +63,10 @@ abstract class View(
         updateDisplay()
     }
 
+    open fun rotateEvent(isChild: Boolean) {
+        updateDisplay()
+    }
+
     override fun addDestroyListener(listener: Listener) {
         destroyListeners.add(listener)
     }

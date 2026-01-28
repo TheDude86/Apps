@@ -20,7 +20,6 @@ import com.mcmlr.system.products.teleport.PlayerTeleportRepository
 import com.mcmlr.system.products.spawn.SpawnRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

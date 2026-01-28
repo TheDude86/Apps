@@ -1,8 +1,6 @@
 package com.mcmlr.system.products.landing
 
 import com.mcmlr.blocks.api.app.App
-import com.mcmlr.blocks.api.app.BaseApp
-import com.mcmlr.blocks.api.app.BaseEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.system.S
@@ -19,7 +17,6 @@ import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.preferences.PreferencesRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

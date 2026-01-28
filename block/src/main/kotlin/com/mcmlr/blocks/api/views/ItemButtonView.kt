@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.views
 
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.RootView.Companion.ITEM_VIEW_MULTIPLIER
+import com.mcmlr.packetFactory
 import org.bukkit.Color
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Transformation
@@ -71,7 +72,7 @@ class ItemButtonView(
     fun setSize(width: Float, height: Float) {
         if (dudeDisplay == null) return
         dudeDisplay?.setTransformation(
-            com.mojang.math.Transformation(
+            packetFactory.transformation(
                 Vector3f(0f, 0f, 0f),
                 Quaternionf(0f, 0f, 0f, 1f),
                 Vector3f(ITEM_VIEW_MULTIPLIER * width, ITEM_VIEW_MULTIPLIER * height, ITEM_VIEW_MULTIPLIER * width),

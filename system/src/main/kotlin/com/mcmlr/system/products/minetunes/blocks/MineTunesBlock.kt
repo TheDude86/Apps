@@ -1,6 +1,5 @@
 package com.mcmlr.system.products.minetunes.blocks
 
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.Interactor
@@ -9,21 +8,14 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
-import com.mcmlr.blocks.core.collectFirst
-import com.mcmlr.system.products.minetunes.NewsActionModel
-import com.mcmlr.system.products.minetunes.NewsActionType
-import com.mcmlr.system.products.minetunes.NewsModel
-import com.mcmlr.system.products.minetunes.NewsRepository
 import com.mcmlr.system.products.minetunes.S
 import org.bukkit.Color
 import org.bukkit.entity.Player
-import java.util.Date
 import javax.inject.Inject
 
 class MineTunesBlock @Inject constructor(

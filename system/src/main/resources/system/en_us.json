@@ -39,6 +39,7 @@
   "enabled_apps_button": "§6Enabled Apps",
   "configure_apps_button": "§6Configure Apps",
   "default_language_button": "§6Set Default Language",
+  "billboard_button": "§6Add Billboard To World",
 
   "configure_apps_title": "§l§o§nConfigure Apps",
 
@@ -51,5 +52,17 @@
 
   "calibration_message_one": "§b§oCalibrating... Use your scroll wheel to move the screen forward and back.",
   "calibration_message_two": "§b§oCalibrating... Double tap sneak to save.",
-  "calibration_message_saved": "§aScreen calibration saved!"
+  "calibration_message_saved": "§aScreen calibration saved!",
+
+  "billboard_title": "§l§o§nBillboard",
+  "nearby_button": "§6Nearby",
+  "all_button": "§6All",
+  "search_placeholder": "§7\uD83D\uDD0D Search Existing Billboards...",
+  "create_billboard_button": "§6Add Billboard",
+  "create_billboard_title": "§l§o§nAdd Billboard",
+  "create_billboard_name_placeholder": "Click to set billboard name...",
+  "create_billboard_icon": "Select\nIcon",
+  "create_billboard_create_button": "§6Next",
+  "create_billboard_update_button": "§6Update",
+  "create_billboard_cancel_button": "§cCancel"
 }

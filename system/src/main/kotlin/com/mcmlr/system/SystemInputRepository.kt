@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import java.util.UUID
@@ -34,10 +35,20 @@ class SystemInputRepository: InputRepository {
     private val playerChatFlow = MutableStateFlow<AsyncPlayerChatEvent?>(null)
     private val inputUsers = HashSet<UUID>()
     private val cursorFlowMap = HashMap<UUID, MutableStateFlow<CursorModel>>()
+    private val playerInteractFlowMap = HashMap<UUID, MutableStateFlow<PlayerInteractEvent>>()
     private val playerMoveFlowMap = HashMap<UUID, MutableSharedFlow<PlayerMoveEvent>>()
     private val cursorScrollMap = HashMap<UUID, MutableSharedFlow<ScrollModel>>()
     private val scrollingUsers = HashSet<UUID>()
     private val activeUsers = HashSet<UUID>()
+
+    override fun updatePlayerInteractStream(event: PlayerInteractEvent) {
+        val mapEntry = playerInteractFlowMap[event.player.uniqueId]
+        if (mapEntry == null) {
+            playerInteractFlowMap[event.player.uniqueId] = MutableStateFlow(event)
+        } else {
+            mapEntry.emitBackground(event)
+        }
+    }
 
     override fun updateStream(data: CursorModel): Boolean {
         val mapEntry = cursorFlowMap[data.playerId]
@@ -73,6 +84,8 @@ class SystemInputRepository: InputRepository {
         cursorScrollMap[event.player.uniqueId]?.emitBackground(ScrollModel(e))
         if (scrollingUsers.contains(event.player.uniqueId)) event.isCancelled = true
     }
+
+    override fun playerInteractStream(playerId: UUID): Flow<PlayerInteractEvent> = playerInteractFlowMap[playerId] ?: flow { }
 
     override fun cursorStream(playerId: UUID): Flow<CursorModel> = cursorFlowMap[playerId] ?: flow { }
 

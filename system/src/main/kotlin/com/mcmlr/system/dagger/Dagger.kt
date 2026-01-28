@@ -1,21 +1,19 @@
 package com.mcmlr.system.dagger
 
 import com.mcmlr.blocks.api.Resources
-import com.mcmlr.blocks.api.app.BaseApp
+import com.mcmlr.blocks.api.data.BillboardModel
+import com.mcmlr.blocks.api.data.BillboardOrigin
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.data.PlayerOrigin
 import com.mcmlr.system.SystemApp
 import com.mcmlr.system.SystemEnvironment
-import com.mcmlr.system.products.homes.HomesApp
 import com.mcmlr.system.products.minetunes.DownloadService
-import com.mcmlr.system.products.pong.PongApp
 import com.mcmlr.system.products.preferences.PreferencesRepository
-import com.mcmlr.system.products.settings.AdminApp
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -152,9 +150,11 @@ class SystemAppModule {
 
     @AppScope
     @Provides
-    fun origin(player: Player, preferencesRepository: PreferencesRepository): Origin {
-        return Origin(player, preferencesRepository.model.screenDistance)
-    }
+    fun billboard(app: SystemApp): BillboardModel? = app.billboard
+
+    @AppScope
+    @Provides
+    fun origin(billboard: BillboardModel?, player: Player, preferencesRepository: PreferencesRepository): Origin = billboard?.let { BillboardOrigin(it, player) } ?: PlayerOrigin(player, preferencesRepository.model.screenDistance)
 }
 
 

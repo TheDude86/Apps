@@ -24,7 +24,6 @@ import com.mcmlr.system.products.support.TextEditorBlock.Companion.TEXT_BUNDLE_K
 import com.mcmlr.system.products.support.TextModel
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

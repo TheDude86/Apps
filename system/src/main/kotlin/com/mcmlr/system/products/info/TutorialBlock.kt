@@ -9,7 +9,6 @@ import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.*
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

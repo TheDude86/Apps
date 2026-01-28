@@ -4,15 +4,19 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Location
 import java.io.File
 import java.io.FileWriter
+import java.util.UUID
 
 data class AppConfigModel(
     var title: String = "${ChatColor.BOLD}Welcome to ${ChatColor.GOLD}${ChatColor.BOLD}Apps!",
     var usePermissions: Boolean = true,
     var setupComplete: Boolean = false,
     var defaultLanguage: String = "en_US",
+    var billboards: BillboardConfigModel = BillboardConfigModel(),
     var enabledApps: List<String> = listOf(
         "admin",
         "announcements",
@@ -46,13 +50,30 @@ data class WarpConfigModel(
     var cooldown: Int = 0,
 ): ConfigModel()
 
-
-
 class HomeConfigModel(
     var maxHomes: Int = 1,
     var delay: Int = 0,
     var cooldown: Int = 0,
 ): ConfigModel()
+
+data class BillboardConfigModel(
+    val billboards: MutableList<BillboardModel> = mutableListOf()
+): ConfigModel()
+
+data class BillboardModel(
+    val id: UUID,
+    val name: String,
+    val icon: String,
+    val world: String,
+    val x: Double,
+    val y: Double,
+    val z: Double,
+    val rotation: Float,
+    val scale: Int,
+) {
+    val location: Location
+        get() = Location(Bukkit.getWorld(world), x, y, z, rotation, 0f)
+}
 
 open class ConfigModel() {
 

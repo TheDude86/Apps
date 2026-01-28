@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.log
+import com.mcmlr.packetFactory
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
@@ -14,7 +15,6 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Color
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
 import org.bukkit.entity.Player
 import kotlin.math.abs
 
@@ -116,7 +116,7 @@ abstract class DudeDisplay(
     }
 
     fun teleport(player: Player, location: Location) {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         val p = pos
         val dx = location.x - p.x
@@ -165,7 +165,7 @@ abstract class DudeDisplay(
         itemDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }
         blockDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }
 
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         playerConnection.send(
             ClientboundMoveEntityPacket.PosRot(
@@ -187,7 +187,7 @@ abstract class DudeDisplay(
     }
 
     fun remove() {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         playerConnection.send(ClientboundRemoveEntitiesPacket(uniqueId))
     }
@@ -201,7 +201,7 @@ abstract class DudeDisplay(
     }
 
     fun renderUpdate() {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         val display = textDisplay
             ?: itemDisplay

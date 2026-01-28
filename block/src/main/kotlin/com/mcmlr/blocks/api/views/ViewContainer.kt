@@ -14,11 +14,8 @@ import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.blocks.core.disposeOn
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.entity.EntityType
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -120,6 +117,15 @@ open class ViewContainer(
         children.forEach {
             if (it is View) {
                 it.calibrateEvent(event, isChild)
+            }
+        }
+    }
+
+    override fun rotateEvent(isChild: Boolean) {
+        super.rotateEvent(isChild)
+        children.forEach {
+            if (it is View) {
+                it.rotateEvent(isChild)
             }
         }
     }
