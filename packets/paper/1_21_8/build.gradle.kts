@@ -11,12 +11,9 @@ repositories {
 
 dependencies {
     implementation(project(":packets:base"))
-    implementation(project(":packets:paper:1_20_5"))
-    implementation(project(":packets:paper:1_21_8"))
-    implementation(project(":packets:paper:1_21_11"))
     testImplementation(kotlin("test"))
 
-    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 }
 
 tasks.test {

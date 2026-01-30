@@ -157,8 +157,8 @@ abstract class DudeDisplay(
     private fun convertToLocation(display: Display?) = if (display != null) Location(textDisplay?.level()?.world, display.x, display.y, display.z, display.yRot, display.xRot) else null
 
 
-    fun scroll(event: ScrollEvent) {
-        val direction = if (event == ScrollEvent.UP) -0.01 else 0.01
+    fun scroll(event: ScrollEvent, scale: Int) {
+        val direction = scale * if (event == ScrollEvent.UP) -0.01 else 0.01
         setTeleportDuration(5)
 
         textDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }

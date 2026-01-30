@@ -81,7 +81,7 @@ class RootView(
 
     override fun setTextInput(getInput: Boolean) {}
 
-    override fun scroll(scrollEvent: ScrollEvent) {}
+    override fun scroll(scrollEvent: ScrollEvent, scale: Int) {}
 
     override fun updateLocation(location: Location) {}
 

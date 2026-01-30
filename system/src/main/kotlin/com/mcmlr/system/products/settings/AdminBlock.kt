@@ -50,7 +50,8 @@ class AdminBlockViewController(
 
     private lateinit var billboardButton: ButtonView
 
-    override fun setBillboardListener(listener: Listener) = billboardButton.addListener(listener)
+//    override fun setBillboardListener(listener: Listener) = billboardButton.addListener(listener)
+    override fun setBillboardListener(listener: Listener) {}
 
     override fun setTitleListener(listener: Listener) = titleButton.addListener(listener)
 
@@ -125,15 +126,15 @@ class AdminBlockViewController(
             highlightedText = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()).bolden(),
         )
 
-        billboardButton = addButtonView(
-            modifier = Modifier()
-                .size(WRAP_CONTENT, WRAP_CONTENT)
-                .alignStartToStartOf(enabledAppsButton)
-                .alignTopToBottomOf(languageButton)
-                .margins(top = 50),
-            text = R.getString(player, S.BILLBOARD_BUTTON.resource()),
-            highlightedText = R.getString(player, S.BILLBOARD_BUTTON.resource()).bolden(),
-        )
+//        billboardButton = addButtonView(
+//            modifier = Modifier()
+//                .size(WRAP_CONTENT, WRAP_CONTENT)
+//                .alignStartToStartOf(enabledAppsButton)
+//                .alignTopToBottomOf(languageButton)
+//                .margins(top = 50),
+//            text = R.getString(player, S.BILLBOARD_BUTTON.resource()),
+//            highlightedText = R.getString(player, S.BILLBOARD_BUTTON.resource()).bolden(),
+//        )
     }
 }
 

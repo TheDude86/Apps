@@ -162,7 +162,7 @@ abstract class Block(protected val player: Player, val origin: Origin): Context 
     fun attach(context: Context, parentView: ViewContainer) {
         this.parent = context.getBlock()
         this.context = context
-        view().attach(parentView)
+        view().attach(parentView, this.origin)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.ContextListener
@@ -8,6 +9,7 @@ import com.mcmlr.blocks.api.block.EmptyListener
 import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.DudeDispatcher
 import com.mcmlr.blocks.core.collectLatest
 import com.mcmlr.blocks.core.collectOn
@@ -72,7 +74,7 @@ open class ViewContainer(
         dependants.forEach { it.updatePosition() }
     }
 
-    protected fun renderChild(view: Viewable) {
+    protected open fun renderChild(view: Viewable) {
         view.render()
         val display = (view as? View)?.dudeDisplay ?: return
         if (view is ButtonView) {
@@ -99,9 +101,9 @@ open class ViewContainer(
         }
     }
 
-    override fun scroll(scrollEvent: ScrollEvent) {
-        dudeDisplay?.scroll(scrollEvent)
-        children.forEach { it.scroll(scrollEvent) }
+    override fun scroll(scrollEvent: ScrollEvent, scale: Int) {
+        dudeDisplay?.scroll(scrollEvent, scale)
+        children.forEach { it.scroll(scrollEvent, scale) }
     }
 
     open fun scrollEvent(event: ScrollModel, isChild: Boolean) {
@@ -150,7 +152,7 @@ open class ViewContainer(
     ): PagerView {
         val view = PagerView(modifier, background, height = height)
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
 
         content.invokeContext(view)
@@ -166,7 +168,7 @@ open class ViewContainer(
     ): ListView {
         val view = ListView(modifier, background, height = height)
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
 
         content.invokeContext(view)
@@ -183,7 +185,7 @@ open class ViewContainer(
     ): ListFeedView {
         val view = ListFeedView(modifier, background, height = height, backgroundHighlight = backgroundHighlight)
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
 
         content.invokeContext(view)
@@ -199,7 +201,7 @@ open class ViewContainer(
     ): FeedView {
         val view = FeedView(modifier, background, height = height)
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
 
         content.invokeContext(view)
@@ -218,7 +220,7 @@ open class ViewContainer(
         content: ContextListener<ViewContainer> = EmptyContextListener<ViewContainer>(),
     ): ViewContainer {
         val view = ViewContainer(modifier, clickable, background, backgroundHighlight, mutableListOf(listener), teleportDuration = teleportDuration, height = height)
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
 
         content.invokeContext(view)
@@ -239,7 +241,7 @@ open class ViewContainer(
             height = height,
         )
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
         return view
     }
@@ -257,7 +259,7 @@ open class ViewContainer(
             height = height,
         )
 
-        view.attach(this)
+        view.attach(this, origin)
         children.add(view)
         return view
     }
@@ -306,7 +308,7 @@ open class ViewContainer(
             teleportDuration = teleportDuration,
             height = height,
         )
-        view.attach(this)
+        view.attach(this, origin)
 
         children.add(view)
         return view
@@ -337,7 +339,7 @@ open class ViewContainer(
             teleportDuration = teleportDuration,
             height = height,
         )
-        view.attach(this)
+        view.attach(this, origin)
 
         children.add(view)
         return view
@@ -370,7 +372,7 @@ open class ViewContainer(
             teleportDuration = teleportDuration,
             height = height,
         )
-        view.attach(this)
+        view.attach(this, origin)
 
         children.add(view)
         return view
@@ -393,7 +395,7 @@ open class ViewContainer(
             teleportDuration = teleportDuration,
             height = height,
         )
-        view.attach(this)
+        view.attach(this, origin)
 
         children.add(view)
         return view
@@ -416,7 +418,7 @@ open class ViewContainer(
             teleportDuration = teleportDuration,
             height = height,
         )
-        view.attach(this)
+        view.attach(this, origin)
 
         children.add(view)
         return view

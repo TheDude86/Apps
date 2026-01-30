@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 
 open class ViewController(
     private val player: Player,
-    private val origin: Origin,
+    origin: Origin,
     background: Color = Color.fromARGB(192, 0, 0, 0),
 ): ViewContainer(
     modifier = Modifier().size(MATCH_PARENT, MATCH_PARENT),
@@ -27,7 +27,8 @@ open class ViewController(
     private lateinit var context: Context
 
     init {
-        attach(RootView(player, origin))
+        this.origin = origin
+        attach(RootView(player, origin), origin)
     }
 
     fun updateOrigin(origin: Location) {

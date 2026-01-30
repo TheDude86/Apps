@@ -52,6 +52,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     lateinit var inputRepository: InputRepository
 
     private val backgroundApps = HashMap<String, App>()
+    private var initialized = false
     private var foregroundApp: App? = null
     private var moveJob: Job? = null
     private var calibrationJob: Job? = null
@@ -160,7 +161,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.playerMoveStream(player.uniqueId)
             .collectOn(DudeDispatcher(player))
             .collectLatest {
-                if (billboard != null) {
+                if (billboard != null && initialized) {
                     origin.rotate(player.location.yaw - 180)
                     head?.rotateEvent()
                     return@collectLatest
@@ -198,6 +199,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         systemAppComponent.inject(this)
 
         this.origin = newOrigin
+        this.initialized = true
         registerEvents(eventHandler)
     }
 

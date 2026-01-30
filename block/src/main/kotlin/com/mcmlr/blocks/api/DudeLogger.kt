@@ -25,6 +25,7 @@ fun checkVersion(version: Versions): Boolean {
     return currentValue.versionNumber >= version.versionNumber
 }
 
+//TODO: Move to new module
 enum class Versions(val versionName: String, val versionNumber: Int) {
     UNKNOWN("", -1),
     V1_19_4("1.19.4-R0.1-SNAPSHOT", 0),
