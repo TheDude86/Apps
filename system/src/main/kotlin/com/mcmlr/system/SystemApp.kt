@@ -39,7 +39,9 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.min
@@ -161,9 +163,15 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.playerMoveStream(player.uniqueId)
             .collectOn(DudeDispatcher(player))
             .collectLatest {
+                val billboard = billboard
                 if (billboard != null && initialized) {
-                    origin.rotate(player.location.yaw - 180)
-                    head?.rotateEvent()
+                    val app = foregroundApp
+                    if (app != null) {
+                        app.rotateEvent()
+                    } else {
+                        head?.rotateEvent()
+                    }
+
                     return@collectLatest
                 }
 

@@ -132,6 +132,9 @@ abstract class DudeDisplay(
         textDisplay?.setPos(nx, ny, nz)
         itemDisplay?.setPos(nx, ny, nz)
         blockDisplay?.setPos(nx, ny, nz)
+        textDisplay?.yRot = location.yaw
+        itemDisplay?.yRot = location.yaw
+        blockDisplay?.yRot = location.yaw
 
         playerConnection.send(
             ClientboundMoveEntityPacket.PosRot(

@@ -62,14 +62,15 @@ data class BillboardConfigModel(
 
 data class BillboardModel(
     val id: UUID,
-    val name: String,
-    val icon: String,
-    val world: String,
-    val x: Double,
-    val y: Double,
-    val z: Double,
-    val rotation: Float,
-    val scale: Int,
+    var name: String,
+    var icon: String?,
+    var world: String,
+    var x: Double,
+    var y: Double,
+    var z: Double,
+    var rotation: Float,
+    var scale: Int,
+    var fixed: Boolean,
 ) {
     val location: Location
         get() = Location(Bukkit.getWorld(world), x, y, z, rotation, 0f)

@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.warps
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
@@ -9,6 +10,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.FeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -251,7 +253,10 @@ class WarpsInteractor(
 
     private fun getWarps() {
         clear()
-        presenter.setWarps(warpsRepository.getWarps(), false, this)
+
+        warpsRepository.addOnLoadCompleteListener {
+            presenter.setWarps(it.warps, false, this)
+        }
     }
 
     override fun teleport(warp: WarpModel) {

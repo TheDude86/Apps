@@ -12,6 +12,7 @@ import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.S
 import com.mcmlr.system.products.settings.billboards.BillboardBlock
+import com.mcmlr.system.products.settings.billboards.EditBillboardBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
@@ -26,7 +27,15 @@ class AdminBlock @Inject constructor(
     billboardBlock: BillboardBlock,
 ) : Block(player, origin) {
     private val view: AdminBlockViewController = AdminBlockViewController(player, origin)
-    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock, titleBlock, defaultLanguageBlock, billboardBlock)
+    private val interactor: AdminInteractor = AdminInteractor(
+        view,
+        permissionsBlock,
+        enabledAppsBlock,
+        configureAppsBlock,
+        titleBlock,
+        defaultLanguageBlock,
+        billboardBlock,
+    )
 
     override fun interactor(): Interactor = interactor
 
@@ -50,8 +59,8 @@ class AdminBlockViewController(
 
     private lateinit var billboardButton: ButtonView
 
-//    override fun setBillboardListener(listener: Listener) = billboardButton.addListener(listener)
-    override fun setBillboardListener(listener: Listener) {}
+    override fun setBillboardListener(listener: Listener) = billboardButton.addListener(listener)
+//    override fun setBillboardListener(listener: Listener) {}
 
     override fun setTitleListener(listener: Listener) = titleButton.addListener(listener)
 
@@ -126,15 +135,15 @@ class AdminBlockViewController(
             highlightedText = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()).bolden(),
         )
 
-//        billboardButton = addButtonView(
-//            modifier = Modifier()
-//                .size(WRAP_CONTENT, WRAP_CONTENT)
-//                .alignStartToStartOf(enabledAppsButton)
-//                .alignTopToBottomOf(languageButton)
-//                .margins(top = 50),
-//            text = R.getString(player, S.BILLBOARD_BUTTON.resource()),
-//            highlightedText = R.getString(player, S.BILLBOARD_BUTTON.resource()).bolden(),
-//        )
+        billboardButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToStartOf(enabledAppsButton)
+                .alignTopToBottomOf(languageButton)
+                .margins(top = 50),
+            text = R.getString(player, S.BILLBOARD_BUTTON.resource()),
+            highlightedText = R.getString(player, S.BILLBOARD_BUTTON.resource()).bolden(),
+        )
     }
 }
 

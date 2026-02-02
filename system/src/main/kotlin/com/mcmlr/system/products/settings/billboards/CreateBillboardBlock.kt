@@ -14,6 +14,7 @@ import com.mcmlr.blocks.api.block.NavigationViewController
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.TextListener
 import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.data.BillboardModel
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.packets.ItemDisplayPacket
 import com.mcmlr.blocks.api.packets.TextDisplayPacket
@@ -26,6 +27,7 @@ import com.mcmlr.blocks.core.disposeOn
 import com.mcmlr.system.IconSelectionBlock
 import com.mcmlr.system.IconSelectionBlock.Companion.MATERIAL_BUNDLE_KEY
 import com.mcmlr.system.S
+import com.mcmlr.system.SystemConfigRepository
 import com.mcmlr.system.products.minetunes.player.Playlist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.joml.Vector3f
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.time.Duration.Companion.milliseconds
@@ -46,9 +49,10 @@ class CreateBillboardBlock @Inject constructor(
     player: Player,
     origin: Origin,
     iconSelectionBlock: IconSelectionBlock,
+    systemConfigRepository: SystemConfigRepository,
 ): Block(player, origin) {
     private val view = CreateBillboardViewController(player, origin)
-    private val interactor = CreateBillboardInteractor(player, view, iconSelectionBlock)
+    private val interactor = CreateBillboardInteractor(player, view, iconSelectionBlock, systemConfigRepository)
 
     override fun view(): ViewController = view
     override fun interactor(): Interactor = interactor
@@ -214,6 +218,7 @@ class CreateBillboardInteractor(
     private val player: Player,
     private val presenter: CreateBillboardPresenter,
     private val iconSelectionBlock: IconSelectionBlock,
+    private val systemConfigRepository: SystemConfigRepository,
 ): Interactor(presenter) {
 
     private var billboardName: String? = null
@@ -258,6 +263,7 @@ class CreateBillboardInteractor(
             override fun invoke() {
                 val name = billboardName
                 val icon = billboardIcon
+                var selectedLocation: Location? = null
 
                 minimized = true
                 minimize()
@@ -289,14 +295,14 @@ class CreateBillboardInteractor(
 
                     while (true) {
                         val o = cos(offset - 1.0) * 0.1
-                        val loc = player.getTargetBlock(null, 20).location.clone().add(0.5, 1.75 + o, 0.5)
-                        loc.yaw = rotation
+                        selectedLocation = player.getTargetBlock(null, 20).location.clone().add(0.5, 1.75 + o, 0.5)
+                        selectedLocation.yaw = rotation
 
-                        bar.update(location = loc)
+                        bar.update(location = selectedLocation)
 
-                        loc.yaw = player.location.yaw - 180
-                        loc.add(0.0, 0.75, 0.0)
-                        hologram.update(location = loc)
+                        selectedLocation.yaw = player.location.yaw - 180
+                        selectedLocation.add(0.0, 0.75, 0.0)
+                        hologram.update(location = selectedLocation)
 
                         rotation = (rotation + 3f) % 360f
                         offset = (offset + 0.1)
@@ -308,6 +314,22 @@ class CreateBillboardInteractor(
                 job.invokeOnCompletion {
                     hologram.remove()
                     bar.remove()
+
+                    systemConfigRepository.addBillboard(
+                        BillboardModel(
+                            id = UUID.randomUUID(),
+                            name = name ?: "Foo",
+                            icon = icon?.name ?: "minecraft:air",
+                            world = selectedLocation?.world?.name ?: "",
+                            x = selectedLocation?.x ?: 0.0,
+                            y = selectedLocation?.y ?: 0.0,
+                            z = selectedLocation?.z ?: 0.0,
+                            rotation = selectedLocation?.yaw ?: 0f,
+                            scale = 10,
+                            fixed = false,
+                        )
+                    )
+                    close()
                 }
             }
         })

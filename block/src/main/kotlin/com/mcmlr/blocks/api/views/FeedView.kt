@@ -41,6 +41,21 @@ open class FeedView(
         }
     }
 
+    override fun renderChild(view: Viewable) {
+        if (isViewInBounds(view)) {
+            super.renderChild(view)
+        }
+    }
+
+    override fun rotateEvent(isChild: Boolean) {
+        updateDisplay()
+        children.forEach {
+            if (it is View && isViewInBounds(it)) {
+                it.rotateEvent(isChild)
+            }
+        }
+    }
+
     fun addScrollListener(listener: ScrollListener) {
         scrollListeners.add(listener)
     }

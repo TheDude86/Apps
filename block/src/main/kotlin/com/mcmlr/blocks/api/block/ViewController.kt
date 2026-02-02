@@ -52,13 +52,7 @@ open class ViewController(
         if (!isChild) dudeDisplay = parent.addContainerDisplay(this)
 
         children.forEach {
-            it.render()
-            val display = (it as? View)?.dudeDisplay ?: return@forEach
-            if (it is ButtonView) {
-                buttonMap[display.uniqueId] = it
-            } else if (it is FeedView) {
-                scrollMap[display.uniqueId] = it
-            }
+            renderChild(it)
         }
     }
 

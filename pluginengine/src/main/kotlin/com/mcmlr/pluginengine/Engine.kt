@@ -183,28 +183,28 @@ class Engine(private val model: EngineModel) {
             }
             .disposeOn(disposer = disposer)
 
-        val ledger = mutableMapOf<Player, BillboardModel>()
+//        val ledger = mutableMapOf<Player, BillboardModel>()
 
-        systemConfigRepository.getBillboardsStream()
-            .collectOn(Dispatchers.IO)
-            .collectLatest { list ->
-                val players = ledger.keys.map { it }.toMutableList()
-
-                list.forEach { instance ->
-                    if (!ledger.containsKey(instance.first)) {
-                        ledger[instance.first] = instance.second
-                        systemEnvironment.launchBillboard(instance.first, "", instance.second)
-                    } else {
-                        players.remove(instance.first)
-                    }
-                }
-
-                players.forEach {
-                    ledger.remove(it)
-                    systemEnvironment.shutdown(it)
-                }
-            }
-            .disposeOn(disposer = disposer)
+//        systemConfigRepository.getBillboardsStream()
+//            .collectOn(Dispatchers.IO)
+//            .collectLatest { list ->
+//                val players = ledger.keys.map { it }.toMutableList()
+//
+//                list.forEach { instance ->
+//                    if (!ledger.containsKey(instance.first)) {
+//                        ledger[instance.first] = instance.second
+//                        systemEnvironment.launchBillboard(instance.first, "", instance.second)
+//                    } else {
+//                        players.remove(instance.first)
+//                    }
+//                }
+//
+//                players.forEach {
+//                    ledger.remove(it)
+//                    systemEnvironment.shutdown(it)
+//                }
+//            }
+//            .disposeOn(disposer = disposer)
 
         plugin.server.pluginManager.registerEvents(eventHandler, plugin)
         plugin.getCommand(model.openCommand)?.setExecutor(eventHandler)

@@ -53,6 +53,10 @@ abstract class App(player: Player): BaseApp(player) {
         head?.calibrateEvent(event, isChild)
     }
 
+    fun rotateEvent() {
+        head?.rotateEvent()
+    }
+
     fun textInputEvent(event: AsyncPlayerChatEvent) {
         head?.textInputEvent(event)
     }

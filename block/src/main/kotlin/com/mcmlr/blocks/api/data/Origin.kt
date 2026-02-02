@@ -17,8 +17,6 @@ interface Origin {
 
     fun scrollIn()
 
-    fun rotate(angle: Float)
-
     fun location(): Location
 
     fun distance(): Double
@@ -50,8 +48,6 @@ class PlayerOrigin(
         calibrate()
     }
 
-    override fun rotate(angle: Float) {}
-
     override fun location(): Location = origin
 
     override fun distance(): Double = distance
@@ -75,13 +71,9 @@ class BillboardOrigin(private val billboard: BillboardModel, private val player:
 
     override fun scrollIn() {}
 
-    override fun rotate(angle: Float) {
-        billboard.location.yaw = angle
-    }
-
     override fun location(): Location {
         val l = billboard.location
-        l.yaw = player.location.yaw
+        l.direction = Vector(billboard.x - player.eyeLocation.x, 0.0, billboard.z - player.eyeLocation.z)
 
         return l
     }
