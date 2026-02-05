@@ -44,6 +44,18 @@ class SystemConfigRepository @Inject constructor(
 
     fun updateBillboardsStream(data: List<Pair<Player, BillboardModel>>) = activeBillboardsFlow.emitBackground(data)
 
+    fun editBillboard(billboard: BillboardModel) = save {
+        var index = -1
+        for (i in 0..<model.billboards.billboards.size) {
+            if (model.billboards.billboards[i].id == billboard.id) {
+                index = i
+                break
+            }
+        }
+
+        if (index > -1) model.billboards.billboards[index] = billboard
+    }
+
     fun addBillboard(billboard: BillboardModel) = save {
         model.billboards.billboards.add(billboard)
     }

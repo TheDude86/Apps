@@ -71,9 +71,24 @@ data class BillboardModel(
     var rotation: Float,
     var scale: Int,
     var fixed: Boolean,
+    var defaultApp: String? = null,
 ) {
     val location: Location
         get() = Location(Bukkit.getWorld(world), x, y, z, rotation, 0f)
+
+    fun clone(): BillboardModel = BillboardModel(
+        id = id,
+        name = name,
+        icon = icon,
+        world = world,
+        x = x,
+        y = y,
+        z = z,
+        rotation = rotation,
+        scale = scale,
+        fixed = fixed,
+        defaultApp = defaultApp,
+    )
 }
 
 open class ConfigModel() {

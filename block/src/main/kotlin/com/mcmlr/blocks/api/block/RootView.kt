@@ -364,6 +364,7 @@ class RootView(
         showCorners(view, Material.DIRT)
         if (!view.visible) {
             view.clear()
+            view.dudeDisplay = null
             return
         } else if (view.dudeDisplay == null) {
             view.render()

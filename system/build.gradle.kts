@@ -10,6 +10,7 @@ repositories {
     }
 
     maven("https://repo.extendedclip.com/releases/")
+    maven("https://repo.momirealms.net/releases/")
     maven("https://jitpack.io")
 }
 
@@ -27,6 +28,8 @@ dependencies {
     //Plugins
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
+    compileOnly("net.momirealms:craft-engine-core:0.0.67")
+    compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
 
     //Dagger
     implementation("com.google.dagger:dagger:2.56.2")

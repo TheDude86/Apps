@@ -79,8 +79,8 @@ class AdminBlockViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.SETTINGS_TITLE.resource()),
             size = 16,
         )

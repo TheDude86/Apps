@@ -73,7 +73,11 @@ class BillboardOrigin(private val billboard: BillboardModel, private val player:
 
     override fun location(): Location {
         val l = billboard.location
-        l.direction = Vector(billboard.x - player.eyeLocation.x, 0.0, billboard.z - player.eyeLocation.z)
+        if (billboard.fixed) {
+            l.yaw = billboard.rotation
+        } else {
+            l.direction = Vector(billboard.x - player.eyeLocation.x, 0.0, billboard.z - player.eyeLocation.z)
+        }
 
         return l
     }

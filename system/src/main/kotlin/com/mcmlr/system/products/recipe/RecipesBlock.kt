@@ -1,15 +1,7 @@
 package com.mcmlr.system.products.recipe
 
 import com.mcmlr.blocks.api.app.R
-import com.mcmlr.blocks.api.block.Block
-import com.mcmlr.blocks.api.block.ContextListener
-import com.mcmlr.blocks.api.block.EmptyContextListener
-import com.mcmlr.blocks.api.block.Interactor
-import com.mcmlr.blocks.api.block.Listener
-import com.mcmlr.blocks.api.block.NavigationViewController
-import com.mcmlr.blocks.api.block.Presenter
-import com.mcmlr.blocks.api.block.TextListener
-import com.mcmlr.blocks.api.block.ViewController
+import com.mcmlr.blocks.api.block.*
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -17,13 +9,16 @@ import com.mcmlr.blocks.api.views.TextInputView
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
-import org.bukkit.*
+import net.momirealms.craftengine.bukkit.api.CraftEngineItems
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine
+import net.momirealms.craftengine.core.item.CustomItem
+import net.momirealms.craftengine.core.item.recipe.CustomShapedRecipe
+import net.momirealms.craftengine.core.item.recipe.CustomShapelessRecipe
+import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe
+import org.bukkit.Bukkit
+import org.bukkit.Color
 import org.bukkit.entity.Player
-import org.bukkit.inventory.FurnaceRecipe
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
+import org.bukkit.inventory.*
 import javax.inject.Inject
 
 class RecipesBlock @Inject constructor(
@@ -51,7 +46,7 @@ class RecipesViewController(
 
     override fun addSearchListener(listener: TextListener) = searchButton.addTextChangedListener(listener)
 
-    override fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit) {
+    override fun setFeed(recipes: List<DudeRecipe>, itemCallback: (DudeRecipe) -> Unit) {
         feedView.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 for (i in recipes.indices step 6) {
@@ -65,11 +60,17 @@ class RecipesViewController(
                                     if (i + j >= recipes.size) break
                                     val recipe = recipes[i + j]
 
+                                    val item = when {
+                                        recipe.vanillaRecipe != null -> recipe.vanillaRecipe.result
+                                        recipe.craftEngineRecipe != null -> recipe.craftEngineRecipe.buildItemStack()
+                                        else -> null
+                                    }
+
                                     addItemButtonView(
                                         modifier = Modifier()
                                             .position(-500 + (200 * j), 0)
                                             .size(73, 73),
-                                        item = recipe.result,
+                                        item = item,
                                         callback = object : Listener {
                                             override fun invoke() {
                                                 itemCallback.invoke(recipe)
@@ -129,8 +130,8 @@ class RecipesViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.RECIPES_TITLE.resource()),
             size = 16,
         )
@@ -250,7 +251,7 @@ class RecipesViewController(
 interface RecipesPresenter: Presenter {
     fun addSearchListener(listener: TextListener)
 
-    fun setFeed(recipes: List<Recipe>, itemCallback: (Recipe) -> Unit)
+    fun setFeed(recipes: List<DudeRecipe>, itemCallback: (DudeRecipe) -> Unit)
 
     fun setShapedRecipe(shape: Array<String>, recipe: Map<Char, ItemStack>)
 
@@ -261,33 +262,117 @@ class RecipesInteractor(
     private val presenter: RecipesPresenter,
 ): Interactor(presenter) {
 
-    private val recipes = mutableListOf<Recipe>()
-    private val feedCallback: (Recipe) -> Unit = { recipe ->
-        when (recipe) {
-            is ShapedRecipe -> presenter.setShapedRecipe(recipe.shape, recipe.ingredientMap)
+    private val recipes = mutableListOf<DudeRecipe>()
+    private val feedCallback: (DudeRecipe) -> Unit = { recipe ->
+        when {
+            recipe.vanillaRecipe != null -> {
 
-            is ShapelessRecipe -> presenter.setShapelessRecipe(recipe.ingredientList)
+                when (recipe.vanillaRecipe) {
+                    is ShapedRecipe -> presenter.setShapedRecipe(recipe.vanillaRecipe.shape, recipe.vanillaRecipe.ingredientMap)
 
-            is FurnaceRecipe -> {
+                    is ShapelessRecipe -> presenter.setShapelessRecipe(recipe.vanillaRecipe.ingredientList)
 
+                    is FurnaceRecipe -> {
+
+                    }
+                }
+            }
+
+            recipe.craftEngineRecipe != null -> {
+                val craftEngineRecipe = BukkitCraftEngine.instance().recipeManager<ItemStack>().recipeById(recipe.craftEngineRecipe.id()).get()
+
+                when(craftEngineRecipe) {
+                    is CustomShapedRecipe<*> -> {
+                        val ingredients = mutableMapOf<Char, ItemStack>()
+                        craftEngineRecipe.pattern().ingredients().forEach {
+                            val key = it.key
+                            val value = it.value
+                            val ingredient = if (value.items().isNotEmpty()) value.items().first() else value.minecraftItems().firstOrNull() ?: return@forEach
+                            val item = BukkitCraftEngine.instance().itemManager().buildItemStack(ingredient.key(), null) ?: return@forEach
+
+                            ingredients[key] = item
+                        }
+
+                        presenter.setShapedRecipe(craftEngineRecipe.pattern().pattern(), ingredients)
+                    }
+
+                    is CustomShapelessRecipe<*> -> {
+                        updateCraftEngineShapelessRecipe(craftEngineRecipe)
+                    }
+
+                    is CustomSmithingTransformRecipe<*> -> {
+
+//                        craftEngineRecipe.ingredientsInUse().forEach {
+//                            it.items().forEach {
+//                                log(Log.DEBUG, it.key().value)
+//                            }
+//
+//                            it.minecraftItems().forEach {
+//                                log(Log.ASSERT, it.key().value)
+//                            }
+//                        }
+
+                        updateCraftEngineShapelessRecipe(craftEngineRecipe)
+                    }
+                }
             }
         }
+    }
+
+    private fun updateCraftEngineShapelessRecipe(recipe: net.momirealms.craftengine.core.item.recipe.Recipe<*>) {
+        val ingredients = mutableListOf<ItemStack>()
+        recipe.ingredientsInUse().forEach {
+            val ingredient = if (it.items().isNotEmpty()) it.items().first() else it.minecraftItems().firstOrNull() ?: return@forEach
+            val item = CraftEngineItems.byId(ingredient.key())?.buildItemStack() ?: return@forEach
+            ingredients.add(item)
+        }
+
+        presenter.setShapelessRecipe(ingredients)
     }
 
     override fun onCreate() {
         super.onCreate()
 
         recipes.clear()
+
+//        CraftEngineItems
+//            .loadedItems()
+//            .values
+//            .filter {
+//                val optional = BukkitCraftEngine.instance().recipeManager<ItemStack>().recipeById(it.id())
+//                if (optional.isPresent) {
+//                    val recipe = optional.get()
+//                    recipe is CustomShapedRecipe<*> || recipe is CustomShapelessRecipe<*>
+//                } else {
+//                    false
+//                }
+//            }
+//            .forEach {
+//                recipes.add(DudeRecipe(craftEngineRecipe = it))
+//            }
+
         Bukkit.getServer().recipeIterator().forEach {
-            if (it is ShapedRecipe || it is ShapelessRecipe) recipes.add(it)
+            if (it is ShapedRecipe || it is ShapelessRecipe) recipes.add(DudeRecipe(vanillaRecipe = it))
         }
 
         presenter.addSearchListener(object : TextListener {
             override fun invoke(text: String) {
-                presenter.setFeed(recipes.filter { it.result.type.name.fromMCItem().lowercase().contains(text.lowercase()) }, feedCallback)
+                presenter.setFeed(recipes.filter {
+                    when {
+                        it.vanillaRecipe != null -> {
+                            it.vanillaRecipe.result.type.name.fromMCItem().lowercase().contains(text.lowercase())
+                        }
+                        it.craftEngineRecipe != null -> {
+                            it.craftEngineRecipe.id().value.fromMCItem().lowercase().contains(text.lowercase())
+                        }
+                        else -> false
+                    }
+                }, feedCallback)
             }
         })
 
         presenter.setFeed(recipes, feedCallback)
     }
 }
+
+data class DudeRecipe(val vanillaRecipe: Recipe? = null, val craftEngineRecipe: CustomItem<ItemStack>? = null)

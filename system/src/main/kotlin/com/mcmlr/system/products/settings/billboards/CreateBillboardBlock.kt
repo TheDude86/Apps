@@ -318,8 +318,8 @@ class CreateBillboardInteractor(
                     systemConfigRepository.addBillboard(
                         BillboardModel(
                             id = UUID.randomUUID(),
-                            name = name ?: "Foo",
-                            icon = icon?.name ?: "minecraft:air",
+                            name = name ?: "Billboard #${systemConfigRepository.model.billboards.billboards.size}",
+                            icon = icon?.name,
                             world = selectedLocation?.world?.name ?: "",
                             x = selectedLocation?.x ?: 0.0,
                             y = selectedLocation?.y ?: 0.0,
@@ -327,6 +327,7 @@ class CreateBillboardInteractor(
                             rotation = selectedLocation?.yaw ?: 0f,
                             scale = 10,
                             fixed = false,
+                            defaultApp = null,
                         )
                     )
                     close()

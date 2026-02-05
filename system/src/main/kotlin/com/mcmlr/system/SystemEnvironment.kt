@@ -96,7 +96,7 @@ class SystemEnvironment(private val plugin: JavaPlugin, private val useSystem: B
                 list.forEach { instance ->
                     if (!ledger.containsKey(instance.first)) {
                         ledger[instance.first] = instance.second
-                        launchBillboard(instance.first, "", instance.second)
+                        launchBillboard(instance.first, instance.second)
                     } else {
                         players.remove(instance.first)
                     }
@@ -114,9 +114,11 @@ class SystemEnvironment(private val plugin: JavaPlugin, private val useSystem: B
         R.loadStrings(name(), player.locale)
     }
 
-    fun launchBillboard(player: Player, deeplink: String?, billboard: BillboardModel) {
+    fun launchBillboard(player: Player, billboard: BillboardModel) {
         R.loadStrings(name(), player.locale)
         val app = getInstance(player)
+        val deeplink = billboard.defaultApp?.let { "$it://" }
+        val useSystem = deeplink == null
         app.configure(this, deeplink, inputRepository, useSystem, billboard)
 
         if (appMap.containsKey(app.player.uniqueId)) {
