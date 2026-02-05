@@ -1,36 +1,27 @@
 package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
+import com.mcmlr.packetFactory
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.world.entity.Display
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_21_R5.CraftWorld
-import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_21_R5.inventory.CraftItemStack
 import org.bukkit.entity.BlockDisplay
-import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
 import org.joml.AxisAngle4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import kotlin.experimental.and
-import kotlin.experimental.inv
-import kotlin.experimental.or
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -90,7 +81,7 @@ class RootView(
 
     override fun setTextInput(getInput: Boolean) {}
 
-    override fun scroll(scrollEvent: ScrollEvent) {}
+    override fun scroll(scrollEvent: ScrollEvent, scale: Int) {}
 
     override fun updateLocation(location: Location) {}
 
@@ -110,9 +101,9 @@ class RootView(
         }
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorEvent) {
+    fun cursorEvent(cursor: Location, event: CursorEvent) {
         when(event) {
-            CursorEvent.MOVE -> update(displays, cursor)
+            CursorEvent.MOVE -> update(cursor)
             CursorEvent.CLICK -> click()
             CursorEvent.CLEAR, CursorEvent.CALIBRATE -> { } //Do nothing
         }
@@ -151,7 +142,7 @@ class RootView(
         }
     }
 
-    private fun update(displays: List<Entity>, cursor: Location) {
+    private fun update(cursor: Location) {
         var button: DudeDisplay? = null
         var d = 1.0
         buttonMap.values.forEach {
@@ -161,7 +152,7 @@ class RootView(
             val dy = abs(pos.y - cursor.y)
             val dz = abs(pos.z - cursor.z)
 
-            if (dx <= 0.09 && dy <= 0.04 && dz <= 0.09) {
+            if (dx <= 0.09 * origin.scale && dy <= 0.04 * origin.scale && dz <= 0.09 * origin.scale) {
                 val horizontal = sqrt(dx.pow(2) + dz.pow(2))
                 val distance = sqrt(horizontal.pow(2) + dy.pow(2))
                 if (d > distance) {
@@ -192,7 +183,7 @@ class RootView(
             val dy = abs(pos.y - cursor.y)
             val dz = abs(pos.z - cursor.z)
 
-            if (dx <= 0.09 && dy <= 0.04 && dz <= 0.09) {
+            if (dx <= 0.09 * origin.scale && dy <= 0.04 * origin.scale && dz <= 0.09 * origin.scale) {
                 val horizontal = sqrt(dx.pow(2) + dz.pow(2))
                 val distance = sqrt(horizontal.pow(2) + dy.pow(2))
                 if (d > distance) {
@@ -210,11 +201,11 @@ class RootView(
     private fun updateItemButton(itemButtonView: ItemButtonView, highlighted: Boolean) {
         if (highlighted) {
             val dimensions = itemButtonView.getDimensions()
-            itemButtonView.setSize(dimensions.width * 1.2f, dimensions.height * 1.2f)
+            itemButtonView.setSize(dimensions.width * 1.2f * origin.scale, dimensions.height * 1.2f * origin.scale)
             itemButtonView.highlighted = true
         } else {
             val dimensions = itemButtonView.getDimensions()
-            itemButtonView.setSize(dimensions.width.toFloat(), dimensions.height.toFloat())
+            itemButtonView.setSize(dimensions.width.toFloat() * origin.scale, dimensions.height.toFloat() * origin.scale)
             itemButtonView.highlighted = false
         }
 
@@ -257,7 +248,7 @@ class RootView(
         val dimensions = view.getDimensions()
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, (player.world as CraftWorld).handle)
+        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, packetFactory.serverLevel(player))
         display.setPos(location.x, location.y, location.z)
         display.yRot = location.yaw
         display.xRot = location.pitch
@@ -268,16 +259,16 @@ class RootView(
         display.entityData.set<Int>(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, view.background.asARGB())
 
         if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(
-                measurements.containerXOffset * dimensions.width,
-                measurements.containerYOffset * dimensions.height,
+                measurements.containerXOffset * dimensions.width * origin.scale,
+                measurements.containerYOffset * dimensions.height * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.containerWidth * dimensions.width,
-                measurements.containerHeight * dimensions.height,
+                measurements.containerWidth * dimensions.width * origin.scale,
+                measurements.containerHeight * dimensions.height * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f)
@@ -298,7 +289,7 @@ class RootView(
 
         val textSize = 0.04f * (view.size / 10.0f)
         val location = getDisplayLocation(pos.x, pos.y, view.level())
-        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, (player.world as CraftWorld).handle)
+        val display = Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, packetFactory.serverLevel(player))
         display.setPos(location.x, location.y, location.z)
         display.yRot = location.yaw
         display.xRot = location.pitch
@@ -321,14 +312,14 @@ class RootView(
 
         if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
 
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(
                 0f,
-                measurements.textYOffset * (dimensions.height / (2 + (dimensions.height * 0.0005f))),
+                measurements.textYOffset * (dimensions.height / (2 + (dimensions.height * 0.0005f))) * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f),
-            Vector3f(textSize, textSize, textSize),
+            Vector3f(textSize * origin.scale, textSize * origin.scale, textSize * origin.scale),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
 
@@ -349,16 +340,16 @@ class RootView(
 
         display.teleport(player, getDisplayLocation(pos.x, pos.y, view.level()))
         display.setBackgroundColor(view.background)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(
-                measurements.containerXOffset * dimensions.width,
-                measurements.containerYOffset * dimensions.height,
+                measurements.containerXOffset * dimensions.width * origin.scale,
+                measurements.containerYOffset * dimensions.height * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.containerWidth * dimensions.width,
-                measurements.containerHeight * dimensions.height,
+                measurements.containerWidth * dimensions.width * origin.scale,
+                measurements.containerHeight * dimensions.height * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f)
@@ -373,6 +364,7 @@ class RootView(
         showCorners(view, Material.DIRT)
         if (!view.visible) {
             view.clear()
+            view.dudeDisplay = null
             return
         } else if (view.dudeDisplay == null) {
             view.render()
@@ -392,14 +384,14 @@ class RootView(
         display.setBackgroundColor(view.background)
         display.setAlignment(view.alignment)
         display.setTeleportDuration(view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(
                 0f,
-                measurements.textYOffset * (dimensions.height / 2),
+                measurements.textYOffset * (dimensions.height / (2 + (dimensions.height * 0.0005f))) * origin.scale,
                 0f
             ),
             Quaternionf(0f, 0f, 0f, 1f),
-            Vector3f(textSize, textSize, textSize),
+            Vector3f(textSize * origin.scale, textSize * origin.scale, textSize * origin.scale),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
 
@@ -414,21 +406,21 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, (player.world as CraftWorld).handle)
+        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, packetFactory.serverLevel(player))
         display.addTag("mcmlr.apps")
         display.setPos(location.x, location.y, location.z)
         display.yRot = location.yaw
         display.xRot = location.pitch
 
-        display.itemStack = CraftItemStack.asNMSCopy(view.item)
+        display.itemStack = packetFactory.itemStack(view.item)
         if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(0f, getItemYOffset(view.item.type, dimensions.height), 0f),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.itemDimension * dimensions.width,
-                measurements.itemDimension * dimensions.height,
-                measurements.itemDimension * dimensions.width
+                measurements.itemDimension * dimensions.width * origin.scale,
+                measurements.itemDimension * dimensions.height * origin.scale,
+                measurements.itemDimension * dimensions.width * origin.scale
             ),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
@@ -445,21 +437,21 @@ class RootView(
 
         val location = getDisplayLocation(pos.x, pos.y, view.level())
         location.yaw -= 180
-        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, (player.world as CraftWorld).handle)
+        val display = Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY, packetFactory.serverLevel(player))
         display.addTag("mcmlr.apps")
         display.setPos(location.x, location.y, location.z)
         display.yRot = location.yaw
         display.xRot = location.pitch
 
-        view.item?.let { display.itemStack = CraftItemStack.asNMSCopy(it) }
+        view.item?.let { display.itemStack = packetFactory.itemStack(it) }
         if (checkVersion(Versions.V1_20_2)) display.entityData.set<Int>(Display.TextDisplay.DATA_POS_ROT_INTERPOLATION_DURATION_ID, view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(0f, getItemYOffset(view.item?.type, dimensions.height), 0f),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.itemDimension * dimensions.width,
-                measurements.itemDimension * dimensions.height,
-                measurements.itemDimension * dimensions.width
+                measurements.itemDimension * dimensions.width * origin.scale,
+                measurements.itemDimension * dimensions.height * origin.scale,
+                measurements.itemDimension * dimensions.width * origin.scale
             ),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
@@ -489,15 +481,15 @@ class RootView(
         val display = (view.dudeDisplay as? ItemDudeDisplay) ?: return
         display.teleport(player, location)
 
-        display.itemStack = CraftItemStack.asNMSCopy(ItemStack(view.item))
+        display.itemStack = packetFactory.itemStack(view.item)
         display.setTeleportDuration(view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(0f, getItemYOffset(view.item.type, dimensions.height), 0f),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.itemDimension * dimensions.width,
-                measurements.itemDimension * dimensions.height,
-                measurements.itemDimension * dimensions.width
+                measurements.itemDimension * dimensions.width * origin.scale,
+                measurements.itemDimension * dimensions.height * origin.scale,
+                measurements.itemDimension * dimensions.width * origin.scale
             ),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
@@ -524,15 +516,15 @@ class RootView(
         val display = (view.dudeDisplay as? ItemDudeDisplay) ?: return
         display.teleport(player, location)
 
-        view.item?.let { display.itemStack = CraftItemStack.asNMSCopy(ItemStack(it)) }
+        view.item?.let { display.itemStack = packetFactory.itemStack(it) }
         if (checkVersion(Versions.V1_20_2)) display.setTeleportDuration(view.teleportDuration)
-        display.setTransformation(com.mojang.math.Transformation(
+        display.setTransformation(packetFactory.transformation(
             Vector3f(0f, getItemYOffset(view.item?.type, dimensions.height), 0f),
             Quaternionf(0f, 0f, 0f, 1f),
             Vector3f(
-                measurements.itemDimension * dimensions.width,
-                measurements.itemDimension * dimensions.height,
-                measurements.itemDimension * dimensions.width,
+                measurements.itemDimension * dimensions.width * origin.scale,
+                measurements.itemDimension * dimensions.height * origin.scale,
+                measurements.itemDimension * dimensions.width * origin.scale,
             ),
             Quaternionf(0f, 0f, 0f, 1f)
         ))
@@ -541,7 +533,7 @@ class RootView(
     }
 
     private fun getItemYOffset(item: Material?, height: Int) = when(item) {
-        Material.PLAYER_HEAD -> (height - 10) * 0.0001f //TODO: Account for size difference
+        Material.PLAYER_HEAD -> (height - 10) * 0.0001f * origin.scale //TODO: Account for size difference
         else -> 0f
     }
 
@@ -549,7 +541,7 @@ class RootView(
         val xVector = xVector(origin.location().direction.normalize())
         val yVector = yVector(origin.location().direction.normalize())
         val direction = origin.location().direction.normalize()
-        val location = origin.location().clone().subtract(direction.multiply(0.004 * level)).add(yVector.multiply(y / 8000.toDouble())).subtract(xVector.multiply(x / 8000.toDouble()))
+        val location = origin.location().clone().subtract(direction.multiply(0.004 * level * origin.scale)).add(yVector.multiply((y / 8000.toDouble()) * origin.scale)).subtract(xVector.multiply((x / 8000.toDouble()) * origin.scale))
         location.yaw += 180
         location.pitch *= -1
         return location
@@ -585,7 +577,7 @@ class RootView(
     }
 
     private fun render(display: Display) {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
 
         playerConnection.send(ClientboundAddEntityPacket(

@@ -11,8 +11,8 @@ import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.S
-import org.bukkit.ChatColor
-import org.bukkit.Location
+import com.mcmlr.system.products.settings.billboards.BillboardBlock
+import com.mcmlr.system.products.settings.billboards.EditBillboardBlock
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
@@ -24,9 +24,18 @@ class AdminBlock @Inject constructor(
     configureAppsBlock: ConfigureAppsBlock,
     titleBlock: TitleBlock,
     defaultLanguageBlock: DefaultLanguageBlock,
+    billboardBlock: BillboardBlock,
 ) : Block(player, origin) {
     private val view: AdminBlockViewController = AdminBlockViewController(player, origin)
-    private val interactor: AdminInteractor = AdminInteractor(view, permissionsBlock, enabledAppsBlock, configureAppsBlock, titleBlock, defaultLanguageBlock)
+    private val interactor: AdminInteractor = AdminInteractor(
+        view,
+        permissionsBlock,
+        enabledAppsBlock,
+        configureAppsBlock,
+        titleBlock,
+        defaultLanguageBlock,
+        billboardBlock,
+    )
 
     override fun interactor(): Interactor = interactor
 
@@ -48,6 +57,11 @@ class AdminBlockViewController(
 
     private lateinit var languageButton: ButtonView
 
+    private lateinit var billboardButton: ButtonView
+
+    override fun setBillboardListener(listener: Listener) = billboardButton.addListener(listener)
+//    override fun setBillboardListener(listener: Listener) {}
+
     override fun setTitleListener(listener: Listener) = titleButton.addListener(listener)
 
     override fun setPermissionsListener(listener: Listener) = permissionsButton.addListener(listener)
@@ -65,8 +79,8 @@ class AdminBlockViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.SETTINGS_TITLE.resource()),
             size = 16,
         )
@@ -76,7 +90,7 @@ class AdminBlockViewController(
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignStartToStartOf(title)
                 .alignTopToBottomOf(title)
-                .margins(top = 500),
+                .margins(top = 450),
             text = R.getString(player, S.SET_TITLE_BUTTON.resource()),
             highlightedText = R.getString(player, S.SET_TITLE_BUTTON.resource()).bolden(),
         )
@@ -120,6 +134,16 @@ class AdminBlockViewController(
             text = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()),
             highlightedText = R.getString(player, S.DEFAULT_LANGUAGE_BUTTON.resource()).bolden(),
         )
+
+        billboardButton = addButtonView(
+            modifier = Modifier()
+                .size(WRAP_CONTENT, WRAP_CONTENT)
+                .alignStartToStartOf(enabledAppsButton)
+                .alignTopToBottomOf(languageButton)
+                .margins(top = 50),
+            text = R.getString(player, S.BILLBOARD_BUTTON.resource()),
+            highlightedText = R.getString(player, S.BILLBOARD_BUTTON.resource()).bolden(),
+        )
     }
 }
 
@@ -133,6 +157,8 @@ interface AdminPresenter: Presenter {
     fun setConfigurableAppsListener(listener: Listener)
 
     fun setDefaultLanguageListener(listener: Listener)
+
+    fun setBillboardListener(listener: Listener)
 }
 
 class AdminInteractor(
@@ -142,6 +168,7 @@ class AdminInteractor(
     private val configureAppsBlock: ConfigureAppsBlock,
     private val titleBlock: TitleBlock,
     private val defaultLanguageBlock: DefaultLanguageBlock,
+    private val billboardBlock: BillboardBlock,
 ): Interactor(presenter) {
     override fun onCreate() {
         super.onCreate()
@@ -173,6 +200,12 @@ class AdminInteractor(
         presenter.setDefaultLanguageListener(object : Listener {
             override fun invoke() {
                 routeTo(defaultLanguageBlock)
+            }
+        })
+
+        presenter.setBillboardListener(object : Listener {
+            override fun invoke() {
+                routeTo(billboardBlock)
             }
         })
     }

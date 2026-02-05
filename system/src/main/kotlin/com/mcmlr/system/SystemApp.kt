@@ -14,6 +14,7 @@ import com.mcmlr.blocks.api.app.ConfigurableEnvironment
 import com.mcmlr.blocks.api.app.Environment
 import com.mcmlr.blocks.api.app.R
 import com.mcmlr.blocks.api.block.Block
+import com.mcmlr.blocks.api.data.BillboardModel
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.log
@@ -38,7 +39,9 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.min
@@ -51,6 +54,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     lateinit var inputRepository: InputRepository
 
     private val backgroundApps = HashMap<String, App>()
+    private var initialized = false
     private var foregroundApp: App? = null
     private var moveJob: Job? = null
     private var calibrationJob: Job? = null
@@ -67,12 +71,12 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
 
-    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, origin: Origin, inputRepository: InputRepository, useSystem: Boolean = true) {
+    fun configure(environment: BaseEnvironment<BaseApp>, deeplink: String?, inputRepository: InputRepository, useSystem: Boolean = true, billboard: BillboardModel? = null) {
         this.parentEnvironment = environment
         this.deeplink = deeplink
         this.useSystem = useSystem
-//        this.origin = origin
         this.inputRepository = inputRepository
+        this.billboard = billboard
     }
 
     override fun onCreate(child: Boolean) {
@@ -159,6 +163,18 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         inputRepository.playerMoveStream(player.uniqueId)
             .collectOn(DudeDispatcher(player))
             .collectLatest {
+                val billboard = billboard
+                if (billboard != null && initialized) {
+                    val app = foregroundApp
+                    if (app != null) {
+                        app.rotateEvent()
+                    } else {
+                        head?.rotateEvent()
+                    }
+
+                    return@collectLatest
+                }
+
                 val app = foregroundApp
                 if (app != null) {
                     app.minimize()
@@ -191,6 +207,7 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         systemAppComponent.inject(this)
 
         this.origin = newOrigin
+        this.initialized = true
         registerEvents(eventHandler)
     }
 
@@ -209,19 +226,14 @@ class SystemApp(player: Player): BaseApp(player), AppManager {
         val modifier = min(60f, abs(yawDelta))
 
         val direction = model.data.direction.normalize()
-        val cursor = model.data.add(direction.clone().multiply(origin.distance + ((modifier / 60f) * 0.1)))
-//                val displays = player.world.getNearbyEntities(cursor, 0.09, 0.04, 0.09).filter { entity ->
-//                    entity is TextDisplay ||
-//                            entity is ItemDisplay ||
-//                            entity is BlockDisplay
-//                }
+        val cursor = model.data.add(direction.clone().multiply(origin.distance() + ((modifier / 60f) * 0.1)))
 
         val app = foregroundApp
         if (app != null) {
             app.cursorEvent(model)
-            app.cursorEvent(listOf(), cursor, model)
+            app.cursorEvent(cursor, model)
         } else {
-            head?.cursorEvent(listOf(), cursor, model)
+            head?.cursorEvent(cursor, model)
         }
 
         if (model.event == CursorEvent.CLICK) inputRepository.updateStream(CursorModel(player.uniqueId, model.data, CursorEvent.CLEAR))

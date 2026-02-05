@@ -1,20 +1,14 @@
 package com.mcmlr.blocks.api.app
 
 import com.mcmlr.blocks.AppManager
-import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.data.InputRepository
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import kotlin.math.max
-import kotlin.math.min
 
 abstract class App(player: Player): BaseApp(player) {
     lateinit var inputRepository: InputRepository
@@ -41,8 +35,8 @@ abstract class App(player: Player): BaseApp(player) {
         head?.setCalibrating(calibrating)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
-        head?.cursorEvent(displays, cursor, event)
+    fun cursorEvent(cursor: Location, event: CursorModel) {
+        head?.cursorEvent(cursor, event)
     }
 
     fun scrollEvent(event: ScrollModel, isChild: Boolean = false) {
@@ -57,6 +51,10 @@ abstract class App(player: Player): BaseApp(player) {
         }
 
         head?.calibrateEvent(event, isChild)
+    }
+
+    fun rotateEvent() {
+        head?.rotateEvent()
     }
 
     fun textInputEvent(event: AsyncPlayerChatEvent) {

@@ -16,9 +16,7 @@ import com.mcmlr.blocks.api.views.*
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.IconSelectionBlock
 import com.mcmlr.system.IconSelectionBlock.Companion.MATERIAL_BUNDLE_KEY
-import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

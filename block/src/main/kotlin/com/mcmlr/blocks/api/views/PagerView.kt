@@ -2,6 +2,7 @@ package com.mcmlr.blocks.api.views
 
 import com.mcmlr.blocks.api.block.EmptyContextListener
 import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.core.DudeDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,15 +18,16 @@ class PagerView(
 ): ViewContainer(modifier, false, background, height = height) {
 
     private var index = 0
-    private val centerView: ViewContainer
-    private val leftView: ViewContainer
-    private val rightView: ViewContainer
+    private lateinit var centerView: ViewContainer
+    private lateinit var leftView: ViewContainer
+    private lateinit var rightView: ViewContainer
 
     private var adapter: PagerViewAdapter? = null
 
     private val pageListeners: MutableList<PageListener> = mutableListOf()
 
-    init {
+    override fun attach(parent: Viewable, origin: Origin) {
+        super.attach(parent, origin)
         val dimensions = getDimensions()
 
         centerView = addViewContainer(

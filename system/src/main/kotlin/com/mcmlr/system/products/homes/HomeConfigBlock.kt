@@ -15,7 +15,6 @@ import com.mcmlr.blocks.api.views.TextView
 import com.mcmlr.blocks.api.views.ViewContainer
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 import kotlin.math.max

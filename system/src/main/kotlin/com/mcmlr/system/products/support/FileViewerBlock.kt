@@ -17,7 +17,6 @@ import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.products.yaml.S
 import com.mcmlr.system.products.yaml.YAMLBlock
 import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.io.File
 import javax.inject.Inject

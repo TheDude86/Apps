@@ -1,8 +1,10 @@
 package com.mcmlr.blocks.api.views
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.ContextListener
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.core.MutablePair
 import org.bukkit.Color
 
@@ -39,6 +41,21 @@ open class FeedView(
         }
     }
 
+    override fun renderChild(view: Viewable) {
+        if (isViewInBounds(view)) {
+            super.renderChild(view)
+        }
+    }
+
+    override fun rotateEvent(isChild: Boolean) {
+        updateDisplay()
+        children.forEach {
+            if (it is View && isViewInBounds(it)) {
+                it.rotateEvent(isChild)
+            }
+        }
+    }
+
     fun addScrollListener(listener: ScrollListener) {
         scrollListeners.add(listener)
     }
@@ -68,7 +85,7 @@ open class FeedView(
         childOffset += if (event.event == ScrollEvent.DOWN) 1 else -1
 
         renderedChildren.forEach { childView ->
-            childView.first.scroll(event.event)
+            childView.first.scroll(event.event, origin.scale)
             childView.first.offset = childOffset
             if (!isViewInBounds(childView.first)) {
                 childView.first.clear()

@@ -23,8 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import javax.inject.Inject
@@ -116,8 +114,8 @@ class PongViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.PONG_TITLE.resource()),
             size = 16,
         )

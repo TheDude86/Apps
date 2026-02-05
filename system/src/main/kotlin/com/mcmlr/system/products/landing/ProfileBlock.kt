@@ -9,7 +9,6 @@ import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.system.placeholder.placeholders
 import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 

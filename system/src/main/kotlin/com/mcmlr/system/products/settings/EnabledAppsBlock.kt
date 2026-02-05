@@ -19,8 +19,6 @@ import com.mcmlr.system.products.announcements.AnnouncementsEnvironment
 import com.mcmlr.system.products.data.ApplicationsRepository
 import com.mcmlr.system.products.info.EnabledApplicationModel
 import com.mcmlr.system.products.preferences.PreferencesEnvironment
-import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 import kotlin.collections.set

@@ -13,6 +13,7 @@ import java.io.InputStream
 abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) {
 
     lateinit var model: T
+    private var loadJob: Job? = null
 
     fun <U: ConfigModel> generateModel(path: String, name: String, default: U, onCompleteListener: (suspend (U) -> Unit)? = null) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -78,7 +79,7 @@ abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) 
 
     fun loadModel(path: String, name: String, default: T, onCompleteListener: ((T) -> Unit)? = null) {
         model = default
-        CoroutineScope(Dispatchers.IO).launch {
+        loadJob = CoroutineScope(Dispatchers.IO).launch {
             val gson = GsonBuilder()
                 .setPrettyPrinting()
                 .create()
@@ -105,6 +106,16 @@ abstract class Repository<T: ConfigModel>(private val dataFolder: File? = null) 
             model.filePath = path
             model.fileName = name
             onCompleteListener?.invoke(model)
+        }
+    }
+
+    fun addOnLoadCompleteListener(onCompleteListener: ((T) -> Unit)) {
+        if (loadJob?.isCompleted == true) {
+            onCompleteListener.invoke(model)
+        } else {
+            loadJob?.invokeOnCompletion {
+                onCompleteListener.invoke(model)
+            }
         }
     }
 

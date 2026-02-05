@@ -2,20 +2,16 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
-import com.mcmlr.blocks.api.app.BaseApp
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.*
 import org.bukkit.Color
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 
 open class ViewController(
     private val player: Player,
-    private val origin: Origin,
+    origin: Origin,
     background: Color = Color.fromARGB(192, 0, 0, 0),
 ): ViewContainer(
     modifier = Modifier().size(MATCH_PARENT, MATCH_PARENT),
@@ -31,7 +27,8 @@ open class ViewController(
     private lateinit var context: Context
 
     init {
-        attach(RootView(player, origin))
+        this.origin = origin
+        attach(RootView(player, origin), origin)
     }
 
     fun updateOrigin(origin: Location) {
@@ -55,13 +52,7 @@ open class ViewController(
         if (!isChild) dudeDisplay = parent.addContainerDisplay(this)
 
         children.forEach {
-            it.render()
-            val display = (it as? View)?.dudeDisplay ?: return@forEach
-            if (it is ButtonView) {
-                buttonMap[display.uniqueId] = it
-            } else if (it is FeedView) {
-                scrollMap[display.uniqueId] = it
-            }
+            renderChild(it)
         }
     }
 
@@ -101,9 +92,9 @@ open class ViewController(
         root.cursorEventV2(position, event)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
+    fun cursorEvent(cursor: Location, event: CursorModel) {
         val root = parent as? RootView ?: return
-        root.cursorEvent(displays, cursor, event.event)
+        root.cursorEvent(cursor, event.event)
     }
 
     override fun scrollEvent(event: ScrollModel, isChild: Boolean) {

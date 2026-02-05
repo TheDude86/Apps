@@ -8,7 +8,6 @@ import com.mcmlr.blocks.core.bolden
 import com.mcmlr.system.products.yaml.S
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.configuration.MemorySection
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player

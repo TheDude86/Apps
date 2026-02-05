@@ -78,7 +78,7 @@ interface Viewable {
 
     fun setTextInput(getInput: Boolean)
 
-    fun scroll(scrollEvent: ScrollEvent)
+    fun scroll(scrollEvent: ScrollEvent, scale: Int)
 
     fun updateLocation(location: Location)
 

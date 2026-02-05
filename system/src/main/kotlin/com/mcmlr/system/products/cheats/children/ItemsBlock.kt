@@ -18,7 +18,6 @@ import com.mcmlr.blocks.core.collectOn
 import com.mcmlr.system.products.data.MaterialsRepository
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

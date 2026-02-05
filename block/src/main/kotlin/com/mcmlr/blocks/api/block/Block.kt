@@ -2,17 +2,14 @@ package com.mcmlr.blocks.api.block
 
 import com.mcmlr.blocks.api.CursorEvent
 import com.mcmlr.blocks.api.CursorModel
-import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.app.*
 import com.mcmlr.blocks.api.data.Origin
-import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.api.views.Viewable
 import kotlinx.coroutines.flow.Flow
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
@@ -134,15 +131,21 @@ abstract class Block(protected val player: Player, val origin: Origin): Context 
         router().calibrateEvent(event)
     }
 
+    open fun rotateEvent(isChild: Boolean = false) {
+        view().rotateEvent(isChild)
+        router().rotateEvent()
+    }
+
     fun cursorEventV2(position: Coordinates, event: CursorEvent) {
         view().cursorEventV2(position, event)
         router().cursorEventV2(position, event)
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
+    fun cursorEvent(cursor: Location, event: CursorModel) {
         context.cursorEvent(event)
-        view().cursorEvent(displays, cursor, event)
-        router().cursorEvent(displays, cursor, event)
+        view().cursorEvent(cursor, event)
+        router().cursorEvent(cursor, event)
+        interactor().cursorEvent(cursor, event)
     }
 
     fun moveEventChild(newOrigin: Origin) {
@@ -159,7 +162,7 @@ abstract class Block(protected val player: Player, val origin: Origin): Context 
     fun attach(context: Context, parentView: ViewContainer) {
         this.parent = context.getBlock()
         this.context = context
-        view().attach(parentView)
+        view().attach(parentView, this.origin)
     }
 }
 

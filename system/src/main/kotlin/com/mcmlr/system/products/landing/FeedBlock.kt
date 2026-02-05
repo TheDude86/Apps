@@ -1,5 +1,6 @@
 package com.mcmlr.system.products.landing
 
+import com.mcmlr.blocks.api.Log
 import com.mcmlr.blocks.api.block.Block
 import com.mcmlr.blocks.api.block.ContextListener
 import com.mcmlr.blocks.api.block.Interactor
@@ -7,6 +8,7 @@ import com.mcmlr.blocks.api.block.Listener
 import com.mcmlr.blocks.api.block.Presenter
 import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
+import com.mcmlr.blocks.api.log
 import com.mcmlr.blocks.api.views.Alignment
 import com.mcmlr.blocks.api.views.ListFeedView
 import com.mcmlr.blocks.api.views.Modifier
@@ -87,8 +89,10 @@ class FeedViewController(
                                 val author = Bukkit.getOfflinePlayer(UUID.fromString(it.authorId))
                                 val head = ItemStack(Material.PLAYER_HEAD)
                                 val headMeta = head.itemMeta as SkullMeta
-                                headMeta.owningPlayer = author
-                                head.itemMeta = headMeta
+                                if (!author.playerProfile.name.isNullOrBlank()) {
+                                    headMeta.owningPlayer = author
+                                    head.itemMeta = headMeta
+                                }
 
                                 val authorHead = addItemView(
                                     modifier = Modifier()

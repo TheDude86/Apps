@@ -16,7 +16,6 @@ import com.mcmlr.blocks.core.fromMCItem
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -54,8 +53,8 @@ class MarketViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.MARKET_TITLE.resource()),
             size = 16,
         )

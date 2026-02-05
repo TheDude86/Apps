@@ -4,15 +4,19 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Location
 import java.io.File
 import java.io.FileWriter
+import java.util.UUID
 
 data class AppConfigModel(
     var title: String = "${ChatColor.BOLD}Welcome to ${ChatColor.GOLD}${ChatColor.BOLD}Apps!",
     var usePermissions: Boolean = true,
     var setupComplete: Boolean = false,
     var defaultLanguage: String = "en_US",
+    var billboards: BillboardConfigModel = BillboardConfigModel(),
     var enabledApps: List<String> = listOf(
         "admin",
         "announcements",
@@ -46,13 +50,46 @@ data class WarpConfigModel(
     var cooldown: Int = 0,
 ): ConfigModel()
 
-
-
 class HomeConfigModel(
     var maxHomes: Int = 1,
     var delay: Int = 0,
     var cooldown: Int = 0,
 ): ConfigModel()
+
+data class BillboardConfigModel(
+    val billboards: MutableList<BillboardModel> = mutableListOf()
+): ConfigModel()
+
+data class BillboardModel(
+    val id: UUID,
+    var name: String,
+    var icon: String?,
+    var world: String,
+    var x: Double,
+    var y: Double,
+    var z: Double,
+    var rotation: Float,
+    var scale: Int,
+    var fixed: Boolean,
+    var defaultApp: String? = null,
+) {
+    val location: Location
+        get() = Location(Bukkit.getWorld(world), x, y, z, rotation, 0f)
+
+    fun clone(): BillboardModel = BillboardModel(
+        id = id,
+        name = name,
+        icon = icon,
+        world = world,
+        x = x,
+        y = y,
+        z = z,
+        rotation = rotation,
+        scale = scale,
+        fixed = fixed,
+        defaultApp = defaultApp,
+    )
+}
 
 open class ConfigModel() {
 

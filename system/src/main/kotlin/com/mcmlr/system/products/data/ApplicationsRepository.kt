@@ -74,6 +74,8 @@ class ApplicationsRepository @Inject constructor(
 
     fun getApps(): List<Environment<App>> = enabledApps()
 
+    fun getApp(name: String?): Environment<*>? = if (name == null) null else enabledApps().find { it.name().lowercase() == name.lowercase() }
+
     fun getConfigurableApps(): List<ConfigurableEnvironment<ConfigurableApp>> = enabledApps().mapNotNull { it as? ConfigurableEnvironment<*> }
 
     fun getApp(appName: String, player: Player): Environment<App>? {

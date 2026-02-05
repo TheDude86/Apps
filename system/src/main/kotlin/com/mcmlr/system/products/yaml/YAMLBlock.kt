@@ -19,7 +19,6 @@ import com.mcmlr.blocks.core.titlecase
 import com.mcmlr.system.products.support.FileViewerBlock
 import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.io.File
 import java.nio.file.Files
@@ -244,8 +243,8 @@ class YAMLViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = "${ChatColor.BOLD}${ChatColor.ITALIC}${ChatColor.UNDERLINE}${R.getString(player, S.FILES.resource())}",
             size = 16,
         )

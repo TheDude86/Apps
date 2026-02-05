@@ -4,7 +4,6 @@ import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.ButtonView
 import com.mcmlr.blocks.api.views.Modifier
 import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.entity.Player
 
 open class NavigationViewController(player: Player, origin: Origin): ViewController(player, origin),

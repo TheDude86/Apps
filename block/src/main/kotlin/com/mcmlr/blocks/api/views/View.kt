@@ -3,6 +3,7 @@ package com.mcmlr.blocks.api.views
 import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.ScrollModel
 import com.mcmlr.blocks.api.block.Listener
+import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Area.*
 import com.mcmlr.blocks.api.views.Axis.X
 import com.mcmlr.blocks.api.views.Axis.Y
@@ -27,6 +28,8 @@ abstract class View(
     lateinit var parent: Viewable
     var dudeDisplay: DudeDisplay? = null
 
+    protected lateinit var origin: Origin
+
     protected var corners: List<BlockDisplay> = mutableListOf()
     protected var dependants: MutableList<Viewable> = mutableListOf()
     protected var destroyListeners: MutableList<Listener> = mutableListOf()
@@ -46,12 +49,13 @@ abstract class View(
         if (reconfigure) updateDisplay()
     }
 
-    fun attach(parent: Viewable) {
+    open fun attach(parent: Viewable, origin: Origin) {
         modifier.start?.view?.addDependant(this)
         modifier.top?.view?.addDependant(this)
         modifier.end?.view?.addDependant(this)
         modifier.bottom?.view?.addDependant(this)
         this.parent = parent
+        this.origin = origin
         parent.addDestroyListener(object : Listener {
             override fun invoke() {
                 clear()
@@ -60,6 +64,10 @@ abstract class View(
     }
 
     open fun calibrateEvent(event: ScrollModel, isChild: Boolean) {
+        updateDisplay()
+    }
+
+    open fun rotateEvent(isChild: Boolean) {
         updateDisplay()
     }
 
@@ -141,8 +149,8 @@ abstract class View(
 
     override fun getViewModifier(): Modifier = modifier
 
-    override fun scroll(scrollEvent: ScrollEvent) {
-        dudeDisplay?.scroll(scrollEvent)
+    override fun scroll(scrollEvent: ScrollEvent, scale: Int) {
+        dudeDisplay?.scroll(scrollEvent, scale)
     }
 
     override fun updateLocation(location: Location) {

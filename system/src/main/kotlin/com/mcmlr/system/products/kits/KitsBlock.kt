@@ -71,12 +71,6 @@ class KitsViewController(
         kitItemList.updateView(object : ContextListener<ViewContainer>() {
             override fun ViewContainer.invoke() {
                 items.forEach {
-//                @Suppress("DEPRECATION") val key = if (checkVersion("1.21.5-R0.1-SNAPSHOT")) {
-//                    Material.valueOf(it.material).keyOrNull
-//                } else {
-//                    Material.valueOf(it.material).key
-//                }
-
                     @Suppress("DEPRECATION") val key = Material.valueOf(it.material).key
 
                     addViewContainer(
@@ -148,8 +142,8 @@ class KitsViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.KITS_TITLE.resource()),
             size = 16,
         )

@@ -10,9 +10,7 @@ import com.mcmlr.blocks.api.block.ViewController
 import com.mcmlr.blocks.api.data.Origin
 import com.mcmlr.blocks.api.views.Modifier
 import com.mcmlr.blocks.api.views.ViewContainer
-import org.bukkit.ChatColor
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import javax.inject.Inject
 
@@ -44,8 +42,8 @@ class PreferencesViewController(
             modifier = Modifier()
                 .size(WRAP_CONTENT, WRAP_CONTENT)
                 .alignTopToTopOf(this)
-                .alignStartToEndOf(backButton!!)
-                .margins(top = 250, start = 400),
+                .alignStartToStartOf(this)
+                .margins(top = 250, start = 970),
             text = R.getString(player, S.PREFERENCES_TITLE.resource()),
             size = 16,
         )

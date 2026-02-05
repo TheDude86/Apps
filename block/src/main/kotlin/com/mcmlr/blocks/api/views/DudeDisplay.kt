@@ -5,6 +5,7 @@ import com.mcmlr.blocks.api.ScrollEvent
 import com.mcmlr.blocks.api.Versions
 import com.mcmlr.blocks.api.checkVersion
 import com.mcmlr.blocks.api.log
+import com.mcmlr.packetFactory
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
@@ -14,7 +15,6 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Color
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer
 import org.bukkit.entity.Player
 import kotlin.math.abs
 
@@ -116,7 +116,7 @@ abstract class DudeDisplay(
     }
 
     fun teleport(player: Player, location: Location) {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         val p = pos
         val dx = location.x - p.x
@@ -132,6 +132,9 @@ abstract class DudeDisplay(
         textDisplay?.setPos(nx, ny, nz)
         itemDisplay?.setPos(nx, ny, nz)
         blockDisplay?.setPos(nx, ny, nz)
+        textDisplay?.yRot = location.yaw
+        itemDisplay?.yRot = location.yaw
+        blockDisplay?.yRot = location.yaw
 
         playerConnection.send(
             ClientboundMoveEntityPacket.PosRot(
@@ -157,15 +160,15 @@ abstract class DudeDisplay(
     private fun convertToLocation(display: Display?) = if (display != null) Location(textDisplay?.level()?.world, display.x, display.y, display.z, display.yRot, display.xRot) else null
 
 
-    fun scroll(event: ScrollEvent) {
-        val direction = if (event == ScrollEvent.UP) -0.01 else 0.01
+    fun scroll(event: ScrollEvent, scale: Int) {
+        val direction = scale * if (event == ScrollEvent.UP) -0.01 else 0.01
         setTeleportDuration(5)
 
         textDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }
         itemDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }
         blockDisplay?.let { it.setPos(it.x, it.y + direction, it.z) }
 
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         playerConnection.send(
             ClientboundMoveEntityPacket.PosRot(
@@ -187,7 +190,7 @@ abstract class DudeDisplay(
     }
 
     fun remove() {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         playerConnection.send(ClientboundRemoveEntitiesPacket(uniqueId))
     }
@@ -201,7 +204,7 @@ abstract class DudeDisplay(
     }
 
     fun renderUpdate() {
-        val handle = (player as CraftPlayer).handle
+        val handle = packetFactory.serverPlayer(player)
         val playerConnection = handle.connection
         val display = textDisplay
             ?: itemDisplay

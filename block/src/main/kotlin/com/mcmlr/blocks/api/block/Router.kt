@@ -14,7 +14,6 @@ import com.mcmlr.blocks.api.views.Coordinates
 import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.api.views.Viewable
 import org.bukkit.Location
-import org.bukkit.entity.Entity
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
 open class Router {
@@ -101,8 +100,12 @@ open class Router {
         childNodes.forEach { it.calibrateEvent(event, true) }
     }
 
-    fun cursorEvent(displays: List<Entity>, cursor: Location, event: CursorModel) {
-        childNodes.forEach { it.cursorEvent(displays, cursor, event) }
+    fun rotateEvent() {
+        childNodes.forEach { it.rotateEvent(true) }
+    }
+
+    fun cursorEvent(cursor: Location, event: CursorModel) {
+        childNodes.forEach { it.cursorEvent(cursor, event) }
     }
 
     fun cursorEventV2(position: Coordinates, event: CursorEvent) {

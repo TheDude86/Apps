@@ -5,17 +5,22 @@ import com.mcmlr.blocks.api.ScrollModel
 import kotlinx.coroutines.flow.Flow
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import java.util.UUID
 
 interface InputRepository {
 
+    fun updatePlayerInteractStream(event: PlayerInteractEvent)
+
     fun updateStream(data: CursorModel): Boolean
 
     fun updateMoveStream(event: PlayerMoveEvent)
 
     fun updateScrollStream(event: PlayerItemHeldEvent)
+
+    fun playerInteractStream(playerId: UUID): Flow<PlayerInteractEvent>
 
     fun cursorStream(playerId: UUID): Flow<CursorModel>
 
