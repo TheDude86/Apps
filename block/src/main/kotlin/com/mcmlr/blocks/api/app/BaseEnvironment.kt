@@ -111,6 +111,8 @@ object R {
         "tr_tr" to "tr_tr",
         //Greek
         "el_gr" to "gr_gr",
+        //Russian
+        "ru_ru" to "ru_ru",
     )
 
     fun containsLocale(locale: String): Boolean = appsStringMaps.values.firstOrNull()?.containsKey(locale) == true
