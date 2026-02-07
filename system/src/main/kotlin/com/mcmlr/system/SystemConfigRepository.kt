@@ -31,6 +31,7 @@ class SystemConfigRepository @Inject constructor(
             Locale("pl", "pl"),
             Locale("tr", "tr"),
             Locale("el", "gr"),
+            Locale("ru", "ru"),
         )
     }
 
