@@ -10,8 +10,8 @@ import com.mcmlr.blocks.api.views.ViewContainer
 import com.mcmlr.blocks.core.bolden
 import com.mcmlr.blocks.core.fromMCItem
 import net.momirealms.craftengine.bukkit.api.CraftEngineItems
+import net.momirealms.craftengine.bukkit.item.BukkitItemDefinition
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine
-import net.momirealms.craftengine.core.item.CustomItem
 import net.momirealms.craftengine.core.item.recipe.CustomShapedRecipe
 import net.momirealms.craftengine.core.item.recipe.CustomShapelessRecipe
 import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe
@@ -62,7 +62,7 @@ class RecipesViewController(
 
                                     val item = when {
                                         recipe.vanillaRecipe != null -> recipe.vanillaRecipe.result
-                                        recipe.craftEngineRecipe != null -> recipe.craftEngineRecipe.buildItemStack()
+                                        recipe.craftEngineRecipe != null -> recipe.craftEngineRecipe.buildBukkitItem()
                                         else -> null
                                     }
 
@@ -279,16 +279,16 @@ class RecipesInteractor(
             }
 
             recipe.craftEngineRecipe != null -> {
-                val craftEngineRecipe = BukkitCraftEngine.instance().recipeManager<ItemStack>().recipeById(recipe.craftEngineRecipe.id()).get()
+                val craftEngineRecipe = BukkitCraftEngine.instance().recipeManager().recipeById(recipe.craftEngineRecipe.id()).get()
 
                 when(craftEngineRecipe) {
-                    is CustomShapedRecipe<*> -> {
+                    is CustomShapedRecipe -> {
                         val ingredients = mutableMapOf<Char, ItemStack>()
                         craftEngineRecipe.pattern().ingredients().forEach {
                             val key = it.key
                             val value = it.value
                             val ingredient = if (value.items().isNotEmpty()) value.items().first() else value.minecraftItems().firstOrNull() ?: return@forEach
-                            val item = BukkitCraftEngine.instance().itemManager().buildItemStack(ingredient.key(), null) ?: return@forEach
+                            val item = CraftEngineItems.byId(ingredient.key())?.buildBukkitItem() ?: return@forEach
 
                             ingredients[key] = item
                         }
@@ -296,11 +296,11 @@ class RecipesInteractor(
                         presenter.setShapedRecipe(craftEngineRecipe.pattern().pattern(), ingredients)
                     }
 
-                    is CustomShapelessRecipe<*> -> {
+                    is CustomShapelessRecipe -> {
                         updateCraftEngineShapelessRecipe(craftEngineRecipe)
                     }
 
-                    is CustomSmithingTransformRecipe<*> -> {
+                    is CustomSmithingTransformRecipe -> {
 
 //                        craftEngineRecipe.ingredientsInUse().forEach {
 //                            it.items().forEach {
@@ -319,11 +319,11 @@ class RecipesInteractor(
         }
     }
 
-    private fun updateCraftEngineShapelessRecipe(recipe: net.momirealms.craftengine.core.item.recipe.Recipe<*>) {
+    private fun updateCraftEngineShapelessRecipe(recipe: net.momirealms.craftengine.core.item.recipe.Recipe) {
         val ingredients = mutableListOf<ItemStack>()
         recipe.ingredientsInUse().forEach {
             val ingredient = if (it.items().isNotEmpty()) it.items().first() else it.minecraftItems().firstOrNull() ?: return@forEach
-            val item = CraftEngineItems.byId(ingredient.key())?.buildItemStack() ?: return@forEach
+            val item = CraftEngineItems.byId(ingredient.key())?.buildBukkitItem() ?: return@forEach
             ingredients.add(item)
         }
 
@@ -375,4 +375,4 @@ class RecipesInteractor(
     }
 }
 
-data class DudeRecipe(val vanillaRecipe: Recipe? = null, val craftEngineRecipe: CustomItem<ItemStack>? = null)
+data class DudeRecipe(val vanillaRecipe: Recipe? = null, val craftEngineRecipe: BukkitItemDefinition? = null)
